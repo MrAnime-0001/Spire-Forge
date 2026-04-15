@@ -249,6 +249,8 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 .boss-bar-text{font-size:12px;color:var(--text-dim);line-height:1.5;}
 .boss-select-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.6rem;}
 .boss-btn{padding:3px 9px;background:none;border:1px solid var(--border);border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--text-muted);transition:all .12s;}
+.gold-preset{padding:2px 6px;background:none;border:1px solid var(--border);border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);cursor:pointer;transition:all .12s;letter-spacing:.04em;}
+.gold-preset:hover{border-color:var(--border-bright);color:var(--amber);}
 .boss-btn:hover{border-color:var(--border-bright);color:var(--text-dim);}
 .boss-btn.active{border-color:var(--ember);color:var(--ember);background:rgba(192,66,26,.1);}
 /* Engine tracker */
@@ -280,10 +282,19 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
     <button class="act-btn" id="act2btn" onclick="setAct(2)">2 — City</button>
     <button class="act-btn" id="act3btn" onclick="setAct(3)">3 — Beyond</button>
     <span class="act-advice" id="actAdvice"></span>
-    <span style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.06em">gold</span>
-      <input type="number" id="goldInput" value="0" min="0" max="9999" oninput="updateGoldAdvice()" style="width:60px;background:var(--bg2);border:1px solid var(--border-bright);border-radius:3px;padding:3px 6px;color:var(--amber-bright);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;text-align:center">
-      <span id="goldAdvice" style="font-size:11px;color:var(--text-muted);font-style:italic"></span>
+    <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:auto;flex-shrink:0">
+      <span style="display:flex;align-items:center;gap:6px">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.06em">gold</span>
+        <input type="number" id="goldInput" value="0" min="0" max="9999" oninput="updateGoldAdvice()" style="width:60px;background:var(--bg2);border:1px solid var(--border-bright);border-radius:3px;padding:3px 6px;color:var(--amber-bright);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;text-align:center">
+        <span style="display:flex;gap:3px">
+          <button onclick="setGold(0)" class="gold-preset">0</button>
+          <button onclick="setGold(100)" class="gold-preset">100</button>
+          <button onclick="setGold(200)" class="gold-preset">200</button>
+          <button onclick="setGold(300)" class="gold-preset">300</button>
+          <button onclick="setGold(500)" class="gold-preset">500</button>
+        </span>
+      </span>
+      <span id="goldAdvice" style="font-size:11px;color:var(--text-muted);font-style:italic;min-height:1em"></span>
     </span>
   </div>
 
@@ -2159,6 +2170,10 @@ function pickerAddCard(name) { addCard(name); renderPickerAdd(); }
 // ============================================================
 // GOLD TRACKER
 // ============================================================
+function setGold(v) {
+  document.getElementById('goldInput').value = v;
+  updateGoldAdvice();
+}
 function updateGoldAdvice() {
   const g = parseInt(document.getElementById('goldInput').value) || 0;
   const el = document.getElementById('goldAdvice');
@@ -2262,34 +2277,34 @@ const REGION_DATA = {
       'Vantom': {
         type: 'Gimmick',
         strategy: 'Has "Slippery" — 9 charges that cap all incoming damage to 1. Use multi-hits or orbs to strip all 9 charges, then block hard for the final Dismember tail attack.',
-        cards: { ironclad:'Twin Strike', silent:'Shivs / Blade Dance', defect:'Orb attacks / Claw', regent:'Vigor-boosted multi-hits', necrobinder:'Osty multi-hits' }
+        tactic: 'Prioritise multi-hit attacks to strip the 9 Slippery charges fast.'
       },
       'The Kin': {
         type: 'Multi-Enemy',
         strategy: 'A Priest leader and two Followers. The Followers flee the moment the Priest dies. Ignore the Followers completely and burst the Priest down as fast as possible.',
-        cards: { ironclad:'Carnage', silent:'Eviscerate', defect:'Sunder', regent:'Star cards', necrobinder:'Soul Reap' }
+        tactic: 'Focus all damage on the Priest. Single heavy hits work best here.'
       },
       'Ceremonial Beast': {
         type: 'Phase-Shift',
         strategy: 'Ramps damage each turn. At 150 HP it enters "Ringing" — you can only play 1 card per turn. Save a full burst hand for the moment it hits 150 HP to push through the phase before Ringing locks you out.',
-        cards: { ironclad:'Bludgeon', silent:'Phantasmal Killer combos', defect:'Hyper Beam', regent:'Vigor stacks', necrobinder:'The Scythe' }
+        tactic: 'Save a full burst hand — dump everything the moment it crosses 150 HP.'
       }
     },
     elites: {
       'Bygone Effigy': {
         type: 'Gimmick',
         strategy: 'Wakes on turn 3 and deals 25 per turn from then on. Its Slow debuff adds 10% damage taken per card played — play all your block and zero-damage skills first, then end the turn with your heaviest attacks to maximise the multiplier.',
-        cards: { ironclad:'Pommel Strike', silent:'Infinite Shivs', defect:'Turbo / Coolheaded', regent:'Cantrips', necrobinder:'Osty setup' }
+        tactic: 'Play block and zero-damage skills first, then hit hard at end of turn to exploit the Slow multiplier.'
       },
       'Phrog Parasite': {
         type: 'Multi-Enemy',
         strategy: 'Clogs your deck with permanent Infection cards that deal damage if held. Burst it down by turn 3 to limit how many Infections you take, then use AoE once it splits into four Wrigglers.',
-        cards: { ironclad:'Whirlwind+', silent:'Dagger Spray', defect:'Sweeping Beam', regent:'AoE Star cards', necrobinder:'Deathbringer+' }
+        tactic: 'Kill it by turn 3, then use AoE to clear the Wrigglers it splits into.'
       },
       'Byrdonis': {
         type: 'Scaling',
         strategy: 'Infinite damage scaling — every turn it gets stronger. Do not stall. Front-load every point of damage you have from turn 1. There is no safe turn to hold back.',
-        cards: { ironclad:'Any high-damage opener', silent:'Front-loaded burst', defect:'Front-loaded burst', regent:'Front-loaded burst', necrobinder:'Front-loaded burst' }
+        tactic: 'Front-load all damage from turn 1. Every turn you stall it gets stronger.'
       }
     }
   },
@@ -2301,34 +2316,34 @@ const REGION_DATA = {
       'Waterfall Giant': {
         type: 'Gimmick',
         strategy: 'Stores "Steam Eruption" damage and releases it as a 30-40 damage explosion when defeated. Enter with high HP and hold your biggest block cards for the killing turn to absorb the explosion.',
-        cards: { ironclad:'Power Through', silent:'Blur', defect:'Reinforced Body', regent:'Healing / Block cards', necrobinder:'Mass block' }
+        tactic: 'Save your heaviest block cards for the killing turn to absorb the explosion.'
       },
       'Soul Fysh': {
         type: 'Gimmick',
         strategy: 'Constantly adds "Beckon" cards to your hand — each deals 6 damage to you if held at end of turn. Also uses Intangibility. Use discard or exhaust mechanics to remove Beckons before end of turn every cycle.',
-        cards: { ironclad:'True Grit', silent:'Tools of the Trade', defect:'Recycle', regent:'Discard effects', necrobinder:'Exhaust synergies' }
+        tactic: 'Discard or exhaust Beckon cards before end of turn every cycle.'
       },
       'Lagavulin Matriarch': {
         type: 'Phase-Shift',
         strategy: 'Starts asleep for 3 turns — use this window to set up powers and stack buffs. When she wakes she applies Strength and Dexterity debuffs. Rely on damage that ignores those debuffs such as Poison, Doom, or orb damage.',
-        cards: { ironclad:'Fire Breathing', silent:'Poison', defect:'Static Discharge', regent:'Continuous buffs', necrobinder:'Doom' }
+        tactic: 'Use the 3-turn sleep window for setup. Use damage that ignores debuffs — Poison, Doom, or orbs.'
       }
     },
     elites: {
       'Phantasmal Gardeners': {
         type: 'Multi-Enemy',
         strategy: 'Four enemies cycling fixed intents: Multi-hit, Buff, Weak, then Strong. Target enemies on their Strong turn to interrupt the most dangerous damage cycle. Optimal kill order: 4, 1, 3, 2.',
-        cards: { ironclad:'Whirlwind+', silent:'Noxious Fumes', defect:'Glassworks', regent:'AoE', necrobinder:'Deathbringer+ / End of Days+' }
+        tactic: 'AoE damage is key. Kill order: 4, 1, 3, 2. Hit them on their Strong intent turn.'
       },
       'Terror Eel': {
         type: 'Gimmick',
         strategy: 'Applies Vulnerable then hits hard. Block until it enters its stun window, then dump every damage card you have before it recovers.',
-        cards: { ironclad:'High block then burst', silent:'High block then burst', defect:'High block then burst', regent:'High block then burst', necrobinder:'High block then burst' }
+        tactic: 'Block through the Vulnerable cycles, then burst it down hard during the stun window.'
       },
       'Skulking Colony': {
         type: 'Scaling',
         strategy: 'Prevents you from burst-killing it. You need consistent, balanced damage and block output every turn. Do not let it snowball — steady pressure wins this fight.',
-        cards: { ironclad:'Consistent output', silent:'Consistent output', defect:'Consistent output', regent:'Consistent output', necrobinder:'Consistent output' }
+        tactic: 'Cannot be burst-killed. Apply steady damage and block every turn — no all-in turns.'
       }
     }
   },
@@ -2340,34 +2355,34 @@ const REGION_DATA = {
       'The Insatiable': {
         type: 'Timer',
         strategy: 'Casts "Sandpit" — a 4-turn instant death countdown. Play Frantic Escape cards to extend the timer each turn, but their energy cost increases each time. You need strong energy generation to keep pace.',
-        cards: { ironclad:'Hellraiser', silent:'Well-Laid Plans', defect:'Energy generation', regent:'Cost reduction', necrobinder:'Draw power' }
+        tactic: 'Strong energy generation is essential to keep playing Frantic Escapes as their cost rises.'
       },
       'Knowledge Demon': {
         type: 'Strategic Choice',
         strategy: 'Forces you to choose between permanent deck debuffs or resource debuffs each turn. Specialise — either go so aggressive you end the fight before the choices cripple you, or go hyper-defensive to outlast Disintegration.',
-        cards: { ironclad:'High aggression or full defence', silent:'High aggression or full defence', defect:'High aggression or full defence', regent:'High aggression or full defence', necrobinder:'High aggression or full defence' }
+        tactic: 'Commit to one extreme — either end the fight fast or go fully defensive to outlast Disintegration.'
       },
       'Kaiser Crab': {
         type: 'Multi-Enemy',
         strategy: 'Two independent claws — each has directional damage reduction based on which side is attacking. Always face the attacking arm to reduce incoming damage. Destroy the Rocket claw first.',
-        cards: { ironclad:'Single-target burst', silent:'Single-target burst', defect:'Single-target burst', regent:'Single-target burst', necrobinder:'Single-target burst' }
+        tactic: 'Focus single-target damage. Face the attacking arm each turn. Destroy the Rocket claw first.'
       }
     },
     elites: {
       'Decimillipede': {
         type: 'Multi-Enemy',
         strategy: 'Three segments that individually scale Strength and regenerate health. You must kill all three segments in the same turn. AoE that deals enough to one-shot all three simultaneously is mandatory.',
-        cards: { ironclad:'Whirlwind', silent:'Grand Finale', defect:'Electrodynamics', regent:'Powerful AoE', necrobinder:'Doombringer / Death Pulse' }
+        tactic: 'Mandatory AoE — all three segments must die in the same turn or they regenerate.'
       },
       'Entomancer': {
         type: 'Gimmick',
         strategy: 'Punishes multi-hit attacks and small decks while scaling its own Strength. Use high-damage single attacks only. Do not use multi-hits here.',
-        cards: { ironclad:'Bludgeon', silent:'Single-hit burst', defect:'Single-hit burst', regent:'Vigor scaling', necrobinder:'Single-hit burst' }
+        tactic: 'Single heavy hits only. Multi-hit attacks are punished here — avoid them entirely.'
       },
       'Infested Prism': {
         type: 'Gimmick',
         strategy: 'Very high health and block, but grants you +1 energy per turn as a passive. Use this long fight to set up your engine fully. Do not rush — the energy bonus is worth taking your time.',
-        cards: { ironclad:'Engine setup cards', silent:'Engine setup cards', defect:'Engine setup cards', regent:'Engine setup cards', necrobinder:'Engine setup cards' }
+        tactic: 'Treat this as a free engine-building window. The +1 energy per turn is worth the long fight.'
       }
     }
   },
@@ -2379,17 +2394,17 @@ const REGION_DATA = {
       'The Queen': {
         type: 'Multi-Enemy',
         strategy: 'Hides behind "Torch Head Amalgam" — a high-HP summon — while applying 99-turn Frail, Weak, and Vulnerable. Treat Phase 1 as a setup window. Apply Weak to the summon to stall it while building your powers, then burst the Queen the moment she is exposed.',
-        cards: { ironclad:'Limit Break', silent:'Malaise / Leg Sweep', defect:'Power scaling', regent:'Vigor', necrobinder:'The Scythe' }
+        tactic: 'Build powers during Phase 1. Apply Weak to the summon to stall it, then burst the Queen when exposed.'
       },
       'Doormaker': {
         type: 'Phase-Shift',
         strategy: 'Cycles through successive Doors with increasing HP pools — a pure DPS check. Deal maximum damage during every brief exposed window. Persistent damage like Poison and Doom carries over between Door phases making them especially strong here.',
-        cards: { ironclad:'Sustained damage', silent:'Poison builds', defect:'Sustained damage', regent:'Sustained damage', necrobinder:'Doom builds' }
+        tactic: 'Persistent damage like Poison and Doom carries over between Door phases — prioritise those.'
       },
       'Test Subject #C8': {
         type: 'Phase-Shift',
         strategy: 'Three phases: Enrage, Painful Stabs, and Intangibility. You can only deal damage when it is not Intangible. Requires very high draw and energy generation to capitalise on every window it gives you.',
-        cards: { ironclad:'Offering', silent:'Adrenaline', defect:'Seek / Double Energy', regent:'Draw power', necrobinder:'Soul Reap' }
+        tactic: 'High draw and energy generation — you need to maximise every window when it is not Intangible.'
       }
     },
     elites: {}
@@ -2427,13 +2442,11 @@ function renderBossAlert() {
     const rk = BOSS_TO_REGION[selectedBoss];
     const rd = REGION_DATA[rk];
     const boss = rd.bosses[selectedBoss];
-    const charCards = boss.cards[currentChar] || '';
-
     html += `<div class="boss-bar" style="border-color:${rd.color}40;background:${rd.color}0d;margin-top:.5rem">`;
     html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:8px">${boss.type}</span></div>`;
     html += `<div class="boss-bar-text">${boss.strategy}</div>`;
-    if (charCards) {
-      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:5px;letter-spacing:.06em">${currentChar} cards: <span style="color:${rd.color}">${charCards}</span></div>`;
+    if (boss.tactic) {
+      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};margin-top:6px;letter-spacing:.04em;font-style:italic">${boss.tactic}</div>`;
     }
     html += `</div>`;
 
@@ -2442,12 +2455,11 @@ function renderBossAlert() {
     if (Object.keys(elites).length > 0) {
       html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin:.5rem 0 .3rem">${rd.label} elites — expect these</div>`;
       Object.entries(elites).forEach(([ename, elite]) => {
-        const eCharCards = elite.cards[currentChar] || '';
         html += `<div style="padding:.45rem .7rem;border-radius:3px;border:1px solid ${rd.color}25;background:${rd.color}08;margin-bottom:.35rem">`;
         html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:3px">${ename} <span style="opacity:.5;font-size:8px">${elite.type}</span></div>`;
         html += `<div style="font-size:12px;color:var(--text-dim);line-height:1.5">${elite.strategy}</div>`;
-        if (eCharCards) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px;letter-spacing:.06em">${currentChar} cards: <span style="color:${rd.color}">${eCharCards}</span></div>`;
+        if (elite.tactic) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};margin-top:5px;letter-spacing:.04em;font-style:italic">${elite.tactic}</div>`;
         }
         html += `</div>`;
       });
