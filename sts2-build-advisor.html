@@ -232,6 +232,33 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 .picker-empty{font-size:12px;color:var(--text-muted);font-style:italic;padding:.6rem 2px;}
 .picker-reward-steps{padding:8px 10px;}
 
+/* Three axes */
+.axes-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:.65rem .9rem;margin-bottom:.75rem;}
+.axes-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem;}
+.axis-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.axis-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);width:62px;flex-shrink:0;}
+.axis-bar-bg{flex:1;height:7px;background:var(--surface);border-radius:99px;overflow:hidden;}
+.axis-bar-fill{height:100%;border-radius:99px;transition:width .4s;}
+.axis-val{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);width:28px;text-align:right;}
+.axis-flag{font-size:9px;font-style:italic;margin-left:2px;}
+.volume-score{font-family:'Cinzel',serif;font-size:18px;font-weight:600;text-align:center;margin:.4rem 0 .2rem;}
+.volume-label{font-family:'Share Tech Mono',monospace;font-size:9px;text-align:center;letter-spacing:.1em;text-transform:uppercase;}
+/* Boss alert */
+.boss-bar{padding:.5rem .75rem;border-radius:4px;margin-bottom:.6rem;border:1px solid;}
+.boss-bar-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;}
+.boss-bar-text{font-size:12px;color:var(--text-dim);line-height:1.5;}
+.boss-select-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.6rem;}
+.boss-btn{padding:3px 9px;background:none;border:1px solid var(--border);border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--text-muted);transition:all .12s;}
+.boss-btn:hover{border-color:var(--border-bright);color:var(--text-dim);}
+.boss-btn.active{border-color:var(--ember);color:var(--ember);background:rgba(192,66,26,.1);}
+/* Engine tracker */
+.engine-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:.65rem .9rem;margin-bottom:.75rem;}
+.engine-status{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.engine-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.engine-name{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);}
+.engine-pct{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:auto;}
+
+
 @media(max-width:480px){h1{font-size:1.5rem;}.deck-stats{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
@@ -253,6 +280,11 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
     <button class="act-btn" id="act2btn" onclick="setAct(2)">2 — City</button>
     <button class="act-btn" id="act3btn" onclick="setAct(3)">3 — Beyond</button>
     <span class="act-advice" id="actAdvice"></span>
+    <span style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.06em">gold</span>
+      <input type="number" id="goldInput" value="0" min="0" max="9999" oninput="updateGoldAdvice()" style="width:60px;background:var(--bg2);border:1px solid var(--border-bright);border-radius:3px;padding:3px 6px;color:var(--amber-bright);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;text-align:center">
+      <span id="goldAdvice" style="font-size:11px;color:var(--text-muted);font-style:italic"></span>
+    </span>
   </div>
 
   <div class="health-row">
@@ -271,10 +303,12 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
       <div class="panel-title">your deck <span id="deckCount">0 cards</span></div>
       <div class="deck-stats" id="deckStats"></div>
       <div class="btn-row">
-        <button class="action-btn danger" onclick="openRemoveModal()">✕ remove card</button>
         <button class="action-btn" onclick="resetRun()" style="border-color:rgba(192,66,26,0.6);color:#c06060;">☠ died</button>
         <button class="action-btn" onclick="openSaveModal()" style="font-size:9px">💾 save</button>
         <button class="action-btn" onclick="openLoadModal()" style="font-size:9px">📂 load</button>
+        <button class="action-btn" onclick="exportDeck()" style="font-size:9px">⬆ export</button>
+        <button class="action-btn" onclick="importDeckClick()" style="font-size:9px">⬇ import</button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importDeckFile(event)">
       </div>
       <div class="deck-list" id="deckList"></div>
 
@@ -293,8 +327,15 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 
     <!-- Middle: deck balance + priorities -->
     <div>
-      <div class="panel-title">build priorities</div>
+      <div class="panel-title">deck analysis</div>
+      <!-- Boss alert bar -->
+      <div id="bossAlertBar"></div>
+      <!-- Three axes -->
+      <div id="threeAxes"></div>
+      <!-- Balance bar -->
       <div id="deckBalance"></div>
+      <!-- Engine tracker -->
+      <div id="engineTracker"></div>
       <div id="priorityPanel"></div>
     </div>
 
@@ -307,7 +348,7 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
   </div>
 </div>
 
-<!-- Save loadout modal -->
+
 <div class="modal-overlay hidden" id="saveOverlay">
   <div class="modal" style="max-width:440px">
     <div class="modal-header">
@@ -351,20 +392,6 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 </div>
 
 
-
-<!-- Remove card modal -->
-<div class="modal-overlay hidden" id="removeOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Remove a Card</span>
-      <button class="modal-close" onclick="closeRemoveModal()">✕</button>
-    </div>
-    <div class="modal-search">
-      <input type="text" id="removeSearch" placeholder="Search deck..." oninput="renderRemoveModal()">
-    </div>
-    <div class="modal-body" id="removeBody"></div>
-  </div>
-</div>
 
 <script>
 // ============================================================
@@ -1360,55 +1387,6 @@ function renderModalCards() {
 }
 
 
-
-function renderRemoveModal() {
-  const q = (document.getElementById('removeSearch').value || '').toLowerCase();
-  const body = document.getElementById('removeBody');
-  const topBuildKey = getTopBuild();
-  const topBuild = topBuildKey ? BUILD_DATA[currentChar].builds[topBuildKey] : null;
-  const cards = (ALL_CARDS[currentChar] || []).concat(ALL_CARDS['colorless'] || []);
-  const allOtherCards = ['ironclad','silent','defect','necrobinder','regent'].filter(k=>k!==currentChar).flatMap(k=>ALL_CARDS[k]||[]);
-  function findCard(name) { return cards.find(x=>x.name===name) || allOtherCards.find(x=>x.name===name); }
-
-  const sorted = Object.entries(deck)
-    .filter(([name]) => !q || name.toLowerCase().includes(q))
-    .sort((a,b) => {
-      // Starters go first as removal candidates
-      const isStarter = n => n === 'Strike' || n === 'Defend';
-      const aS = isStarter(a[0]) ? 0 : (topBuild && topBuild.cards.includes(a[0])) ? 2 : 1;
-      const bS = isStarter(b[0]) ? 0 : (topBuild && topBuild.cards.includes(b[0])) ? 2 : 1;
-      return aS - bS;
-    });
-
-  if (sorted.length === 0) { body.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:.5rem">Deck is empty.</p>'; return; }
-
-  body.innerHTML = sorted.map(([name, count]) => {
-    const c = findCard(name);
-    const isBad = name==='Strike'||name==='Defend';
-    const isCoreOfBuild = topBuild && topBuild.cards.includes(name);
-    const verdict = isBad ? 'REMOVE' : isCoreOfBuild ? 'KEEP' : 'OPTIONAL';
-    const verdictCls = isBad ? 'verdict-skip' : isCoreOfBuild ? 'verdict-take' : 'verdict-synergy';
-    const reason = isBad ? 'Starter card — removal is highest priority' : isCoreOfBuild ? 'Core build card — don\'t remove' : 'Consider if it\'s not pulling its weight';
-    return `<div class="card-option" onclick="removeFromDeck('${name.replace(/'/g,"\\'")}')">
-      <div>
-        <div class="card-opt-name">${name} <span style="font-size:11px;color:var(--text-muted)">(×${count})</span></div>
-        <div class="card-opt-reason">${reason}</div>
-      </div>
-      <span class="card-opt-verdict ${verdictCls}">${verdict}</span>
-    </div>`;
-  }).join('');
-}
-
-function removeFromDeck(name) {
-  if (!deck[name]) return;
-  deck[name]--;
-  if (deck[name] <= 0) delete deck[name];
-  renderDeck();
-  updateResult();
-  updatePriorityPanel();
-  renderRemoveModal();
-}
-
 // ============================================================
 // PRIORITY PANEL (middle column)
 // ============================================================
@@ -2177,6 +2155,474 @@ function pickerRowHtmlAdd(c, typeCls, vs) {
 }
 
 function pickerAddCard(name) { addCard(name); renderPickerAdd(); }
+
+// ============================================================
+// GOLD TRACKER
+// ============================================================
+function updateGoldAdvice() {
+  const g = parseInt(document.getElementById('goldInput').value) || 0;
+  const el = document.getElementById('goldAdvice');
+  if (g < 100) el.innerHTML = '<span style="color:#c06060">⚠ below 100 — avoid shops</span>';
+  else if (g < 300) el.innerHTML = '<span style="color:var(--amber)">aim for 300 to afford relics</span>';
+  else el.innerHTML = '<span style="color:var(--green-bright)">✓ good — shop ready</span>';
+}
+
+// ============================================================
+// THREE AXES + VOLUME
+// ============================================================
+const VELOCITY_CARDS = {
+  ironclad: ['Shrug It Off','Pommel Strike','Headbutt','Battle Trance','Burning Pact','Second Wind','Offering','Corruption','Dark Embrace','Feel No Pain','Pyre','Hellraiser'],
+  silent: ['Acrobatics','Prepared','Dagger Throw','Reflex','Tactician','Tools of the Trade','Calculated Gamble','Adrenaline','Backstab','Expertise'],
+  defect: ['Scrape','Flash of Steel','FTL','Skim','Hologram','Compile Driver','TURBO','Double Energy','Coolheaded'],
+  necrobinder: ['Scourge','Graveblast','Fetch','Dredge','Parse','Reave','Grave Warden','Wisp'],
+  regent: ['Glow','Prophesize','Glimmer','Photon Cut','Convergence']
+};
+
+function calcThreeAxes() {
+  if (!currentChar || getDeckSize() === 0) return null;
+  const stats = getDeckStats();
+  const total = getDeckSize();
+  const playable = Math.max(1, total - (stats.other||0));
+
+  // Damage score: atk% of playable, scaled 0-100
+  const dmgScore = Math.min(100, Math.round((stats.atk / playable) * 200));
+  // Block score: def% of playable, scaled 0-100, with bonus for barricade/juggernaut
+  let blkScore = Math.min(100, Math.round((stats.def / playable) * 200));
+  // Check for block-generating powers
+  const blockPowers = ['Barricade','Juggernaut','Afterimage','Stone Armor','Crimson Mantle','Feel No Pain','Shroud'];
+  blockPowers.forEach(n => { if (deck[n]) blkScore = Math.min(100, blkScore + 15); });
+  // Velocity score: count velocity/cycling cards
+  const velCards = VELOCITY_CARDS[currentChar] || [];
+  let velCount = 0;
+  Object.keys(deck).forEach(n => { if (velCards.includes(n)) velCount += deck[n]; });
+  // Also count powers/scaling as partial velocity
+  velCount += stats.scl * 0.4;
+  const velScore = Math.min(100, Math.round(velCount * 18));
+
+  return { dmg: dmgScore, blk: blkScore, vel: velScore };
+}
+
+function renderThreeAxes() {
+  const el = document.getElementById('threeAxes');
+  if (!el) return;
+  if (!currentChar || getDeckSize() === 0) { el.innerHTML = ''; return; }
+
+  const axes = calcThreeAxes();
+  if (!axes) { el.innerHTML = ''; return; }
+
+  // Volume = geometric mean of the three, scaled. Zero in any axis = 0
+  const volume = axes.dmg === 0 || axes.blk === 0 || axes.vel === 0
+    ? 0
+    : Math.round(Math.pow(axes.dmg * axes.blk * axes.vel, 1/3));
+
+  const volColor = volume >= 70 ? 'var(--green-bright)' : volume >= 40 ? 'var(--amber-bright)' : '#c06060';
+  const volLabel = volume >= 70 ? 'Solid' : volume >= 50 ? 'Developing' : volume >= 30 ? 'Brittle' : axes.blk === 0 ? 'No Defense' : axes.dmg === 0 ? 'No Damage' : axes.vel === 0 ? 'Clunky' : 'Weak';
+
+  const dmgFlag = axes.dmg < 25 ? '<span class="axis-flag" style="color:#c06060">low dmg</span>' : axes.dmg >= 70 ? '<span class="axis-flag" style="color:var(--amber)">high — add vel/blk</span>' : '';
+  const blkFlag = axes.blk < 25 ? '<span class="axis-flag" style="color:#c06060">⚠ no block</span>' : axes.blk >= 80 ? '<span class="axis-flag" style="color:var(--amber)">high — check dmg</span>' : '';
+  const velFlag = axes.vel < 20 ? '<span class="axis-flag" style="color:var(--amber)">add draw/energy</span>' : '';
+
+  el.innerHTML = `<div class="axes-wrap">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">
+      <span class="axes-title" style="margin:0">three axes</span>
+      <span class="volume-score" style="color:${volColor};font-size:16px;margin:0">${volume}</span>
+      <span class="volume-label" style="font-size:9px;color:${volColor};margin:0">${volLabel}</span>
+    </div>
+    <div class="axis-row">
+      <span class="axis-label">damage</span>
+      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.dmg}%;background:#c04040"></div></div>
+      <span class="axis-val">${axes.dmg}</span>${dmgFlag}
+    </div>
+    <div class="axis-row">
+      <span class="axis-label">block</span>
+      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.blk}%;background:#378add"></div></div>
+      <span class="axis-val">${axes.blk}</span>${blkFlag}
+    </div>
+    <div class="axis-row">
+      <span class="axis-label">velocity</span>
+      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.vel}%;background:#4a9a8a"></div></div>
+      <span class="axis-val">${axes.vel}</span>${velFlag}
+    </div>
+    ${axes.vel < 20 && getDeckSize() > 6 ? `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:4px">Add velocity cards: ${(VELOCITY_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</div>` : ''}
+  </div>`;
+}
+
+// ============================================================
+// BOSS / ELITE ALERTS
+// ============================================================
+// ============================================================
+// REGION / BOSS / ELITE DATA  (STS2-accurate)
+// ============================================================
+const REGION_DATA = {
+  overgrowth: {
+    label: 'Overgrowth',
+    act: 1,
+    color: '#6aac5f',
+    bosses: {
+      'Vantom': {
+        type: 'Gimmick',
+        strategy: 'Has "Slippery" — 9 charges that cap all incoming damage to 1. Use multi-hits or orbs to strip all 9 charges, then block hard for the final Dismember tail attack.',
+        cards: { ironclad:'Twin Strike', silent:'Shivs / Blade Dance', defect:'Orb attacks / Claw', regent:'Vigor-boosted multi-hits', necrobinder:'Osty multi-hits' }
+      },
+      'The Kin': {
+        type: 'Multi-Enemy',
+        strategy: 'A Priest leader and two Followers. The Followers flee the moment the Priest dies. Ignore the Followers completely and burst the Priest down as fast as possible.',
+        cards: { ironclad:'Carnage', silent:'Eviscerate', defect:'Sunder', regent:'Star cards', necrobinder:'Soul Reap' }
+      },
+      'Ceremonial Beast': {
+        type: 'Phase-Shift',
+        strategy: 'Ramps damage each turn. At 150 HP it enters "Ringing" — you can only play 1 card per turn. Save a full burst hand for the moment it hits 150 HP to push through the phase before Ringing locks you out.',
+        cards: { ironclad:'Bludgeon', silent:'Phantasmal Killer combos', defect:'Hyper Beam', regent:'Vigor stacks', necrobinder:'The Scythe' }
+      }
+    },
+    elites: {
+      'Bygone Effigy': {
+        type: 'Gimmick',
+        strategy: 'Wakes on turn 3 and deals 25 per turn from then on. Its Slow debuff adds 10% damage taken per card played — play all your block and zero-damage skills first, then end the turn with your heaviest attacks to maximise the multiplier.',
+        cards: { ironclad:'Pommel Strike', silent:'Infinite Shivs', defect:'Turbo / Coolheaded', regent:'Cantrips', necrobinder:'Osty setup' }
+      },
+      'Phrog Parasite': {
+        type: 'Multi-Enemy',
+        strategy: 'Clogs your deck with permanent Infection cards that deal damage if held. Burst it down by turn 3 to limit how many Infections you take, then use AoE once it splits into four Wrigglers.',
+        cards: { ironclad:'Whirlwind+', silent:'Dagger Spray', defect:'Sweeping Beam', regent:'AoE Star cards', necrobinder:'Deathbringer+' }
+      },
+      'Byrdonis': {
+        type: 'Scaling',
+        strategy: 'Infinite damage scaling — every turn it gets stronger. Do not stall. Front-load every point of damage you have from turn 1. There is no safe turn to hold back.',
+        cards: { ironclad:'Any high-damage opener', silent:'Front-loaded burst', defect:'Front-loaded burst', regent:'Front-loaded burst', necrobinder:'Front-loaded burst' }
+      }
+    }
+  },
+  underdock: {
+    label: 'Underdock',
+    act: 1,
+    color: '#4a8cba',
+    bosses: {
+      'Waterfall Giant': {
+        type: 'Gimmick',
+        strategy: 'Stores "Steam Eruption" damage and releases it as a 30-40 damage explosion when defeated. Enter with high HP and hold your biggest block cards for the killing turn to absorb the explosion.',
+        cards: { ironclad:'Power Through', silent:'Blur', defect:'Reinforced Body', regent:'Healing / Block cards', necrobinder:'Mass block' }
+      },
+      'Soul Fysh': {
+        type: 'Gimmick',
+        strategy: 'Constantly adds "Beckon" cards to your hand — each deals 6 damage to you if held at end of turn. Also uses Intangibility. Use discard or exhaust mechanics to remove Beckons before end of turn every cycle.',
+        cards: { ironclad:'True Grit', silent:'Tools of the Trade', defect:'Recycle', regent:'Discard effects', necrobinder:'Exhaust synergies' }
+      },
+      'Lagavulin Matriarch': {
+        type: 'Phase-Shift',
+        strategy: 'Starts asleep for 3 turns — use this window to set up powers and stack buffs. When she wakes she applies Strength and Dexterity debuffs. Rely on damage that ignores those debuffs such as Poison, Doom, or orb damage.',
+        cards: { ironclad:'Fire Breathing', silent:'Poison', defect:'Static Discharge', regent:'Continuous buffs', necrobinder:'Doom' }
+      }
+    },
+    elites: {
+      'Phantasmal Gardeners': {
+        type: 'Multi-Enemy',
+        strategy: 'Four enemies cycling fixed intents: Multi-hit, Buff, Weak, then Strong. Target enemies on their Strong turn to interrupt the most dangerous damage cycle. Optimal kill order: 4, 1, 3, 2.',
+        cards: { ironclad:'Whirlwind+', silent:'Noxious Fumes', defect:'Glassworks', regent:'AoE', necrobinder:'Deathbringer+ / End of Days+' }
+      },
+      'Terror Eel': {
+        type: 'Gimmick',
+        strategy: 'Applies Vulnerable then hits hard. Block until it enters its stun window, then dump every damage card you have before it recovers.',
+        cards: { ironclad:'High block then burst', silent:'High block then burst', defect:'High block then burst', regent:'High block then burst', necrobinder:'High block then burst' }
+      },
+      'Skulking Colony': {
+        type: 'Scaling',
+        strategy: 'Prevents you from burst-killing it. You need consistent, balanced damage and block output every turn. Do not let it snowball — steady pressure wins this fight.',
+        cards: { ironclad:'Consistent output', silent:'Consistent output', defect:'Consistent output', regent:'Consistent output', necrobinder:'Consistent output' }
+      }
+    }
+  },
+  hive: {
+    label: 'Hive',
+    act: 2,
+    color: '#c8922a',
+    bosses: {
+      'The Insatiable': {
+        type: 'Timer',
+        strategy: 'Casts "Sandpit" — a 4-turn instant death countdown. Play Frantic Escape cards to extend the timer each turn, but their energy cost increases each time. You need strong energy generation to keep pace.',
+        cards: { ironclad:'Hellraiser', silent:'Well-Laid Plans', defect:'Energy generation', regent:'Cost reduction', necrobinder:'Draw power' }
+      },
+      'Knowledge Demon': {
+        type: 'Strategic Choice',
+        strategy: 'Forces you to choose between permanent deck debuffs or resource debuffs each turn. Specialise — either go so aggressive you end the fight before the choices cripple you, or go hyper-defensive to outlast Disintegration.',
+        cards: { ironclad:'High aggression or full defence', silent:'High aggression or full defence', defect:'High aggression or full defence', regent:'High aggression or full defence', necrobinder:'High aggression or full defence' }
+      },
+      'Kaiser Crab': {
+        type: 'Multi-Enemy',
+        strategy: 'Two independent claws — each has directional damage reduction based on which side is attacking. Always face the attacking arm to reduce incoming damage. Destroy the Rocket claw first.',
+        cards: { ironclad:'Single-target burst', silent:'Single-target burst', defect:'Single-target burst', regent:'Single-target burst', necrobinder:'Single-target burst' }
+      }
+    },
+    elites: {
+      'Decimillipede': {
+        type: 'Multi-Enemy',
+        strategy: 'Three segments that individually scale Strength and regenerate health. You must kill all three segments in the same turn. AoE that deals enough to one-shot all three simultaneously is mandatory.',
+        cards: { ironclad:'Whirlwind', silent:'Grand Finale', defect:'Electrodynamics', regent:'Powerful AoE', necrobinder:'Doombringer / Death Pulse' }
+      },
+      'Entomancer': {
+        type: 'Gimmick',
+        strategy: 'Punishes multi-hit attacks and small decks while scaling its own Strength. Use high-damage single attacks only. Do not use multi-hits here.',
+        cards: { ironclad:'Bludgeon', silent:'Single-hit burst', defect:'Single-hit burst', regent:'Vigor scaling', necrobinder:'Single-hit burst' }
+      },
+      'Infested Prism': {
+        type: 'Gimmick',
+        strategy: 'Very high health and block, but grants you +1 energy per turn as a passive. Use this long fight to set up your engine fully. Do not rush — the energy bonus is worth taking your time.',
+        cards: { ironclad:'Engine setup cards', silent:'Engine setup cards', defect:'Engine setup cards', regent:'Engine setup cards', necrobinder:'Engine setup cards' }
+      }
+    }
+  },
+  glory: {
+    label: 'Glory',
+    act: 3,
+    color: '#9a6aba',
+    bosses: {
+      'The Queen': {
+        type: 'Multi-Enemy',
+        strategy: 'Hides behind "Torch Head Amalgam" — a high-HP summon — while applying 99-turn Frail, Weak, and Vulnerable. Treat Phase 1 as a setup window. Apply Weak to the summon to stall it while building your powers, then burst the Queen the moment she is exposed.',
+        cards: { ironclad:'Limit Break', silent:'Malaise / Leg Sweep', defect:'Power scaling', regent:'Vigor', necrobinder:'The Scythe' }
+      },
+      'Doormaker': {
+        type: 'Phase-Shift',
+        strategy: 'Cycles through successive Doors with increasing HP pools — a pure DPS check. Deal maximum damage during every brief exposed window. Persistent damage like Poison and Doom carries over between Door phases making them especially strong here.',
+        cards: { ironclad:'Sustained damage', silent:'Poison builds', defect:'Sustained damage', regent:'Sustained damage', necrobinder:'Doom builds' }
+      },
+      'Test Subject #C8': {
+        type: 'Phase-Shift',
+        strategy: 'Three phases: Enrage, Painful Stabs, and Intangibility. You can only deal damage when it is not Intangible. Requires very high draw and energy generation to capitalise on every window it gives you.',
+        cards: { ironclad:'Offering', silent:'Adrenaline', defect:'Seek / Double Energy', regent:'Draw power', necrobinder:'Soul Reap' }
+      }
+    },
+    elites: {}
+  }
+};
+
+// Map each boss name to its region key for fast lookup
+const BOSS_TO_REGION = {};
+Object.entries(REGION_DATA).forEach(([rk, rd]) => {
+  Object.keys(rd.bosses).forEach(b => { BOSS_TO_REGION[b] = rk; });
+});
+
+let selectedBoss = null;
+
+function renderBossAlert() {
+  const el = document.getElementById('bossAlertBar');
+  if (!el || !currentChar) { if(el) el.innerHTML=''; return; }
+
+  // Build boss buttons grouped by region
+  let html = `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem">select your boss</div>`;
+
+  Object.entries(REGION_DATA).forEach(([rk, rd]) => {
+    html += `<div style="margin-bottom:.3rem;display:flex;align-items:center;gap:5px;flex-wrap:wrap">`;
+    html += `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:${rd.color};letter-spacing:.08em;text-transform:uppercase;width:72px;flex-shrink:0">${rd.label}</span>`;
+    Object.keys(rd.bosses).forEach(bname => {
+      const sel = selectedBoss === bname;
+      const safeName = bname.replace(/'/g, "\\'");
+      html += `<button class="boss-btn${sel?' active':''}" style="${sel?`border-color:${rd.color};color:${rd.color};background:${rd.color}1a`:''}" onclick="setBoss('${safeName}')">${bname}</button>`;
+    });
+    html += `</div>`;
+  });
+
+  // If a boss is selected, show its region context
+  if (selectedBoss) {
+    const rk = BOSS_TO_REGION[selectedBoss];
+    const rd = REGION_DATA[rk];
+    const boss = rd.bosses[selectedBoss];
+    const charCards = boss.cards[currentChar] || '';
+
+    html += `<div class="boss-bar" style="border-color:${rd.color}40;background:${rd.color}0d;margin-top:.5rem">`;
+    html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:8px">${boss.type}</span></div>`;
+    html += `<div class="boss-bar-text">${boss.strategy}</div>`;
+    if (charCards) {
+      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:5px;letter-spacing:.06em">${currentChar} cards: <span style="color:${rd.color}">${charCards}</span></div>`;
+    }
+    html += `</div>`;
+
+    // Show all elites for this region
+    const elites = rd.elites;
+    if (Object.keys(elites).length > 0) {
+      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin:.5rem 0 .3rem">${rd.label} elites — expect these</div>`;
+      Object.entries(elites).forEach(([ename, elite]) => {
+        const eCharCards = elite.cards[currentChar] || '';
+        html += `<div style="padding:.45rem .7rem;border-radius:3px;border:1px solid ${rd.color}25;background:${rd.color}08;margin-bottom:.35rem">`;
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:3px">${ename} <span style="opacity:.5;font-size:8px">${elite.type}</span></div>`;
+        html += `<div style="font-size:12px;color:var(--text-dim);line-height:1.5">${elite.strategy}</div>`;
+        if (eCharCards) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px;letter-spacing:.06em">${currentChar} cards: <span style="color:${rd.color}">${eCharCards}</span></div>`;
+        }
+        html += `</div>`;
+      });
+    }
+  }
+
+  el.innerHTML = html;
+}
+
+function setBoss(name) {
+  selectedBoss = selectedBoss === name ? null : name;
+  renderBossAlert();
+}
+
+// ============================================================
+// CHARACTER ENGINE TRACKER
+// ============================================================
+const ENGINES = {
+  ironclad: [
+    {name:'Exhaust engine',cards:['Corruption','Dark Embrace','Feel No Pain'],note:'Core Exhaust trinity. Sculpts deck mid-combat. Priority: remove Strikes first.'},
+    {name:'Strength engine',cards:['Demon Form','Inflame','Rupture'],note:'Passive Strength per turn. Go wide with multi-hit.'},
+    {name:'Block engine',cards:['Barricade','Juggernaut','Body Slam'],note:'Block never expires. Juggernaut converts block to damage.'}
+  ],
+  silent: [
+    {name:'Sly engine',cards:['Tactician','Tools of the Trade','Master Planner'],note:'Discard = free Energy. Keep deck thin to cycle fast.'},
+    {name:'Shiv engine',cards:['Accuracy','Infinite Blades','Knife Trap'],note:'Scale Shiv damage. Accuracy stacks multiplicatively.'},
+    {name:'Poison engine',cards:['Noxious Fumes','Accelerant','Bubble Bubble'],note:'Stack Poison then double it. Survive the early turns.'}
+  ],
+  defect: [
+    {name:'Orb/Focus engine',cards:['Defragment','Loop','Multi-Cast'],note:'Stack Focus ASAP. Remove Strikes — passive orbs outscale them by Act 2.'},
+    {name:'Claw engine',cards:['Claw','All for One','Scrape'],note:'Every Claw buffs all Claws. Keep deck small. Feral returns 0-cost attacks.'},
+    {name:'Hologram/TURBO loop',cards:['Hologram','TURBO','Claw'],note:'TURBO generates energy, Hologram retrieves Claw. Infinite-like turns with enough draw.'}
+  ],
+  necrobinder: [
+    {name:'Borrowed Time engine',cards:['Borrowed Time','Graveblast'],note:'Risk Doom on yourself for Energy. Graveblast retrieves from discard. Graveyard manipulation = endless turns.'},
+    {name:'Doom engine',cards:['Deathbringer','Death\'s Door','Shroud'],note:'Stack Doom, then trigger. Need Block to survive the wait. End of Days solves timing.'},
+    {name:'Osty engine',cards:['Rattle','Sic \'Em','Necro Mastery'],note:'Stack Osty HP. Rattle+Sic\'Em each turn. Necro Mastery converts Block to attacks.'},
+    {name:'Soul deferral',cards:['Soul','Haunt','Devour Life'],note:'Bank Souls for future draw instead of playing immediately. Use when Energy is tight.'}
+  ],
+  regent: [
+    {name:'Star/Vigor engine',cards:['Genesis','Alignment','Radiate'],note:'Stack Stars, trade for Energy via Alignment. Radiate = 3 AoE per Star gained. Pattern+Celestial Might = one big hit.'},
+    {name:'Blade/Forge engine',cards:['Summon Forth','Conqueror','The Smith'],note:'Forge the Blade every turn. Conqueror doubles Forge count. Decisions Decisions + Glow are the grease.'},
+    {name:'Starfall mode',cards:['Radiate','Terraforming','Gamma Blast'],note:'25+ Stars in one turn = massive Radiate nuke. Shift to Vigor + Star generation to set up.'}
+  ]
+};
+
+function renderEngineTracker() {
+  const el = document.getElementById('engineTracker');
+  if (!el || !currentChar) { if(el) el.innerHTML=''; return; }
+  const engines = ENGINES[currentChar];
+  if (!engines) { el.innerHTML=''; return; }
+
+  // Only show if deck has some cards
+  if (getDeckSize() < 3) { el.innerHTML=''; return; }
+
+  let bestEngine = null, bestPct = -1;
+  engines.forEach(eng => {
+    const have = eng.cards.filter(n => deck[n]).length;
+    const pct = have / eng.cards.length;
+    if (pct > bestPct) { bestPct = pct; bestEngine = {...eng, have, pct}; }
+  });
+
+  if (!bestEngine || bestEngine.have === 0) { el.innerHTML=''; return; }
+
+  const isLive = bestEngine.pct >= 0.6;
+  const color = isLive ? 'var(--green-bright)' : 'var(--amber)';
+  const status = isLive ? 'engine online' : 'engine forming';
+
+  let html = `<div class="engine-wrap">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${color};letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">${status}: ${bestEngine.name}</div>
+    <div class="axis-row" style="margin-bottom:6px">
+      <div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:${Math.round(bestEngine.pct*100)}%;background:${color}"></div></div>
+      <span class="axis-val">${bestEngine.have}/${bestEngine.cards.length}</span>
+    </div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:.4rem">${bestEngine.note}</div>`;
+
+  // Show missing engine pieces
+  const missing = bestEngine.cards.filter(n => !deck[n]);
+  if (missing.length > 0) {
+    html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em">missing: <span style="color:${color}">${missing.join(', ')}</span></div>`;
+  }
+
+  // Act 2 death clock
+  if (currentAct === 2 && bestEngine.pct < 0.5) {
+    html += `<div style="margin-top:6px;padding:5px 8px;border:1px solid rgba(192,64,64,.35);border-radius:3px;background:rgba(192,64,64,.08);font-size:11px;color:#c06060">⏰ Death clock: Act 2 midpoint and your engine isn't live. Prioritise engine cards over everything else this act.</div>`;
+  }
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+
+// Hook new renders into the update cycle
+const _origUpdateResult = updateResult;
+updateResult = function() {
+  _origUpdateResult();
+  renderThreeAxes();
+  renderEngineTracker();
+  renderBossAlert();
+};
+const _origUpdatePriorityPanel = updatePriorityPanel;
+updatePriorityPanel = function() {
+  _origUpdatePriorityPanel();
+  renderThreeAxes();
+  renderEngineTracker();
+};
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportDeck() {
+  if (!currentChar || getDeckSize() === 0) {
+    alert('Add cards to your deck before exporting.');
+    return;
+  }
+  const data = {
+    version: 1,
+    char: currentChar,
+    act: currentAct,
+    hp: document.getElementById('hpCur').value,
+    hpMax: document.getElementById('hpMax').value,
+    gold: document.getElementById('goldInput').value,
+    deck: deck,
+    exported: new Date().toISOString()
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const charName = currentChar.charAt(0).toUpperCase() + currentChar.slice(1);
+  a.href = url;
+  a.download = 'sts2-' + currentChar + '-act' + currentAct + '-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importDeckClick() {
+  document.getElementById('importFileInput').value = '';
+  document.getElementById('importFileInput').click();
+}
+
+function importDeckFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.char || !data.deck) throw new Error('Invalid file format.');
+      // Apply the imported state
+      currentChar = data.char;
+      deck = data.deck;
+      currentAct = data.act || 1;
+      document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+      const charBtn = document.getElementById('char-' + currentChar);
+      if (charBtn) charBtn.classList.add('active');
+      if (data.hp) document.getElementById('hpCur').value = data.hp;
+      if (data.hpMax) document.getElementById('hpMax').value = data.hpMax;
+      if (data.gold) document.getElementById('goldInput').value = data.gold;
+      document.getElementById('mainUI').style.display = 'block';
+      document.getElementById('inlinePicker').style.display = 'block';
+      updateActUI();
+      updateGoldAdvice();
+      renderDeck();
+      updateResult();
+      updatePriorityPanel();
+      renderPickerList();
+    } catch(err) {
+      alert('Could not import file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
 
 init();
 </script>
