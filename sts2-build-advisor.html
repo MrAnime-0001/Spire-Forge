@@ -2139,8 +2139,9 @@ function calcThreeAxes() {
 }
 
 function getDrawBalance() {
-  // Count how many cards CAN deal damage vs CAN block (hybrids count in both).
-  // This reflects real draw odds — an atk_def card is drawable as both.
+  // Only counts cards that can attack OR block — pure scale, power, skill,
+  // and unplayable/other cards are excluded entirely.
+  // Hybrids count fully in each pool they belong to.
   const charCards = ALL_CARDS[currentChar] || [];
   const colorlessCards = ALL_CARDS['colorless'] || [];
   const allOtherChars = ['ironclad','silent','defect','necrobinder','regent']
@@ -2148,22 +2149,21 @@ function getDrawBalance() {
   function findCard(name) {
     return charCards.find(x=>x.name===name) || colorlessCards.find(x=>x.name===name) || allOtherChars.find(x=>x.name===name);
   }
-  let atkDraw = 0, defDraw = 0, sclDraw = 0;
+  let atkDraw = 0, defDraw = 0, sclDraw = 0, deadDraw = 0;
   Object.entries(deck).forEach(([name, count]) => {
     const c = findCard(name);
     if (!c) return;
     const t = c.type || 'scl';
-    // Each card counted fully in every category it belongs to
-    if (t === 'atk')         { atkDraw += count; }
-    else if (t === 'def')    { defDraw += count; }
+    if      (t === 'atk')         { atkDraw += count; }
+    else if (t === 'def')         { defDraw += count; }
+    else if (t === 'atk_def')     { atkDraw += count; defDraw += count; }
+    else if (t === 'atk_scl')     { atkDraw += count; sclDraw += count; }
+    else if (t === 'def_scl')     { defDraw += count; sclDraw += count; }
+    else if (t === 'atk_def_scl') { atkDraw += count; defDraw += count; sclDraw += count; }
     else if (t === 'scl' || t === 'pow' || t === 'skl') { sclDraw += count; }
-    else if (t === 'atk_def')    { atkDraw += count; defDraw += count; }
-    else if (t === 'atk_scl')    { atkDraw += count; sclDraw += count; }
-    else if (t === 'def_scl')    { defDraw += count; sclDraw += count; }
-    else if (t === 'atk_def_scl'){ atkDraw += count; defDraw += count; sclDraw += count; }
-    // 'other' excluded intentionally
+    else if (t === 'other') { deadDraw += count; }
   });
-  return { atkDraw, defDraw, sclDraw };
+  return { atkDraw, defDraw, sclDraw, deadDraw };
 }
 
 function renderDeckHealth() {
@@ -2186,9 +2186,8 @@ function renderDeckHealth() {
 
   // Draw balance — full counts, hybrids in both pools
   const db = getDrawBalance();
-  const drawTotal = Math.max(1, db.atkDraw + db.defDraw + db.sclDraw);
-  const drawPctAtk = Math.round(db.atkDraw / drawTotal * 100);
-  const drawPctDef = Math.round(db.defDraw / drawTotal * 100);
+  const drawTotal = Math.max(1, db.atkDraw + db.defDraw + db.sclDraw + db.deadDraw);
+
   // ATK:DEF ratio among damage+block draws only (ignoring pure scale)
   const atkDefPool = Math.max(1, db.atkDraw + db.defDraw);
   const rAtk = Math.round(db.atkDraw / atkDefPool * 100);
@@ -2227,10 +2226,11 @@ function renderDeckHealth() {
   const barScl = Math.round(stats.scl/total*100);
   const barOth = Math.max(0, 100-barAtk-barDef-barScl);
 
-  // Draw balance bar (full counts, split ATK | DEF only, scale separate)
-  const barDrawAtk = Math.round(db.atkDraw / drawTotal * 100);
-  const barDrawDef = Math.round(db.defDraw / drawTotal * 100);
-  const barDrawScl = Math.max(0, 100 - barDrawAtk - barDrawDef);
+  // Draw balance bar — all 4 pools
+  const barDrawAtk  = Math.round(db.atkDraw  / drawTotal * 100);
+  const barDrawDef  = Math.round(db.defDraw  / drawTotal * 100);
+  const barDrawScl  = Math.round(db.sclDraw  / drawTotal * 100);
+  const barDrawDead = Math.max(0, 100 - barDrawAtk - barDrawDef - barDrawScl);
 
   const drawBalanceColor = drawRatioBalanced ? 'var(--green-bright)' : (drawHeavyAtk || drawHeavyDef) ? '#c06060' : 'var(--amber-bright)';
   const drawBalanceLabel = drawRatioBalanced ? '✓ balanced' : drawHeavyAtk ? '⚠ atk-heavy' : drawHeavyDef ? '⚠ def-heavy' : '~ close';
@@ -2260,13 +2260,14 @@ function renderDeckHealth() {
     <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin:-3px 0 10px 70px">draw &amp; energy — how fast you cycle through cards</div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
       <span>draw odds</span>
-      <span style="color:${drawBalanceColor};font-size:9px">${db.atkDraw}ATK : ${db.defDraw}DEF &nbsp; ${drawBalanceLabel}</span>
+      <span style="color:${drawBalanceColor};font-size:9px">${db.atkDraw}ATK : ${db.defDraw}DEF${db.sclDraw>0?' : '+db.sclDraw+'SCL':''}${db.deadDraw>0?' : '+db.deadDraw+'DEAD':''}  ${drawBalanceLabel}</span>
     </div>
     <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-bottom:4px">chance of drawing an attack vs a block card — aim for 50/50</div>
     <div class="balance-bar-track" style="margin:.2rem 0 .3rem;height:8px">
       <div class="balance-seg" style="width:${barDrawAtk}%;background:#c04040" title="Attack draws"></div>
       <div class="balance-seg" style="width:${barDrawDef}%;background:#378add" title="Block draws"></div>
       <div class="balance-seg" style="width:${barDrawScl}%;background:#9a6aba" title="Scale draws"></div>
+      <div class="balance-seg" style="width:${barDrawDead}%;background:rgba(140,110,60,.5)" title="Unplayable draws"></div>
     </div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin:.55rem 0 2px">card mix</div>
     <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-bottom:4px">what your deck is made of (hybrid cards split fractionally)</div>
