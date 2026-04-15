@@ -2138,6 +2138,34 @@ function calcThreeAxes() {
   return { dmg: dmgScore, blk: blkScore, vel: velScore };
 }
 
+function getDrawBalance() {
+  // Count how many cards CAN deal damage vs CAN block (hybrids count in both).
+  // This reflects real draw odds — an atk_def card is drawable as both.
+  const charCards = ALL_CARDS[currentChar] || [];
+  const colorlessCards = ALL_CARDS['colorless'] || [];
+  const allOtherChars = ['ironclad','silent','defect','necrobinder','regent']
+    .filter(k=>k!==currentChar).flatMap(k=>ALL_CARDS[k]||[]);
+  function findCard(name) {
+    return charCards.find(x=>x.name===name) || colorlessCards.find(x=>x.name===name) || allOtherChars.find(x=>x.name===name);
+  }
+  let atkDraw = 0, defDraw = 0, sclDraw = 0;
+  Object.entries(deck).forEach(([name, count]) => {
+    const c = findCard(name);
+    if (!c) return;
+    const t = c.type || 'scl';
+    // Each card counted fully in every category it belongs to
+    if (t === 'atk')         { atkDraw += count; }
+    else if (t === 'def')    { defDraw += count; }
+    else if (t === 'scl' || t === 'pow' || t === 'skl') { sclDraw += count; }
+    else if (t === 'atk_def')    { atkDraw += count; defDraw += count; }
+    else if (t === 'atk_scl')    { atkDraw += count; sclDraw += count; }
+    else if (t === 'def_scl')    { defDraw += count; sclDraw += count; }
+    else if (t === 'atk_def_scl'){ atkDraw += count; defDraw += count; sclDraw += count; }
+    // 'other' excluded intentionally
+  });
+  return { atkDraw, defDraw, sclDraw };
+}
+
 function renderDeckHealth() {
   const el = document.getElementById('deckHealth');
   if (!el) return;
@@ -2150,22 +2178,42 @@ function renderDeckHealth() {
   const total = getDeckSize();
   const oth = stats.other || 0;
   const playable = Math.max(1, total - oth);
+
+  // Fractional composition (for bars + legend) — unchanged
   const pAtk = Math.round(stats.atk / playable * 100);
   const pDef = Math.round(stats.def / playable * 100);
   const pScl = Math.round(stats.scl / playable * 100);
 
-  const volume = axes.dmg === 0 || axes.blk === 0 || axes.vel === 0
-    ? 0
-    : Math.round(Math.pow(axes.dmg * axes.blk * axes.vel, 1/3));
-  const volColor = volume >= 70 ? 'var(--green-bright)' : volume >= 40 ? 'var(--amber-bright)' : '#c06060';
-  const volLabel = volume >= 70 ? 'Solid' : volume >= 50 ? 'Developing' : volume >= 30 ? 'Brittle' : axes.blk === 0 ? 'No Defense' : axes.dmg === 0 ? 'No Damage' : axes.vel === 0 ? 'Clunky' : 'Weak';
+  // Draw balance — full counts, hybrids in both pools
+  const db = getDrawBalance();
+  const drawTotal = Math.max(1, db.atkDraw + db.defDraw + db.sclDraw);
+  const drawPctAtk = Math.round(db.atkDraw / drawTotal * 100);
+  const drawPctDef = Math.round(db.defDraw / drawTotal * 100);
+  // ATK:DEF ratio among damage+block draws only (ignoring pure scale)
+  const atkDefPool = Math.max(1, db.atkDraw + db.defDraw);
+  const rAtk = Math.round(db.atkDraw / atkDefPool * 100);
+  const rDef = Math.round(db.defDraw / atkDefPool * 100);
+  const drawRatioBalanced = rAtk >= 40 && rAtk <= 60; // 40-60 either way = balanced
+  const drawHeavyAtk = rAtk > 65;
+  const drawHeavyDef = rDef > 65;
+  // Show ratio as "X:Y" card counts
 
+  // Volume score
+  const volume = axes.dmg === 0 || axes.blk === 0 || axes.vel === 0
+    ? 0 : Math.round(Math.pow(axes.dmg * axes.blk * axes.vel, 1/3));
+  const volColor = volume >= 70 ? 'var(--green-bright)' : volume >= 40 ? 'var(--amber-bright)' : '#c06060';
+  const volLabel = volume >= 70 ? 'Solid' : volume >= 50 ? 'Developing' : volume >= 30 ? 'Brittle'
+    : axes.blk === 0 ? 'No Defense' : axes.dmg === 0 ? 'No Damage' : axes.vel === 0 ? 'Clunky' : 'Weak';
+
+  // Warnings — three axes first, then draw balance
   const warnings = [];
-  if (axes.blk < 25 && total > 6) warnings.push({msg:'No block — elites will punish you.', color:'#6aacda'});
-  if (axes.dmg < 25 && total > 6) warnings.push({msg:'Low damage output — fights will drag.', color:'#c06060'});
-  if (axes.vel < 20 && total > 6) warnings.push({msg:'Low velocity — deck feels clunky. Add draw or energy.', color:'var(--amber)'});
-  if (pAtk > 60 && total > 8) warnings.push({msg:`Attack-heavy (${pAtk}% ATK). Add defense or scaling.`, color:'#c06060'});
-  if (pDef > 60 && total > 8) warnings.push({msg:`Defense-heavy (${pDef}% DEF). You may lack damage in long fights.`, color:'#6aacda'});
+  if (axes.blk < 25 && total > 6)  warnings.push({msg:'No block — elites will punish you.', color:'#6aacda'});
+  if (axes.dmg < 25 && total > 6)  warnings.push({msg:'Low damage output — fights will drag.', color:'#c06060'});
+  if (axes.vel < 20 && total > 6)  warnings.push({msg:'Low velocity — deck feels clunky. Add draw or energy.', color:'var(--amber)'});
+  if (playable > 7) {
+    if (drawHeavyAtk) warnings.push({msg:`Draw skewed toward attack (${rAtk}% of ATK+DEF draws). Add ${Math.ceil(db.atkDraw - db.defDraw)} more block card${db.atkDraw-db.defDraw!==1?'s':''} to reach 50/50.`, color:'#6aacda'});
+    else if (drawHeavyDef) warnings.push({msg:`Draw skewed toward block (${rDef}% of ATK+DEF draws). Add ${Math.ceil(db.defDraw - db.atkDraw)} more attack card${db.defDraw-db.atkDraw!==1?'s':''} to reach 50/50.`, color:'#c06060'});
+  }
   if (oth >= 3) warnings.push({msg:`${oth} dead cards (curses/statuses) diluting draws. Remove at shops.`, color:'#7a6a4a'});
   else if (oth >= 1) warnings.push({msg:`${oth} dead card${oth>1?'s':''} in deck. Consider removing at a shop.`, color:'#7a6a4a'});
 
@@ -2173,47 +2221,71 @@ function renderDeckHealth() {
     ? `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:3px">velocity cards: ${(VELOCITY_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</div>`
     : '';
 
+  // Composition bar (fractional)
   const barAtk = Math.round(stats.atk/total*100);
   const barDef = Math.round(stats.def/total*100);
   const barScl = Math.round(stats.scl/total*100);
   const barOth = Math.max(0, 100-barAtk-barDef-barScl);
 
+  // Draw balance bar (full counts, split ATK | DEF only, scale separate)
+  const barDrawAtk = Math.round(db.atkDraw / drawTotal * 100);
+  const barDrawDef = Math.round(db.defDraw / drawTotal * 100);
+  const barDrawScl = Math.max(0, 100 - barDrawAtk - barDrawDef);
+
+  const drawBalanceColor = drawRatioBalanced ? 'var(--green-bright)' : (drawHeavyAtk || drawHeavyDef) ? '#c06060' : 'var(--amber-bright)';
+  const drawBalanceLabel = drawRatioBalanced ? '✓ balanced' : drawHeavyAtk ? '⚠ atk-heavy' : drawHeavyDef ? '⚠ def-heavy' : '~ close';
+
   el.innerHTML = `<div class="axes-wrap" style="margin-bottom:.75rem">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
       <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">deck health</span>
       <span style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:${volColor}">${volume} <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase">${volLabel}</span></span>
     </div>
     <div class="axis-row">
-      <span class="axis-label">damage</span>
+      <span class="axis-label" title="How much attack damage your deck can deal">damage</span>
       <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.dmg}%;background:#c04040"></div></div>
       <span class="axis-val" style="color:#c06060">${pAtk}%</span>
     </div>
+    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin:-3px 0 5px 70px">attacks — how hard you hit</div>
     <div class="axis-row">
-      <span class="axis-label">block</span>
+      <span class="axis-label" title="How much block/defense your deck generates">block</span>
       <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.blk}%;background:#378add"></div></div>
       <span class="axis-val" style="color:#6aacda">${pDef}%</span>
     </div>
-    <div class="axis-row" style="margin-bottom:6px">
-      <span class="axis-label">velocity</span>
+    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin:-3px 0 5px 70px">defense — how much damage you absorb</div>
+    <div class="axis-row">
+      <span class="axis-label" title="Card draw, energy generation, and deck thinning">velocity</span>
       <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.vel}%;background:#4a9a8a"></div></div>
       <span class="axis-val" style="color:#4abaa0">${axes.vel}</span>
     </div>
-    <div class="balance-bar-track" style="margin:.3rem 0 .35rem">
+    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin:-3px 0 10px 70px">draw &amp; energy — how fast you cycle through cards</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
+      <span>draw odds</span>
+      <span style="color:${drawBalanceColor};font-size:9px">${db.atkDraw}ATK : ${db.defDraw}DEF &nbsp; ${drawBalanceLabel}</span>
+    </div>
+    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-bottom:4px">chance of drawing an attack vs a block card — aim for 50/50</div>
+    <div class="balance-bar-track" style="margin:.2rem 0 .3rem;height:8px">
+      <div class="balance-seg" style="width:${barDrawAtk}%;background:#c04040" title="Attack draws"></div>
+      <div class="balance-seg" style="width:${barDrawDef}%;background:#378add" title="Block draws"></div>
+      <div class="balance-seg" style="width:${barDrawScl}%;background:#9a6aba" title="Scale draws"></div>
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin:.55rem 0 2px">card mix</div>
+    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-bottom:4px">what your deck is made of (hybrid cards split fractionally)</div>
+    <div class="balance-bar-track" style="margin:.2rem 0 .3rem">
       <div class="balance-seg" style="width:${barAtk}%;background:#c04040"></div>
       <div class="balance-seg" style="width:${barDef}%;background:#378add"></div>
       <div class="balance-seg" style="width:${barScl}%;background:#9a6aba"></div>
       <div class="balance-seg" style="width:${barOth}%;background:${oth>0?'rgba(140,110,60,.45)':'rgba(100,90,70,.15)'}"></div>
     </div>
     <div class="balance-legend">
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#c04040"></span><span style="color:#c06060">${pAtk}% ATK</span></span>
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#378add"></span><span style="color:#6aacda">${pDef}% DEF</span></span>
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#9a6aba"></span><span style="color:#b07ad0">${pScl}% SCALE</span></span>
-      ${oth > 0 ? `<span class="balance-legend-item"><span class="balance-dot" style="background:rgba(140,110,60,.7)"></span><span style="color:#7a6a4a">${Math.round(oth/total*100)}% OTHER</span></span>` : ''}
+      <span class="balance-legend-item"><span class="balance-dot" style="background:#c04040"></span><span style="color:#c06060">${pAtk}% attack</span></span>
+      <span class="balance-legend-item"><span class="balance-dot" style="background:#378add"></span><span style="color:#6aacda">${pDef}% block</span></span>
+      <span class="balance-legend-item"><span class="balance-dot" style="background:#9a6aba"></span><span style="color:#b07ad0">${pScl}% scaling</span></span>
+      ${oth > 0 ? `<span class="balance-legend-item"><span class="balance-dot" style="background:rgba(140,110,60,.7)"></span><span style="color:#7a6a4a">${Math.round(oth/total*100)}% dead cards</span></span>` : ''}
     </div>
     ${velSuggest}
     ${warnings.length > 0
       ? warnings.map(w=>`<div class="balance-warning" style="color:${w.color}">\u26a0 ${w.msg}</div>`).join('')
-      : total > 5 ? `<div class="balance-ok">\u2713 ${pAtk}% ATK / ${pDef}% DEF / ${pScl}% SCALE${oth>0?' / '+Math.round(oth/total*100)+'% other':''}</div>` : ''}
+      : total > 5 ? `<div class="balance-ok">\u2713 ${pAtk}% ATK / ${pDef}% DEF / ${pScl}% SCALE — draw balanced ${db.atkDraw}ATK : ${db.defDraw}DEF</div>` : ''}
   </div>`;
 }
 
