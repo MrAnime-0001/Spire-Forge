@@ -2157,9 +2157,9 @@ function getDrawBalance() {
     if      (t === 'atk')         { atkDraw += count; }
     else if (t === 'def')         { defDraw += count; }
     else if (t === 'atk_def')     { atkDraw += count; defDraw += count; }
-    else if (t === 'atk_scl')     { atkDraw += count; sclDraw += count; }
-    else if (t === 'def_scl')     { defDraw += count; sclDraw += count; }
-    else if (t === 'atk_def_scl') { atkDraw += count; defDraw += count; sclDraw += count; }
+    else if (t === 'atk_scl')     { atkDraw += count; }
+    else if (t === 'def_scl')     { defDraw += count; }
+    else if (t === 'atk_def_scl') { atkDraw += count; defDraw += count; }
     else if (t === 'scl' || t === 'pow' || t === 'skl') { sclDraw += count; }
     else if (t === 'other') { deadDraw += count; }
   });
