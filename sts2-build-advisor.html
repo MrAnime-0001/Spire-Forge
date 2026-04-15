@@ -341,10 +341,8 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
       <div class="panel-title">deck analysis</div>
       <!-- Boss alert bar -->
       <div id="bossAlertBar"></div>
-      <!-- Three axes -->
-      <div id="threeAxes"></div>
-      <!-- Balance bar -->
-      <div id="deckBalance"></div>
+      <!-- Deck health (merged axes + balance) -->
+      <div id="deckHealth"></div>
       <!-- Engine tracker -->
       <div id="engineTracker"></div>
       <div id="priorityPanel"></div>
@@ -1404,7 +1402,7 @@ function renderModalCards() {
 function updatePriorityPanel() {
   const panel = document.getElementById('priorityPanel');
   if (!currentChar) { panel.innerHTML = ''; return; }
-  renderDeckBalance();
+  renderDeckHealth();
   const builds = BUILD_DATA[currentChar].builds;
   const topBuildKey = getTopBuild();
   const deckNames = new Set(Object.keys(deck));
@@ -1629,83 +1627,6 @@ function updateResult() {
 // ============================================================
 // DECK BALANCE
 // ============================================================
-function renderDeckBalance() {
-  const el = document.getElementById('deckBalance');
-  if (!el) return;
-  const total = getDeckSize();
-  if (total === 0) { el.innerHTML = ''; return; }
-
-  const stats = getDeckStats();
-  const atk = stats.atk;
-  const def = stats.def;
-  const scl = stats.scl;
-  const oth = stats.other || 0;
-
-  // Balance percentages are calculated against playable cards only
-  const playable = Math.max(1, total - oth);
-  const pAtk = Math.round(atk / playable * 100);
-  const pDef = Math.round(def / playable * 100);
-  const pScl = Math.round(scl / playable * 100);
-  const pOth = total > 0 ? Math.round(oth / total * 100) : 0;
-
-  const IDEAL = 33;
-  const WARN = 13;
-
-  // Dual-type counts
-  const allOtherCharsForDual = ['ironclad','silent','defect','necrobinder','regent'].filter(k=>k!==currentChar).flatMap(k=>ALL_CARDS[k]||[]);
-  const charCards = ALL_CARDS[currentChar] || [];
-  const colorlessCards = ALL_CARDS['colorless'] || [];
-  const dualCounts = {atk_def:0, atk_scl:0, def_scl:0, atk_def_scl:0};
-  Object.entries(deck).forEach(([name,count]) => {
-    const c = charCards.find(x=>x.name===name) || colorlessCards.find(x=>x.name===name) || allOtherCharsForDual.find(x=>x.name===name);
-    if (c && dualCounts[c.type] !== undefined) dualCounts[c.type] += count;
-  });
-  const hasDual = Object.values(dualCounts).some(v=>v>0);
-
-  const warnings = [];
-  if (playable > 5) {
-    if (pAtk > IDEAL + WARN) warnings.push({msg:`Attack-heavy (${pAtk}% of playable). Add defense or scaling.`, color:'#c06060'});
-    else if (pAtk < IDEAL - WARN) warnings.push({msg:`Low attacks (${pAtk}% of playable). You may run out of damage in long fights.`, color:'#c06060'});
-    if (pDef > IDEAL + WARN) warnings.push({msg:`Defense-heavy (${pDef}% of playable). You may lack damage to end fights before enemy scaling hits.`, color:'#6aacda'});
-    else if (pDef < IDEAL - WARN) warnings.push({msg:`Low defense (${pDef}% of playable). Elites will punish you — add block cards.`, color:'#6aacda'});
-    if (pScl > IDEAL + WARN) warnings.push({msg:`Scaling-heavy (${pScl}% of playable). Make sure you can survive early turns.`, color:'#b07ad0'});
-    else if (pScl < IDEAL - WARN && playable > 8) warnings.push({msg:`Low scaling (${pScl}% of playable). No buffs or powers means you won't ramp in long fights.`, color:'#b07ad0'});
-  }
-  if (oth >= 3) warnings.push({msg:`${oth} dead card${oth>1?'s':''} (curses/statuses/quests) diluting your draws. Remove at shops.`, color:'#7a6a4a'});
-  else if (oth >= 1) warnings.push({msg:`${oth} dead card${oth>1?'s':''} in deck (curses/statuses/quests). Consider removing them.`, color:'#7a6a4a'});
-
-  const dualNotes = [];
-  if (dualCounts.atk_def > 0) dualNotes.push(`${dualCounts.atk_def}× ATK/DEF`);
-  if (dualCounts.atk_scl > 0) dualNotes.push(`${dualCounts.atk_scl}× ATK/SCALE`);
-  if (dualCounts.def_scl > 0) dualNotes.push(`${dualCounts.def_scl}× DEF/SCALE`);
-  if (dualCounts.atk_def_scl > 0) dualNotes.push(`${dualCounts.atk_def_scl}× ATK/DEF/SCALE`);
-
-  // Bar uses total — other for the 3 categories, remainder is other
-  const barAtk = Math.round(atk/total*100);
-  const barDef = Math.round(def/total*100);
-  const barScl = Math.round(scl/total*100);
-  const barOth = Math.max(0, 100-barAtk-barDef-barScl);
-
-  el.innerHTML = `<div class="balance-wrap">
-    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">deck balance</div>
-    <div class="balance-bar-track">
-      <div class="balance-seg" style="width:${barAtk}%;background:#c04040"></div>
-      <div class="balance-seg" style="width:${barDef}%;background:#378add"></div>
-      <div class="balance-seg" style="width:${barScl}%;background:#9a6aba"></div>
-      <div class="balance-seg" style="width:${barOth}%;background:${oth>0?'rgba(140,110,60,.45)':'rgba(100,90,70,.15)'}"></div>
-    </div>
-    <div class="balance-legend">
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#c04040"></span><span style="color:#c06060">${pAtk}% ATK (${atk})</span></span>
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#378add"></span><span style="color:#6aacda">${pDef}% DEF (${def})</span></span>
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#9a6aba"></span><span style="color:#b07ad0">${pScl}% SCALE (${scl})</span></span>
-      ${oth > 0 ? `<span class="balance-legend-item"><span class="balance-dot" style="background:rgba(140,110,60,.7)"></span><span style="color:#7a6a4a">${pOth}% OTHER (${oth})</span></span>` : ''}
-    </div>
-    ${hasDual ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:4px;letter-spacing:.04em">dual-type: ${dualNotes.join(', ')} — counted as 0.5 each</div>` : ''}
-    ${warnings.length > 0
-      ? warnings.map(w=>`<div class="balance-warning" style="color:${w.color}">⚠ ${w.msg}</div>`).join('')
-      : total > 5 ? `<div class="balance-ok">✓ Balance looks good — ${pAtk}% ATK / ${pDef}% DEF / ${pScl}% SCALE${oth>0?' / '+pOth+'% other':''}</div>` : ''}
-  </div>`;
-}
 
 // ============================================================
 // SAVE / LOAD LOADOUT
@@ -2217,50 +2138,85 @@ function calcThreeAxes() {
   return { dmg: dmgScore, blk: blkScore, vel: velScore };
 }
 
-function renderThreeAxes() {
-  const el = document.getElementById('threeAxes');
+function renderDeckHealth() {
+  const el = document.getElementById('deckHealth');
   if (!el) return;
   if (!currentChar || getDeckSize() === 0) { el.innerHTML = ''; return; }
 
   const axes = calcThreeAxes();
+  const stats = getDeckStats();
   if (!axes) { el.innerHTML = ''; return; }
 
-  // Volume = geometric mean of the three, scaled. Zero in any axis = 0
+  const total = getDeckSize();
+  const oth = stats.other || 0;
+  const playable = Math.max(1, total - oth);
+  const pAtk = Math.round(stats.atk / playable * 100);
+  const pDef = Math.round(stats.def / playable * 100);
+  const pScl = Math.round(stats.scl / playable * 100);
+
   const volume = axes.dmg === 0 || axes.blk === 0 || axes.vel === 0
     ? 0
     : Math.round(Math.pow(axes.dmg * axes.blk * axes.vel, 1/3));
-
   const volColor = volume >= 70 ? 'var(--green-bright)' : volume >= 40 ? 'var(--amber-bright)' : '#c06060';
   const volLabel = volume >= 70 ? 'Solid' : volume >= 50 ? 'Developing' : volume >= 30 ? 'Brittle' : axes.blk === 0 ? 'No Defense' : axes.dmg === 0 ? 'No Damage' : axes.vel === 0 ? 'Clunky' : 'Weak';
 
-  const dmgFlag = axes.dmg < 25 ? '<span class="axis-flag" style="color:#c06060">low dmg</span>' : axes.dmg >= 70 ? '<span class="axis-flag" style="color:var(--amber)">high — add vel/blk</span>' : '';
-  const blkFlag = axes.blk < 25 ? '<span class="axis-flag" style="color:#c06060">⚠ no block</span>' : axes.blk >= 80 ? '<span class="axis-flag" style="color:var(--amber)">high — check dmg</span>' : '';
-  const velFlag = axes.vel < 20 ? '<span class="axis-flag" style="color:var(--amber)">add draw/energy</span>' : '';
+  const warnings = [];
+  if (axes.blk < 25 && total > 6) warnings.push({msg:'No block — elites will punish you.', color:'#6aacda'});
+  if (axes.dmg < 25 && total > 6) warnings.push({msg:'Low damage output — fights will drag.', color:'#c06060'});
+  if (axes.vel < 20 && total > 6) warnings.push({msg:'Low velocity — deck feels clunky. Add draw or energy.', color:'var(--amber)'});
+  if (pAtk > 60 && total > 8) warnings.push({msg:`Attack-heavy (${pAtk}% ATK). Add defense or scaling.`, color:'#c06060'});
+  if (pDef > 60 && total > 8) warnings.push({msg:`Defense-heavy (${pDef}% DEF). You may lack damage in long fights.`, color:'#6aacda'});
+  if (oth >= 3) warnings.push({msg:`${oth} dead cards (curses/statuses) diluting draws. Remove at shops.`, color:'#7a6a4a'});
+  else if (oth >= 1) warnings.push({msg:`${oth} dead card${oth>1?'s':''} in deck. Consider removing at a shop.`, color:'#7a6a4a'});
 
-  el.innerHTML = `<div class="axes-wrap">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">
-      <span class="axes-title" style="margin:0">three axes</span>
-      <span class="volume-score" style="color:${volColor};font-size:16px;margin:0">${volume}</span>
-      <span class="volume-label" style="font-size:9px;color:${volColor};margin:0">${volLabel}</span>
+  const velSuggest = axes.vel < 20 && total > 6
+    ? `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:3px">velocity cards: ${(VELOCITY_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</div>`
+    : '';
+
+  const barAtk = Math.round(stats.atk/total*100);
+  const barDef = Math.round(stats.def/total*100);
+  const barScl = Math.round(stats.scl/total*100);
+  const barOth = Math.max(0, 100-barAtk-barDef-barScl);
+
+  el.innerHTML = `<div class="axes-wrap" style="margin-bottom:.75rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">deck health</span>
+      <span style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:${volColor}">${volume} <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase">${volLabel}</span></span>
     </div>
     <div class="axis-row">
       <span class="axis-label">damage</span>
       <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.dmg}%;background:#c04040"></div></div>
-      <span class="axis-val">${axes.dmg}</span>${dmgFlag}
+      <span class="axis-val" style="color:#c06060">${pAtk}%</span>
     </div>
     <div class="axis-row">
       <span class="axis-label">block</span>
       <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.blk}%;background:#378add"></div></div>
-      <span class="axis-val">${axes.blk}</span>${blkFlag}
+      <span class="axis-val" style="color:#6aacda">${pDef}%</span>
     </div>
-    <div class="axis-row">
+    <div class="axis-row" style="margin-bottom:6px">
       <span class="axis-label">velocity</span>
       <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.vel}%;background:#4a9a8a"></div></div>
-      <span class="axis-val">${axes.vel}</span>${velFlag}
+      <span class="axis-val" style="color:#4abaa0">${axes.vel}</span>
     </div>
-    ${axes.vel < 20 && getDeckSize() > 6 ? `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:4px">Add velocity cards: ${(VELOCITY_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</div>` : ''}
+    <div class="balance-bar-track" style="margin:.3rem 0 .35rem">
+      <div class="balance-seg" style="width:${barAtk}%;background:#c04040"></div>
+      <div class="balance-seg" style="width:${barDef}%;background:#378add"></div>
+      <div class="balance-seg" style="width:${barScl}%;background:#9a6aba"></div>
+      <div class="balance-seg" style="width:${barOth}%;background:${oth>0?'rgba(140,110,60,.45)':'rgba(100,90,70,.15)'}"></div>
+    </div>
+    <div class="balance-legend">
+      <span class="balance-legend-item"><span class="balance-dot" style="background:#c04040"></span><span style="color:#c06060">${pAtk}% ATK</span></span>
+      <span class="balance-legend-item"><span class="balance-dot" style="background:#378add"></span><span style="color:#6aacda">${pDef}% DEF</span></span>
+      <span class="balance-legend-item"><span class="balance-dot" style="background:#9a6aba"></span><span style="color:#b07ad0">${pScl}% SCALE</span></span>
+      ${oth > 0 ? `<span class="balance-legend-item"><span class="balance-dot" style="background:rgba(140,110,60,.7)"></span><span style="color:#7a6a4a">${Math.round(oth/total*100)}% OTHER</span></span>` : ''}
+    </div>
+    ${velSuggest}
+    ${warnings.length > 0
+      ? warnings.map(w=>`<div class="balance-warning" style="color:${w.color}">\u26a0 ${w.msg}</div>`).join('')
+      : total > 5 ? `<div class="balance-ok">\u2713 ${pAtk}% ATK / ${pDef}% DEF / ${pScl}% SCALE${oth>0?' / '+Math.round(oth/total*100)+'% other':''}</div>` : ''}
   </div>`;
 }
+
 
 // ============================================================
 // BOSS / ELITE ALERTS
@@ -2276,35 +2232,41 @@ const REGION_DATA = {
     bosses: {
       'Vantom': {
         type: 'Gimmick',
-        strategy: 'Has "Slippery" — 9 charges that cap all incoming damage to 1. Use multi-hits or orbs to strip all 9 charges, then block hard for the final Dismember tail attack.',
-        tactic: 'Prioritise multi-hit attacks to strip the 9 Slippery charges fast.'
+        hp: '173 HP',
+        strategy: 'Has "Slippery" — 9 charges that reduce all incoming damage to 1. Every hit strips one charge. Once all 9 are gone, full damage resumes. Finishes with a heavy tail attack.',
+        killOrder: 'Strip charges with rapid hits, then block the final Dismember.'
       },
       'The Kin': {
         type: 'Multi-Enemy',
-        strategy: 'A Priest leader and two Followers. The Followers flee the moment the Priest dies. Ignore the Followers completely and burst the Priest down as fast as possible.',
-        tactic: 'Focus all damage on the Priest. Single heavy hits work best here.'
+        hp: 'Priest 190 HP, 2 Followers ~58 HP each',
+        strategy: 'The Priest debuffs you while two Followers deal damage. The Followers flee immediately the moment the Priest dies, ending the fight.',
+        killOrder: 'Ignore the Followers entirely. All damage goes to the Priest.'
       },
       'Ceremonial Beast': {
         type: 'Phase-Shift',
-        strategy: 'Ramps damage each turn. At 150 HP it enters "Ringing" — you can only play 1 card per turn. Save a full burst hand for the moment it hits 150 HP to push through the phase before Ringing locks you out.',
-        tactic: 'Save a full burst hand — dump everything the moment it crosses 150 HP.'
+        hp: '252 HP — phase shift at 150 HP',
+        strategy: 'Ramps damage each turn. Drops to 1 card play per turn at 150 HP ("Ringing"). The only way to bypass Ringing is to push through it in a single burst window.',
+        killOrder: 'Hold back a full burst hand and dump everything the moment it crosses 150 HP.'
       }
     },
     elites: {
       'Bygone Effigy': {
         type: 'Gimmick',
-        strategy: 'Wakes on turn 3 and deals 25 per turn from then on. Its Slow debuff adds 10% damage taken per card played — play all your block and zero-damage skills first, then end the turn with your heaviest attacks to maximise the multiplier.',
-        tactic: 'Play block and zero-damage skills first, then hit hard at end of turn to exploit the Slow multiplier.'
+        hp: '127 HP',
+        strategy: 'Does nothing on turn 1 — free setup turn. Wakes turn 2 with Slow, which increases damage you take by 10% per card played that turn. Hits for 25+ every turn after waking.',
+        killOrder: 'Play all your block and zero-cost skills first each turn, then finish with your highest-damage attacks to exploit the Slow multiplier against it, not you.'
       },
       'Phrog Parasite': {
         type: 'Multi-Enemy',
-        strategy: 'Clogs your deck with permanent Infection cards that deal damage if held. Burst it down by turn 3 to limit how many Infections you take, then use AoE once it splits into four Wrigglers.',
-        tactic: 'Kill it by turn 3, then use AoE to clear the Wrigglers it splits into.'
+        hp: '61-64 HP, then 4 Wrigglers (17-21 HP each)',
+        strategy: 'Alternates between clogging your deck with permanent Infection cards (deal damage if held) and multi-hit attacks. When it dies it splits into four Wrigglers that spawn stunned for one free turn, then start stacking Strength.',
+        killOrder: 'Kill the Parasite fast to limit Infection spread. Use AoE on the Wrigglers\' stunned turn before they can act.'
       },
       'Byrdonis': {
         type: 'Scaling',
-        strategy: 'Infinite damage scaling — every turn it gets stronger. Do not stall. Front-load every point of damage you have from turn 1. There is no safe turn to hold back.',
-        tactic: 'Front-load all damage from turn 1. Every turn you stall it gets stronger.'
+        hp: '91-94 HP',
+        strategy: 'Gains 1 Strength at end of every turn. Starts manageable but becomes lethal quickly. No mechanics — just a pure speed check.',
+        killOrder: 'No stalling. Front-load all damage from turn 1 and kill it within 3-4 turns.'
       }
     }
   },
@@ -2315,35 +2277,41 @@ const REGION_DATA = {
     bosses: {
       'Waterfall Giant': {
         type: 'Gimmick',
-        strategy: 'Stores "Steam Eruption" damage and releases it as a 30-40 damage explosion when defeated. Enter with high HP and hold your biggest block cards for the killing turn to absorb the explosion.',
-        tactic: 'Save your heaviest block cards for the killing turn to absorb the explosion.'
+        hp: '~350-400 HP — explodes on death',
+        strategy: 'Stores damage dealt to it as "Steam Eruption" and releases it as a 30-40 damage explosion the moment it dies. Entering at low HP means the explosion can finish you after the kill.',
+        killOrder: 'Enter with high HP. Save your heaviest block for the killing turn to absorb the post-death explosion.'
       },
       'Soul Fysh': {
         type: 'Gimmick',
-        strategy: 'Constantly adds "Beckon" cards to your hand — each deals 6 damage to you if held at end of turn. Also uses Intangibility. Use discard or exhaust mechanics to remove Beckons before end of turn every cycle.',
-        tactic: 'Discard or exhaust Beckon cards before end of turn every cycle.'
+        hp: '211 HP',
+        strategy: 'Floods your hand with Beckon cards — each deals 6 damage to you if still held at end of turn. Also phases into Intangibility, making it immune to damage on certain turns.',
+        killOrder: 'Clear Beckon cards through discard or exhaust every turn before end of turn. Attack only on turns it is not Intangible.'
       },
       'Lagavulin Matriarch': {
         type: 'Phase-Shift',
-        strategy: 'Starts asleep for 3 turns — use this window to set up powers and stack buffs. When she wakes she applies Strength and Dexterity debuffs. Rely on damage that ignores those debuffs such as Poison, Doom, or orb damage.',
-        tactic: 'Use the 3-turn sleep window for setup. Use damage that ignores debuffs — Poison, Doom, or orbs.'
+        hp: '222 HP — starts with 12 Plating',
+        strategy: 'Asleep for 3 turns — completely passive, free setup window. On waking she applies permanent Strength and Dexterity debuffs, making all your attack and block cards weaker.',
+        killOrder: 'Use the 3 sleep turns to build powers. After she wakes, rely on damage types that bypass stat debuffs — passive and over-time damage.'
       }
     },
     elites: {
       'Phantasmal Gardeners': {
         type: 'Multi-Enemy',
-        strategy: 'Four enemies cycling fixed intents: Multi-hit, Buff, Weak, then Strong. Target enemies on their Strong turn to interrupt the most dangerous damage cycle. Optimal kill order: 4, 1, 3, 2.',
-        tactic: 'AoE damage is key. Kill order: 4, 1, 3, 2. Hit them on their Strong intent turn.'
+        hp: '4 Gardeners, 28-32 HP each',
+        strategy: 'Four enemies each cycling through Multi-hit, Buff, Weak, then Strong intents at different offsets. Combined damage is 15-20+ per turn from the start and scales with every Buff turn.',
+        killOrder: 'Kill one at a time — reducing four attackers to three drops incoming damage immediately. Target whichever is closest to its Buff intent. Priority order: 4, 1, 3, 2.'
       },
       'Terror Eel': {
         type: 'Gimmick',
-        strategy: 'Applies Vulnerable then hits hard. Block until it enters its stun window, then dump every damage card you have before it recovers.',
-        tactic: 'Block through the Vulnerable cycles, then burst it down hard during the stun window.'
+        hp: '140 HP',
+        strategy: 'Alternates between a single hit and a triple hit with Vigor. When HP drops to 70 it stuns for one turn, then applies permanent 99-stack Vulnerable — 50% more damage taken for the rest of the fight.',
+        killOrder: 'Control when it crosses 70 HP. Only trigger the stun when you have a full burst hand ready. Use that one free turn to deal maximum damage and end the fight.'
       },
       'Skulking Colony': {
         type: 'Scaling',
-        strategy: 'Prevents you from burst-killing it. You need consistent, balanced damage and block output every turn. Do not let it snowball — steady pressure wins this fight.',
-        tactic: 'Cannot be burst-killed. Apply steady damage and block every turn — no all-in turns.'
+        hp: '79 HP',
+        strategy: 'Has Hardened Shell — caps HP loss at 20 per turn no matter how much damage you deal. Cycles through a heavy hit, a clogging attack that adds Dazed cards, a Block + Strength gain, and a double hit.',
+        killOrder: 'Plan for 4-5 turns minimum. Block on its heavy hit turn. Attack consistently on the turns it has no Block. Do not waste big turns trying to burst above the 20-per-turn cap.'
       }
     }
   },
@@ -2354,35 +2322,41 @@ const REGION_DATA = {
     bosses: {
       'The Insatiable': {
         type: 'Timer',
-        strategy: 'Casts "Sandpit" — a 4-turn instant death countdown. Play Frantic Escape cards to extend the timer each turn, but their energy cost increases each time. You need strong energy generation to keep pace.',
-        tactic: 'Strong energy generation is essential to keep playing Frantic Escapes as their cost rises.'
+        hp: '~400 HP + instant-death Sandpit timer',
+        strategy: 'Casts Sandpit — a 4-turn instant death countdown. Playing Frantic Escape cards extends the timer, but each costs 1 more energy than the last. Without strong energy generation the cost outpaces your ability to pay.',
+        killOrder: 'Extend the timer every turn while dealing damage. Energy generation is the core requirement for this fight.'
       },
       'Knowledge Demon': {
         type: 'Strategic Choice',
-        strategy: 'Forces you to choose between permanent deck debuffs or resource debuffs each turn. Specialise — either go so aggressive you end the fight before the choices cripple you, or go hyper-defensive to outlast Disintegration.',
-        tactic: 'Commit to one extreme — either end the fight fast or go fully defensive to outlast Disintegration.'
+        hp: '~380 HP',
+        strategy: 'Forces a choice each turn between permanent deck debuffs or resource debuffs. Both paths compound over time — the longer the fight, the worse your position.',
+        killOrder: 'Pick one approach and fully commit. Either end the fight before the debuffs stack, or go fully defensive and outlast it.'
       },
       'Kaiser Crab': {
         type: 'Multi-Enemy',
-        strategy: 'Two independent claws — each has directional damage reduction based on which side is attacking. Always face the attacking arm to reduce incoming damage. Destroy the Rocket claw first.',
-        tactic: 'Focus single-target damage. Face the attacking arm each turn. Destroy the Rocket claw first.'
+        hp: 'Crusher claw 199 HP, Rocket claw 189 HP',
+        strategy: 'Two claws that act independently. Each has directional damage reduction — attacks from the wrong side deal reduced damage. Rocket claw escalates pressure faster.',
+        killOrder: 'Always face the currently attacking claw to cut incoming damage. Kill the Rocket claw first, then focus the other.'
       }
     },
     elites: {
       'Decimillipede': {
         type: 'Multi-Enemy',
-        strategy: 'Three segments that individually scale Strength and regenerate health. You must kill all three segments in the same turn. AoE that deals enough to one-shot all three simultaneously is mandatory.',
-        tactic: 'Mandatory AoE — all three segments must die in the same turn or they regenerate.'
+        hp: '3 segments, 42-48 HP each',
+        strategy: 'Three segments that each scale Strength every turn and revive if any other segment is still alive when they die. Spreading damage across all three is a trap — partial kills heal back.',
+        killOrder: 'Kill one segment completely before touching the others. AoE that cannot one-shot a segment wastes output and triggers revival. Stack all damage on one target at a time.'
       },
       'Entomancer': {
         type: 'Gimmick',
-        strategy: 'Punishes multi-hit attacks and small decks while scaling its own Strength. Use high-damage single attacks only. Do not use multi-hits here.',
-        tactic: 'Single heavy hits only. Multi-hit attacks are punished here — avoid them entirely.'
+        hp: '145 HP',
+        strategy: 'Adds a Dazed card to your draw pile every time you play an Attack card. As Strength stacks, its attacks scale toward 40+ per turn. More attacks played means more dead draws in future hands.',
+        killOrder: 'Minimise the number of Attack cards played each turn. One heavy single hit is better than several small ones. Passive and over-time damage avoids the Dazed penalty entirely.'
       },
       'Infested Prism': {
         type: 'Gimmick',
-        strategy: 'Very high health and block, but grants you +1 energy per turn as a passive. Use this long fight to set up your engine fully. Do not rush — the energy bonus is worth taking your time.',
-        tactic: 'Treat this as a free engine-building window. The +1 energy per turn is worth the long fight.'
+        hp: '200 HP',
+        strategy: 'Very high health but grants +1 energy the first time you deal Attack damage each turn. Cycles between a heavy single hit, a block-gaining attack, and a Strength + Block buff. Attacking on its block-gaining turns wastes damage.',
+        killOrder: 'Attack at least once per turn to claim the free energy. Concentrate damage on turns when it has no Block. Treat this as a long resource-gain fight — use the extra energy to set up your engine.'
       }
     }
   },
@@ -2393,21 +2367,43 @@ const REGION_DATA = {
     bosses: {
       'The Queen': {
         type: 'Multi-Enemy',
-        strategy: 'Hides behind "Torch Head Amalgam" — a high-HP summon — while applying 99-turn Frail, Weak, and Vulnerable. Treat Phase 1 as a setup window. Apply Weak to the summon to stall it while building your powers, then burst the Queen the moment she is exposed.',
-        tactic: 'Build powers during Phase 1. Apply Weak to the summon to stall it, then burst the Queen when exposed.'
+        hp: 'Torch Head Amalgam (high HP) + The Queen',
+        strategy: 'Hides behind a high-HP summon that she buffs while applying 99-turn Frail, Weak, and Vulnerable to you. The summon must die before she is exposed. Debuffing the summon slows its pressure and buys time.',
+        killOrder: 'Treat Phase 1 as free power-building time. Apply Weak to the summon to slow incoming damage while your deck scales. Burst the Queen hard the moment she is exposed.'
       },
       'Doormaker': {
         type: 'Phase-Shift',
-        strategy: 'Cycles through successive Doors with increasing HP pools — a pure DPS check. Deal maximum damage during every brief exposed window. Persistent damage like Poison and Doom carries over between Door phases making them especially strong here.',
-        tactic: 'Persistent damage like Poison and Doom carries over between Door phases — prioritise those.'
+        hp: 'Door 155 HP (+20 each cycle), Doormaker 489 HP',
+        strategy: 'Cycles through successive Doors — each with more HP than the last. A pure sustained DPS check. Brief windows when the boss is exposed are the only times damage counts. Damage that persists between phases bypasses the HP gates.',
+        killOrder: 'Maximise damage output in every exposed window. Persistent over-time damage carries across phase transitions and is the most efficient damage type here.'
       },
       'Test Subject #C8': {
         type: 'Phase-Shift',
-        strategy: 'Three phases: Enrage, Painful Stabs, and Intangibility. You can only deal damage when it is not Intangible. Requires very high draw and energy generation to capitalise on every window it gives you.',
-        tactic: 'High draw and energy generation — you need to maximise every window when it is not Intangible.'
+        hp: '600 HP total across 3 phases (100 / 200 / 300)',
+        strategy: 'Three phases — Enrage, Painful Stabs, and Intangibility. Intangible phases make it fully immune to damage. The fight punishes slow or low-draw decks that cannot capitalise on the limited damage windows.',
+        killOrder: 'Save burst output for non-Intangible phases. High draw and energy generation let you play more cards in each window.'
       }
     },
-    elites: {}
+    elites: {
+      'Knight Trio': {
+        type: 'Multi-Enemy',
+        hp: 'Flail Knight 101 HP, Spectral Knight 93 HP, Magi Knight 82 HP',
+        strategy: 'Three knights attacking simultaneously. Combined damage is 25-40+ per turn — higher than most Act 3 bosses. Magi Knight applies Dampen (weakens powers) and fires a 35-40 damage Magic Bomb on turn 5 of its cycle. Spectral Knight applies Hex, making your unplayed cards Ethereal and forcing wasted turns.',
+        killOrder: 'Kill Magi Knight first (lowest HP, stops Dampen and Magic Bomb). Then Spectral Knight to stop Hex. Flail Knight last. AoE hits all three simultaneously — strong here.'
+      },
+      'Mecha Knight': {
+        type: 'Gimmick',
+        hp: '300 HP',
+        strategy: 'Hardest elite in the game. Starts with 3 Artifact stacks — your first three debuffs do nothing. Cycles Charge (25 dmg), Flamethrower (adds 4 Burn cards to your hand), Windup (+5 Strength, +15 Block), Heavy Cleave (35 dmg). After one full cycle, Cleave hits 40-45+. Burn cards deal 8 unblockable damage per turn if held.',
+        killOrder: 'Burn off 3 Artifact stacks with cheap disposable debuffs before applying real debuffs. Only attack on Charge and Flamethrower turns — never on Windup. Clear Burn cards immediately.'
+      },
+      'Soul Nexus': {
+        type: 'Gimmick',
+        hp: '234 HP',
+        strategy: 'Always opens with Soul Burn (29 guaranteed damage turn 1 — hardest elite opener in the game). Then randomly rotates Soul Burn (29 dmg), Maelstrom (6-hit AoE), and Drain Life (18 dmg + Weak + Vulnerable), never repeating the same move twice. Drain Life stacks debuffs each cycle, making your attacks weaker and damage taken higher with no time limit.',
+        killOrder: 'Block at least 29 on turn 1 — no exceptions. Use Maelstrom turns as your primary damage windows. After any Drain Life, block heavily on the next turn as Soul Burn now effectively hits for 43+.'
+      }
+    }
   }
 };
 
@@ -2444,9 +2440,12 @@ function renderBossAlert() {
     const boss = rd.bosses[selectedBoss];
     html += `<div class="boss-bar" style="border-color:${rd.color}40;background:${rd.color}0d;margin-top:.5rem">`;
     html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:8px">${boss.type}</span></div>`;
-    html += `<div class="boss-bar-text">${boss.strategy}</div>`;
-    if (boss.tactic) {
-      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};margin-top:6px;letter-spacing:.04em;font-style:italic">${boss.tactic}</div>`;
+    if (boss.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${boss.hp}</span></div>`;
+    html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
+    html += `<div class="boss-bar-text" style="margin-bottom:6px">${boss.strategy}</div>`;
+    if (boss.killOrder) {
+      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
+      html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${boss.killOrder}</div>`;
     }
     html += `</div>`;
 
@@ -2456,10 +2455,13 @@ function renderBossAlert() {
       html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin:.5rem 0 .3rem">${rd.label} elites — expect these</div>`;
       Object.entries(elites).forEach(([ename, elite]) => {
         html += `<div style="padding:.45rem .7rem;border-radius:3px;border:1px solid ${rd.color}25;background:${rd.color}08;margin-bottom:.35rem">`;
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:3px">${ename} <span style="opacity:.5;font-size:8px">${elite.type}</span></div>`;
-        html += `<div style="font-size:12px;color:var(--text-dim);line-height:1.5">${elite.strategy}</div>`;
-        if (elite.tactic) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};margin-top:5px;letter-spacing:.04em;font-style:italic">${elite.tactic}</div>`;
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:4px">${ename} <span style="opacity:.5;font-size:8px">${elite.type}</span></div>`;
+        if (elite.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${elite.hp}</span></div>`;
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
+        html += `<div style="font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:6px">${elite.strategy}</div>`;
+        if (elite.killOrder) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
+          html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${elite.killOrder}</div>`;
         }
         html += `</div>`;
       });
@@ -2556,14 +2558,14 @@ function renderEngineTracker() {
 const _origUpdateResult = updateResult;
 updateResult = function() {
   _origUpdateResult();
-  renderThreeAxes();
+  renderDeckHealth();
   renderEngineTracker();
   renderBossAlert();
 };
 const _origUpdatePriorityPanel = updatePriorityPanel;
 updatePriorityPanel = function() {
   _origUpdatePriorityPanel();
-  renderThreeAxes();
+  renderDeckHealth();
   renderEngineTracker();
 };
 
