@@ -67,7 +67,7 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 .deck-empty{font-size:13px;color:var(--text-muted);font-style:italic;padding:.75rem 0;text-align:center;}
 
 /* Deck stats bar */
-.deck-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:.9rem;}
+.deck-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px;margin-bottom:.9rem;}
 .stat-chip{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:6px 8px;text-align:center;}
 .stat-val{font-family:'Cinzel',serif;font-size:18px;font-weight:600;}
 .stat-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;}
@@ -1307,7 +1307,12 @@ function renderDeck() {
     renderStat(stats.def,'defense',1) +
     renderStat(stats.scl,'scaling',0) +
     (stats.other > 0 ? `<div class="stat-chip"><div class="stat-val" style="color:#7a6a4a">${stats.other}</div><div class="stat-lbl">other</div></div>` : '') +
-    `<div class="stat-chip"><div class="stat-val">${stats.total}</div><div class="stat-lbl">total</div></div>`;
+    `<div class="stat-chip"><div class="stat-val">${stats.total}</div><div class="stat-lbl">total</div></div>` +
+    (function() {
+      const szp = getDeckSizeProfile();
+      const cls = szp.zone==='sweet' ? 'stat-ok' : szp.zone==='danger' ? 'stat-warn' : '';
+      return `<div class="stat-chip" title="${szp.advice}"><div class="stat-val ${cls}" style="font-size:11px;letter-spacing:.04em">${szp.label}</div><div class="stat-lbl">size</div></div>`;
+    })();
 
   if (Object.keys(deck).length === 0) {
     list.innerHTML = '<div class="deck-empty">No cards yet. Use "add card reward" to start.</div>';
@@ -2051,6 +2056,42 @@ function renderRewardVerdict(el) {
     if (name==='Strike'||name==='Defend') { score -= 35; reasons.push('starter card — never add more'); }
     if (alreadyHave >= 2) { score -= 15; reasons.push('already have '+alreadyHave+' copies'); }
 
+    // --- Deck size + composition penalty ---
+    var szp = getDeckSizeProfile();
+    var isAtkCard   = (card.type||'').includes('atk');
+    var isDefCard   = (card.type||'').includes('def');
+    var isSclCard   = (card.type==='pow'||card.type==='skl'||card.type==='scl'||(card.type||'').includes('scl'));
+    var isVelCardSz = isDrawCard || isEnergyCard || isVelCard;
+
+    if (szp.zone === 'bloated' || szp.zone === 'danger') {
+      var sizeBase = szp.zone === 'danger' ? -22 : -12;
+      // Extra penalty if this card type is already over-represented
+      if (isAtkCard && szp.heavyAtk && tipsBuilds.length === 0 && priorityBuilds.length === 0) {
+        score += sizeBase - 10;
+        reasons.push('deck is attack-heavy ('+szp.pAtk+'%) and already large — skip');
+      } else if (isDefCard && szp.heavyDef && tipsBuilds.length === 0 && priorityBuilds.length === 0) {
+        score += sizeBase - 10;
+        reasons.push('deck is defense-heavy ('+szp.pDef+'%) and already large — skip');
+      } else if (isSclCard && szp.heavyScl && !isVelCardSz && tipsBuilds.length === 0 && priorityBuilds.length === 0) {
+        score += sizeBase - 8;
+        reasons.push('deck is scaling-heavy ('+szp.pScl+'%) and already large — skip');
+      } else if (!isVelCardSz && tipsBuilds.length === 0 && priorityBuilds.length === 0) {
+        score += sizeBase;
+        reasons.push('deck already large ('+szp.total+' cards) — only take essentials or draw/energy');
+      }
+      // Velocity cards get a bonus when deck is large — they help you find key cards
+      if (isVelCardSz && szp.zone !== 'danger') { score += 8; reasons.push('draw/energy helps compensate for large deck'); }
+    } else if (szp.zone === 'sweet' || szp.zone === 'lean') {
+      // In healthy range: nudge toward what's missing
+      if (isAtkCard && szp.heavyAtk && !priorityBuilds.length && !tipsBuilds.length) {
+        score -= 6; reasons.push('already attack-heavy ('+szp.pAtk+'%) — consider block or scaling instead');
+      } else if (isDefCard && szp.heavyDef && !priorityBuilds.length && !tipsBuilds.length) {
+        score -= 6; reasons.push('already defense-heavy ('+szp.pDef+'%) — consider attacks or scaling instead');
+      } else if (isSclCard && szp.heavyScl && !isVelCardSz && !priorityBuilds.length && !tipsBuilds.length) {
+        score -= 4; reasons.push('already scaling-heavy ('+szp.pScl+'%) — make sure you have enough attacks');
+      }
+    }
+
     var verdict, vLabel, vBorder, vBg, vColor;
     if (score >= 40) {
       verdict='pick'; vLabel='PICK THIS';
@@ -2086,6 +2127,11 @@ function renderRewardVerdict(el) {
   if (rAtk < 35 && total > 7) deckStateChips.push({t:'def-heavy draws', c:'#6aacda'});
 
   var html = '<div style="font-size:9px;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:4px 2px 6px;border-bottom:1px solid var(--border);margin-bottom:6px">card reward — all builds considered</div>';
+  // Deck size chip
+  var szp = getDeckSizeProfile();
+  var szChipColor = szp.zone==='sweet' ? 'var(--green-bright)' : szp.zone==='danger' ? '#c06060' : 'var(--amber)';
+  var szChipIcon = szp.zone==='sweet' ? '✓' : '⚠';
+  deckStateChips.unshift({t: szChipIcon+' '+szp.total+' cards ('+szp.label+')', c: szChipColor});
   if (deckStateChips.length > 0) {
     html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">';
     deckStateChips.forEach(function(chip) {
@@ -2364,6 +2410,71 @@ const ENERGY_CARDS = {
   regent:      ['Convergence','Alignment','Glow','Void Form']
 };
 
+// ============================================================
+// DECK SIZE ANALYSIS
+// ============================================================
+function getDeckSizeProfile() {
+  const total = getDeckSize();
+  const stats = getDeckStats();
+  const axes = calcThreeAxes();
+  const playable = Math.max(1, total - (stats.other || 0));
+
+  // Percentages of playable deck
+  const pAtk = playable > 0 ? Math.round(stats.atk / playable * 100) : 0;
+  const pDef = playable > 0 ? Math.round(stats.def / playable * 100) : 0;
+  const pScl = playable > 0 ? Math.round(stats.scl / playable * 100) : 0;
+  const velScore = axes ? axes.vel : 0;
+
+  // Determine what the deck is over-represented in
+  // "Heavy" = that category is notably above the others and above a threshold
+  const heavyAtk = pAtk > 45 && pAtk > pDef + 15 && pAtk > pScl + 10;
+  const heavyDef = pDef > 40 && pDef > pAtk + 15;
+  const heavyScl = pScl > 45 && pScl > pAtk + 15;
+  const lowVel   = velScore < 25 && total > 8;
+
+  // Build a focused "what to add next" recommendation
+  function getNextFocusTip() {
+    if (total < 10) return 'Add more playable cards first. Statuses like Dazed can wreck draws in a tiny deck.';
+    if (total < 15) return 'Deck is thin — statuses can clog a high share of your hand. Keep adding until 15.';
+
+    // Composition-specific guidance for when deck is large
+    if (total > 25) {
+      const gaps = [];
+      if (heavyAtk)      gaps.push('stop adding attacks');
+      if (heavyDef)      gaps.push('stop adding block cards');
+      if (heavyScl)      gaps.push('stop adding scaling');
+      if (lowVel)        gaps.push('add draw or energy cards');
+      if (!lowVel && axes && axes.blk < 25) gaps.push('add block cards');
+      if (!lowVel && axes && axes.dmg < 25) gaps.push('add attack cards');
+
+      if (gaps.length > 0) return `Deck is large: ${gaps.join(', ')}.`;
+      return `Deck is large. Only add cards that directly fix a weakness — every new card dilutes your best draws.`;
+    }
+
+    // In healthy range — give a directional tip based on what's missing
+    if (heavyAtk && axes && axes.blk < 40) return `Attack-heavy (${pAtk}%). Next reward: prioritise block or scaling cards over more attacks.`;
+    if (heavyDef && axes && axes.dmg < 40) return `Defense-heavy (${pDef}%). Next reward: you can afford to add damage or scaling instead of more block.`;
+    if (heavyScl && axes && axes.dmg < 35) return `Scaling-heavy (${pScl}%). Make sure you have enough attacks to apply the scaling before Act 2.`;
+    if (lowVel) return `Velocity is low (${velScore}/100). Draw and energy cards will make every other card more consistent.`;
+    return 'Good composition. Keep adding cards that fit your build path.';
+  }
+
+  let zone, color, label;
+  if (total < 10) {
+    zone = 'lean'; color = 'var(--amber-bright)'; label = 'Very Lean';
+  } else if (total < 15) {
+    zone = 'lean'; color = 'var(--amber)'; label = 'Lean';
+  } else if (total <= 25) {
+    zone = 'sweet'; color = 'var(--green-bright)'; label = 'Healthy';
+  } else if (total <= 30) {
+    zone = 'bloated'; color = 'var(--amber)'; label = 'Bloated';
+  } else {
+    zone = 'danger'; color = '#c06060'; label = 'Too Large';
+  }
+
+  return { total, zone, color, label, advice: getNextFocusTip(), pAtk, pDef, pScl, velScore, heavyAtk, heavyDef, heavyScl, lowVel };
+}
+
 function calcThreeAxes() {
   if (!currentChar || getDeckSize() === 0) return null;
   const stats = getDeckStats();
@@ -2470,7 +2581,15 @@ function renderDeckHealth() {
   else if (oth >= 1) warnings.push({msg:`${oth} dead card${oth>1?'s':''} in deck. Consider removing at a shop.`, color:'#7a6a4a'});
 
   const velSuggest = axes.vel < 20 && total > 6
-    ? `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:3px">velocity cards: ${(VELOCITY_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</div>`
+    ? `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:3px">velocity cards to consider: ${(VELOCITY_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</div>`
+    : '';
+
+  // Deck size profile
+  const szp = getDeckSizeProfile();
+
+  // Act 2 velocity nudge for timer bosses
+  const act2VelNudge = (currentAct === 2 && axes.vel < 30 && total > 6)
+    ? `<div style="margin-top:6px;padding:5px 8px;border:1px solid rgba(200,146,42,.4);border-radius:3px;background:rgba(200,146,42,.08);font-size:11px;color:var(--amber-bright)">⏱ Act 2 note: timer bosses like The Insatiable require consistent draw and energy to extend their countdown. Low velocity decks can run out of turns before the kill.</div>`
     : '';
 
   // Composition bar (fractional)
@@ -2540,6 +2659,21 @@ function renderDeckHealth() {
     ${warnings.length > 0
       ? warnings.map(w=>`<div class="balance-warning" style="color:${w.color}">\u26a0 ${w.msg}</div>`).join('')
       : total > 5 ? `<div class="balance-ok">\u2713 ${pAtk}% ATK / ${pDef}% DEF / ${pScl}% SCALE — draw balanced ${db.atkDraw}ATK : ${db.defDraw}DEF</div>` : ''}
+    ${act2VelNudge}
+  </div>
+  <div style="margin-bottom:.75rem;padding:.6rem .9rem;background:var(--bg2);border:1px solid ${szp.color}40;border-left:3px solid ${szp.color};border-radius:4px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.25rem">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">deck size</span>
+      <span style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:${szp.color}">${szp.total} <span style="font-size:9px;letter-spacing:.06em;text-transform:uppercase">${szp.label}</span></span>
+    </div>
+    <div style="height:5px;background:var(--surface);border-radius:99px;overflow:hidden;margin:.35rem 0">
+      <div style="height:100%;border-radius:99px;width:${Math.min(100,Math.round(szp.total/35*100))}%;background:${szp.color};transition:width .4s"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-muted);margin-bottom:.35rem">
+      <span>0</span><span style="color:var(--green-bright)">15 sweet</span><span style="color:var(--green-bright)">25</span><span style="color:#c06060">30+ danger</span>
+    </div>
+    <div style="font-size:11px;color:var(--text-dim);font-style:italic;line-height:1.5">${szp.advice}</div>
+    ${(szp.zone==='bloated'||szp.zone==='danger') ? `<div style="margin-top:5px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.05em">composition: <span style="color:#c06060">${szp.pAtk}% ATK</span> &bull; <span style="color:#6aacda">${szp.pDef}% DEF</span> &bull; <span style="color:#b07ad0">${szp.pScl}% SCL</span> &bull; <span style="color:#4abaa0">vel ${szp.velScore}/100</span></div>` : ''}
   </div>`;
 }
 
@@ -2767,6 +2901,36 @@ function renderBossAlert() {
     html += `<div class="boss-bar" style="border-color:${rd.color}40;background:${rd.color}0d;margin-top:.5rem">`;
     html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:8px">${boss.type}</span></div>`;
     if (boss.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${boss.hp}</span></div>`;
+
+    // Special: Insatiable velocity check
+    if (selectedBoss === 'The Insatiable' && currentChar) {
+      const axes = calcThreeAxes();
+      const szp = getDeckSizeProfile();
+      const total = getDeckSize();
+      let insatWarnings = [];
+      if (axes && axes.vel < 30 && total > 4) {
+        insatWarnings.push(`⚠ Your velocity score is ${axes.vel}/100 — too low for this fight. You need consistent draw and energy to keep playing Frantic Escape cards before the Sandpit timer kills you.`);
+      }
+      if (szp.zone === 'bloated' || szp.zone === 'danger') {
+        insatWarnings.push(`⚠ Your deck has ${szp.total} cards. A large deck reduces your chances of drawing Frantic Escape each turn. Thin it before this fight.`);
+      }
+      if (axes && axes.vel >= 40 && szp.zone === 'sweet') {
+        insatWarnings.push(`✓ Velocity looks adequate for this fight. Confirm you have energy generation — Frantic Escape costs scale up each play.`);
+      }
+      const drawCards = (DRAW_CARDS[currentChar]||[]).filter(n=>deck[n]);
+      const energyCards = (ENERGY_CARDS[currentChar]||[]).filter(n=>deck[n]);
+      if (insatWarnings.length > 0) {
+        html += `<div style="padding:6px 8px;border:1px solid rgba(192,64,64,.5);border-radius:3px;background:rgba(192,64,64,.1);margin-bottom:6px">`;
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c06060;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">⏱ TIMER BOSS — VELOCITY CHECK</div>`;
+        insatWarnings.forEach(w => { html += `<div style="font-size:12px;color:${w.startsWith('✓')?'var(--green-bright)':'#c08060'};line-height:1.55;margin-bottom:3px">${w}</div>`; });
+        if (drawCards.length > 0) html += `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">draw in your deck: <span style="color:var(--amber)">${drawCards.join(', ')}</span></div>`;
+        if (energyCards.length > 0) html += `<div style="font-size:11px;color:var(--text-muted)">energy in your deck: <span style="color:var(--amber)">${energyCards.join(', ')}</span></div>`;
+        if ((DRAW_CARDS[currentChar]||[]).filter(n=>!deck[n]).length > 0) {
+          html += `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">missing draw options: <span style="color:var(--green-bright)">${(DRAW_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</span></div>`;
+        }
+        html += `</div>`;
+      }
+    }
     html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
     html += `<div class="boss-bar-text" style="margin-bottom:6px">${boss.strategy}</div>`;
     if (boss.killOrder) {
