@@ -334,13 +334,14 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
         </div>
         <div class="picker-list" id="pickerList"></div>
       </div>
+
+      <!-- Boss selector + info -->
+      <div id="bossAlertBar" style="margin-top:12px"></div>
     </div>
 
     <!-- Middle: deck balance + priorities -->
     <div>
       <div class="panel-title">deck analysis</div>
-      <!-- Boss alert bar -->
-      <div id="bossAlertBar"></div>
       <!-- Deck health (merged axes + balance) -->
       <div id="deckHealth"></div>
       <!-- Engine tracker -->
@@ -1235,6 +1236,12 @@ function updateActUI() {
     document.getElementById('act'+n+'btn').classList.toggle('active', currentAct === n);
   });
   document.getElementById('actAdvice').textContent = ACT_ADVICE[currentAct - 1];
+  // Clear selected boss if it no longer belongs to the current act
+  if (selectedBoss) {
+    const rk = BOSS_TO_REGION[selectedBoss];
+    if (!rk || REGION_DATA[rk].act !== currentAct) selectedBoss = null;
+  }
+  renderBossAlert();
 }
 
 // ============================================================
@@ -1446,6 +1453,11 @@ function renderModalCards() {
 // ============================================================
 // PRIORITY PANEL (middle column)
 // ============================================================
+function toggleSafePicks() {
+  safePicksOpen = !safePicksOpen;
+  updatePriorityPanel();
+}
+
 function updatePriorityPanel() {
   const panel = document.getElementById('priorityPanel');
   if (!currentChar) { panel.innerHTML = ''; return; }
@@ -1517,26 +1529,39 @@ function updatePriorityPanel() {
     const earlyMissing   = spData.early.filter(n => !deckNames.has(n));
     const genericMissing = spData.generic.filter(n => !deckNames.has(n) && !spData.early.includes(n));
     if (earlyMissing.length > 0 || genericMissing.length > 0) {
-      html += `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:.6rem .85rem;margin-bottom:.75rem">`;
-      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:.2rem">safe picks</div>`;
-      html += `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-bottom:.5rem">Useful across most builds — safe to take any time.</div>`;
-      if (earlyMissing.length > 0) {
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c8922a;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">take early</div>`;
-        earlyMissing.forEach(name => {
-          const card = allCards.find(c => c.name === name);
-          const safeN = name.replace(/'/g,"\'");
-          const tag = typeTagHtml(card);
-          html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid rgba(200,146,42,.3);border-radius:3px;background:rgba(200,146,42,.06);cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='#c8922a';this.style.background='rgba(200,146,42,.14)'" onmouseout="this.style.borderColor='rgba(200,146,42,.3)';this.style.background='rgba(200,146,42,.06)'"><div style="flex:1;font-size:13px;color:var(--text)">${name}</div>${tag}<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c8922a;opacity:.8;flex-shrink:0">+ add</span></div>`;
-        });
-      }
-      if (genericMissing.length > 0) {
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-top:${earlyMissing.length > 0 ? '.4rem' : '0'};margin-bottom:4px">build-agnostic value</div>`;
-        genericMissing.forEach(name => {
-          const card = allCards.find(c => c.name === name);
-          const safeN = name.replace(/'/g,"\'");
-          const tag = typeTagHtml(card);
-          html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--border);border-radius:3px;background:var(--bg2);cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='var(--border-bright)';this.style.background='var(--surface)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg2)'"><div style="flex:1;font-size:13px;color:var(--text-dim)">${name}</div>${tag}<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green-bright);opacity:.7;flex-shrink:0">+ add</span></div>`;
-        });
+      const totalSafe = earlyMissing.length + genericMissing.length;
+      const chevron = safePicksOpen ? '▴' : '▾';
+      html += `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;margin-bottom:.75rem;overflow:hidden">`;
+      // Clickable header row
+      html += `<div onclick="toggleSafePicks()" style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .85rem;cursor:pointer;user-select:none" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">`;
+      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)">safe picks</span>`;
+      html += `<span style="display:flex;align-items:center;gap:7px">`;
+      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">${totalSafe} card${totalSafe !== 1 ? 's' : ''}</span>`;
+      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);opacity:.7">${chevron}</span>`;
+      html += `</span></div>`;
+      // Collapsible body
+      if (safePicksOpen) {
+        html += `<div style="padding:.1rem .85rem .65rem;border-top:1px solid var(--border)">`;
+        html += `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin:.4rem 0 .5rem">Useful across most builds — safe to take any time.</div>`;
+        if (earlyMissing.length > 0) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c8922a;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">take early</div>`;
+          earlyMissing.forEach(name => {
+            const card = allCards.find(c => c.name === name);
+            const safeN = name.replace(/'/g,"\'");
+            const tag = typeTagHtml(card);
+            html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid rgba(200,146,42,.3);border-radius:3px;background:rgba(200,146,42,.06);cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='#c8922a';this.style.background='rgba(200,146,42,.14)'" onmouseout="this.style.borderColor='rgba(200,146,42,.3)';this.style.background='rgba(200,146,42,.06)'"><div style="flex:1;font-size:13px;color:var(--text)">${name}</div>${tag}<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c8922a;opacity:.8;flex-shrink:0">+ add</span></div>`;
+          });
+        }
+        if (genericMissing.length > 0) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-top:${earlyMissing.length > 0 ? '.4rem' : '0'};margin-bottom:4px">build-agnostic value</div>`;
+          genericMissing.forEach(name => {
+            const card = allCards.find(c => c.name === name);
+            const safeN = name.replace(/'/g,"\'");
+            const tag = typeTagHtml(card);
+            html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--border);border-radius:3px;background:var(--bg2);cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='var(--border-bright)';this.style.background='var(--surface)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg2)'"><div style="flex:1;font-size:13px;color:var(--text-dim)">${name}</div>${tag}<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green-bright);opacity:.7;flex-shrink:0">+ add</span></div>`;
+          });
+        }
+        html += `</div>`;
       }
       html += `</div>`;
       if (issues.length > 0 || topPriority.length > 0 || otherPriority.length > 0) {
@@ -1602,19 +1627,7 @@ function updateResult() {
   const ranked = Object.entries(scores).sort((a, b) => b[1].pct - a[1].pct);
   const [topKey] = ranked[0];
 
-  const actTips = [
-    'Act 1: fight 3+ Elites. Aim for 100 damage in 3 turns. Take card rewards aggressively.',
-    `Act 2: activate your scaling engine. Only take cards for your chosen build. Skip everything else.`,
-    'Act 3: reduce variance. Remove Strikes and Defends. Only take cards that fix disaster hands.'
-  ];
-
   let html = `<div class="fade-up">`;
-
-  // Act advice bar at top
-  html += `<div class="act-tip-box" style="margin-bottom:1rem">
-    <div class="act-tip-title">act ${currentAct} advice</div>
-    <div class="act-tip-text">${actTips[currentAct-1]}</div>
-  </div>`;
 
   ranked.forEach(([key, sc], i) => {
     const build = builds[key];
@@ -1829,6 +1842,7 @@ let pickerTab = 'reward';
 let rewardOffered = [];
 let rewardBuildKey = null;
 let rewardStage = 'select'; // 'select' | 'build' | 'verdict'
+let safePicksOpen = false; // collapsed by default
 
 function showInlinePicker() {
   document.getElementById('inlinePicker').style.display = 'block';
@@ -2858,92 +2872,127 @@ let selectedBoss = null;
 
 function renderBossAlert() {
   const el = document.getElementById('bossAlertBar');
-  if (!el || !currentChar) { if(el) el.innerHTML=''; return; }
+  if (!el) return;
+  if (!currentChar) { el.innerHTML = ''; return; }
 
-  // Build boss buttons grouped by region
-  let html = `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem">select your boss</div>`;
+  // Only show regions for the current act
+  const actRegions = Object.entries(REGION_DATA).filter(([, rd]) => rd.act === currentAct);
 
-  Object.entries(REGION_DATA).forEach(([rk, rd]) => {
-    html += `<div style="margin-bottom:.3rem;display:flex;align-items:center;gap:5px;flex-wrap:wrap">`;
-    html += `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:${rd.color};letter-spacing:.08em;text-transform:uppercase;width:72px;flex-shrink:0">${rd.label}</span>`;
+  let html = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1.1rem">`;
+  html += `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);opacity:.8;margin-bottom:.75rem">boss &amp; region</div>`;
+
+  if (actRegions.length === 0) {
+    html += `<div style="font-size:12px;color:var(--text-muted);font-style:italic">No regions mapped for Act ${currentAct} yet.</div>`;
+    html += `</div>`;
+    el.innerHTML = html;
+    return;
+  }
+
+  // Region + boss buttons — only current act
+  actRegions.forEach(([rk, rd]) => {
+    const isSelectedRegion = selectedBoss && BOSS_TO_REGION[selectedBoss] === rk;
+    html += `<div style="margin-bottom:.5rem">`;
+    html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;opacity:.9">${rd.label}</div>`;
+    html += `<div style="display:flex;flex-wrap:wrap;gap:5px">`;
     Object.keys(rd.bosses).forEach(bname => {
       const sel = selectedBoss === bname;
       const safeName = bname.replace(/'/g, "\\'");
-      html += `<button class="boss-btn${sel?' active':''}" style="${sel?`border-color:${rd.color};color:${rd.color};background:${rd.color}1a`:''}" onclick="setBoss('${safeName}')">${bname}</button>`;
+      html += `<button class="boss-btn${sel?' active':''}" style="${sel ? `border-color:${rd.color};color:${rd.color};background:${rd.color}1a` : ''}" onclick="setBoss('${safeName}')">${bname}</button>`;
     });
-    html += `</div>`;
+    html += `</div></div>`;
   });
 
-  // If a boss is selected, show its region context
-  if (selectedBoss) {
+  // Selected boss info panel
+  if (selectedBoss && BOSS_TO_REGION[selectedBoss]) {
     const rk = BOSS_TO_REGION[selectedBoss];
     const rd = REGION_DATA[rk];
-    const boss = rd.bosses[selectedBoss];
-    html += `<div class="boss-bar" style="border-color:${rd.color}40;background:${rd.color}0d;margin-top:.5rem">`;
-    html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:8px">${boss.type}</span></div>`;
-    if (boss.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${boss.hp}</span></div>`;
+    // Only show if it belongs to a region in the current act
+    if (rd.act === currentAct) {
+      const boss = rd.bosses[selectedBoss];
+      html += `<div style="border-top:1px solid var(--border);margin-top:.6rem;padding-top:.7rem">`;
+      html += `<div class="boss-bar" style="border-color:${rd.color}40;background:${rd.color}0d;margin-top:0">`;
+      html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:8px">${boss.type}</span></div>`;
+      if (boss.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${boss.hp}</span></div>`;
 
-    // Special: Insatiable velocity check
-    if (selectedBoss === 'The Insatiable' && currentChar) {
-      const axes = calcThreeAxes();
-      const szp = getDeckSizeProfile();
-      const total = getDeckSize();
-      let insatWarnings = [];
-      if (axes && axes.vel < 30 && total > 4) {
-        insatWarnings.push(`⚠ Your velocity score is ${axes.vel}/100 — too low for this fight. You need consistent draw and energy to keep playing Frantic Escape cards before the Sandpit timer kills you.`);
-      }
-      if (szp.zone === 'bloated' || szp.zone === 'danger') {
-        insatWarnings.push(`⚠ Your deck has ${szp.total} cards. A large deck reduces your chances of drawing Frantic Escape each turn. Thin it before this fight.`);
-      }
-      if (axes && axes.vel >= 40 && szp.zone === 'sweet') {
-        insatWarnings.push(`✓ Velocity looks adequate for this fight. Confirm you have energy generation — Frantic Escape costs scale up each play.`);
-      }
-      const drawCards = (DRAW_CARDS[currentChar]||[]).filter(n=>deck[n]);
-      const energyCards = (ENERGY_CARDS[currentChar]||[]).filter(n=>deck[n]);
-      if (insatWarnings.length > 0) {
-        html += `<div style="padding:6px 8px;border:1px solid rgba(192,64,64,.5);border-radius:3px;background:rgba(192,64,64,.1);margin-bottom:6px">`;
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c06060;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">⏱ TIMER BOSS — VELOCITY CHECK</div>`;
-        insatWarnings.forEach(w => { html += `<div style="font-size:12px;color:${w.startsWith('✓')?'var(--green-bright)':'#c08060'};line-height:1.55;margin-bottom:3px">${w}</div>`; });
-        if (drawCards.length > 0) html += `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">draw in your deck: <span style="color:var(--amber)">${drawCards.join(', ')}</span></div>`;
-        if (energyCards.length > 0) html += `<div style="font-size:11px;color:var(--text-muted)">energy in your deck: <span style="color:var(--amber)">${energyCards.join(', ')}</span></div>`;
-        if ((DRAW_CARDS[currentChar]||[]).filter(n=>!deck[n]).length > 0) {
-          html += `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">missing draw options: <span style="color:var(--green-bright)">${(DRAW_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</span></div>`;
+      // Insatiable velocity check
+      if (selectedBoss === 'The Insatiable' && currentChar) {
+        const axes = calcThreeAxes();
+        const szp = getDeckSizeProfile();
+        const total = getDeckSize();
+        let insatWarnings = [];
+        if (axes && axes.vel < 30 && total > 4) {
+          insatWarnings.push(`⚠ Your velocity score is ${axes.vel}/100 — too low for this fight. You need consistent draw and energy to keep playing Frantic Escape cards before the Sandpit timer kills you.`);
         }
-        html += `</div>`;
+        if (szp.zone === 'bloated' || szp.zone === 'danger') {
+          insatWarnings.push(`⚠ Your deck has ${szp.total} cards. A large deck reduces your chances of drawing Frantic Escape each turn. Thin it before this fight.`);
+        }
+        if (axes && axes.vel >= 40 && szp.zone === 'sweet') {
+          insatWarnings.push(`✓ Velocity looks adequate for this fight. Confirm you have energy generation — Frantic Escape costs scale up each play.`);
+        }
+        const drawCards = (DRAW_CARDS[currentChar]||[]).filter(n=>deck[n]);
+        const energyCards = (ENERGY_CARDS[currentChar]||[]).filter(n=>deck[n]);
+        if (insatWarnings.length > 0) {
+          html += `<div style="padding:6px 8px;border:1px solid rgba(192,64,64,.5);border-radius:3px;background:rgba(192,64,64,.1);margin-bottom:6px">`;
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c06060;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">⏱ TIMER BOSS — VELOCITY CHECK</div>`;
+          insatWarnings.forEach(w => { html += `<div style="font-size:12px;color:${w.startsWith('✓')?'var(--green-bright)':'#c08060'};line-height:1.55;margin-bottom:3px">${w}</div>`; });
+          if (drawCards.length > 0) html += `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">draw in your deck: <span style="color:var(--amber)">${drawCards.join(', ')}</span></div>`;
+          if (energyCards.length > 0) html += `<div style="font-size:11px;color:var(--text-muted)">energy in your deck: <span style="color:var(--amber)">${energyCards.join(', ')}</span></div>`;
+          if ((DRAW_CARDS[currentChar]||[]).filter(n=>!deck[n]).length > 0) {
+            html += `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">missing draw options: <span style="color:var(--green-bright)">${(DRAW_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</span></div>`;
+          }
+          html += `</div>`;
+        }
       }
-    }
-    html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
-    html += `<div class="boss-bar-text" style="margin-bottom:6px">${boss.strategy}</div>`;
-    if (boss.killOrder) {
-      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
-      html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${boss.killOrder}</div>`;
-    }
-    html += `</div>`;
 
-    // Show all elites for this region
-    const elites = rd.elites;
-    if (Object.keys(elites).length > 0) {
-      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin:.5rem 0 .3rem">${rd.label} elites — expect these</div>`;
-      Object.entries(elites).forEach(([ename, elite]) => {
-        html += `<div style="padding:.45rem .7rem;border-radius:3px;border:1px solid ${rd.color}25;background:${rd.color}08;margin-bottom:.35rem">`;
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:4px">${ename} <span style="opacity:.5;font-size:8px">${elite.type}</span></div>`;
-        if (elite.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${elite.hp}</span></div>`;
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
-        html += `<div style="font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:6px">${elite.strategy}</div>`;
-        if (elite.killOrder) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
-          html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${elite.killOrder}</div>`;
-        }
-        html += `</div>`;
-      });
+      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
+      html += `<div class="boss-bar-text" style="margin-bottom:6px">${boss.strategy}</div>`;
+      if (boss.killOrder) {
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
+        html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${boss.killOrder}</div>`;
+      }
+      html += `</div>`;
+
+      // Elites for this region
+      const elites = rd.elites;
+      if (Object.keys(elites).length > 0) {
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin:.6rem 0 .3rem">${rd.label} elites</div>`;
+        Object.entries(elites).forEach(([ename, elite]) => {
+          html += `<div style="padding:.45rem .7rem;border-radius:3px;border:1px solid ${rd.color}25;background:${rd.color}08;margin-bottom:.35rem">`;
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:4px">${ename} <span style="opacity:.5;font-size:8px">${elite.type}</span></div>`;
+          if (elite.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${elite.hp}</span></div>`;
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
+          html += `<div style="font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:6px">${elite.strategy}</div>`;
+          if (elite.killOrder) {
+            html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
+            html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${elite.killOrder}</div>`;
+          }
+          html += `</div>`;
+        });
+      }
+      html += `</div>`; // close border-top wrapper
     }
   }
 
+  html += `</div>`; // close panel
   el.innerHTML = html;
 }
 
 function setBoss(name) {
-  selectedBoss = selectedBoss === name ? null : name;
+  if (selectedBoss === name) {
+    selectedBoss = null;
+  } else {
+    selectedBoss = name;
+    // Auto-switch act if the region belongs to a different act
+    const rk = BOSS_TO_REGION[name];
+    if (rk && REGION_DATA[rk]) {
+      const regionAct = REGION_DATA[rk].act;
+      if (regionAct !== currentAct) {
+        currentAct = regionAct;
+        updateActUI(); // updates act buttons + advice text
+        updateResult(); // re-renders build panel with new act tips
+      }
+    }
+  }
   renderBossAlert();
 }
 
