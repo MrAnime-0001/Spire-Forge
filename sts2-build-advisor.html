@@ -1851,22 +1851,24 @@ function switchPickerTab(tab) {
 }
 
 // --- REWARD TAB ---
+// Single unified view: search at top, live verdict below as soon as pool has cards.
+// No build-pick stage. rewardStage is kept for compat but only used as 'select'|'verdict'.
 function renderPickerReward() {
   const list = document.getElementById('pickerList');
-  if (rewardStage === 'select') renderRewardSelect(list);
-  else if (rewardStage === 'build') renderRewardBuildPick(list);
-  else renderRewardVerdict(list);
+  renderRewardUnified(list);
 }
 
-function renderRewardSelect(el) {
+function renderRewardUnified(el) {
   const q = (document.getElementById('pickerSearch').value || '').toLowerCase();
   const allCards = getAllCardsForPicker();
   const typeCls = t => t&&t.startsWith('atk')?'tag-atk':t&&t.startsWith('def')?'tag-def':t==='pow'?'tag-pow':t==='other'?'tag-other':'tag-skl';
   let html = '';
+
+  // ── Pool chips (always visible at top) ──
   if (rewardOffered.length > 0) {
-    html += '<div style="padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px">';
-    html += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">offered cards</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">';
+    html += '<div style="padding:5px 2px 7px;border-bottom:1px solid var(--border);margin-bottom:6px">';
+    html += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">pool — click to remove</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
     rewardOffered.forEach(function(n) {
       const c = allCards.find(function(x){return x.name===n;});
       const t = c ? c.type : 'skl';
@@ -1875,17 +1877,14 @@ function renderRewardSelect(el) {
       html += '<span class="deck-item-tag '+typeCls(t)+'" style="font-size:8px;padding:1px 4px">'+t.replace(/_/g,'·').toUpperCase()+'</span>';
       html += ' '+n+' <span style="color:var(--text-muted);font-size:10px">✕</span></span>';
     });
-    html += '</div>';
-    html += '<button onclick="rewardProceed()" style="width:100%;padding:8px;border:1px solid var(--amber);border-radius:3px;background:var(--amber-dim);color:var(--amber-bright);font-size:10px;text-transform:uppercase;cursor:pointer">pick out of these &#8594;</button>';
-    html += '</div>';
+    html += '</div></div>';
   }
-  if (!q) {
-    html += '<div class="picker-empty" style="padding:.5rem 2px">Search for cards being offered — click to add to pool, then press "pick out of these".</div>';
-  } else {
+
+  // ── Search results (only when typing) ──
+  if (q) {
     const allMatches = allCards.filter(function(c){return c.name.toLowerCase().includes(q);});
-    // Own character + colorless first, other characters after
-    const ownMatches = allMatches.filter(function(c){return !c.crossChar;}).slice(0, 10);
-    const crossMatches = allMatches.filter(function(c){return c.crossChar;}).slice(0, 8);
+    const ownMatches  = allMatches.filter(function(c){return !c.crossChar;}).slice(0,10);
+    const crossMatches = allMatches.filter(function(c){return c.crossChar;}).slice(0,8);
     const matches = ownMatches.concat(crossMatches);
     if (!matches.length) {
       html += '<div class="picker-empty">No cards match.</div>';
@@ -1898,51 +1897,33 @@ function renderRewardSelect(el) {
         const bgCol = already ? 'var(--amber-dim)' : 'var(--bg2)';
         const nameCol = already ? 'var(--amber-bright)' : (c.crossChar ? 'var(--text-dim)' : 'var(--text)');
         const addCol = already ? 'var(--amber)' : 'var(--green-bright)';
-        const addLbl = already ? '&#10003;' : '+add';
+        const addLbl = already ? '&#10003; added' : '+ add';
         const crossLabel = c.crossChar ? ' <span style="font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">'+c.crossCharName+'</span>' : '';
         const noteHtml = c.note ? '<div style="font-size:10px;color:var(--text-muted);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.note+'</div>' : '';
         html += '<div onclick="'+clickFn+'" style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:7px;padding:6px 8px;border:1px solid '+borderCol+';border-radius:3px;margin-bottom:3px;background:'+bgCol+';cursor:pointer">';
         html += '<div><div style="font-size:13px;color:'+nameCol+'">'+c.name+crossLabel+'</div>'+noteHtml+'</div>';
         html += '<span class="deck-item-tag '+typeCls(c.type)+'" style="font-size:9px;padding:1px 5px">'+(c.type||'skl').replace(/_/g,'·').toUpperCase()+'</span>';
-        html += '<span style="font-size:9px;color:'+addCol+';opacity:.8">'+addLbl+'</span>';
+        html += '<span style="font-size:9px;color:'+addCol+';min-width:40px;text-align:right">'+addLbl+'</span>';
         html += '</div>';
       });
     }
+    el.innerHTML = html;
+    return; // don't render verdict while user is actively searching
   }
+
+  // ── Empty state ──
+  if (rewardOffered.length === 0) {
+    html += '<div class="picker-empty" style="padding:.75rem 2px">Search for the cards being offered and add them to the pool. Verdicts appear automatically.</div>';
+    el.innerHTML = html;
+    return;
+  }
+
+  // ── Live verdict (auto, no button needed) ──
+  html += renderRewardVerdictHtml();
   el.innerHTML = html;
 }
 
-function renderRewardBuildPick(el) {
-  const builds = BUILD_DATA[currentChar].builds;
-  const deckNames = Object.keys(deck);
-  const topBuildKey = getTopBuild();
-  var html = '<div style="font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;padding:4px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:8px">which build are you going for?</div>';
-  Object.entries(builds).forEach(function(entry) {
-    var key = entry[0]; var b = entry[1];
-    var hits = deckNames.filter(function(n){return b.cards.includes(n);}).length;
-    var pct = Math.round(hits / b.cards.length * 100);
-    var isTop = key === topBuildKey;
-    var sel = rewardBuildKey === key;
-    var borderColor = sel ? b.color+'99' : isTop ? b.color+'44' : 'var(--border)';
-    var bgColor = sel ? b.color+'18' : isTop ? b.color+'0a' : 'var(--bg2)';
-    var nameColor = (sel||isTop) ? b.color : 'var(--text-dim)';
-    var topLabel = (isTop && !sel) ? ' <span style="font-size:9px;opacity:.7">(best match)</span>' : '';
-    var checkmark = sel ? '<span style="font-size:9px;color:'+b.color+'">&#10003;</span>' : '';
-    html += '<div onclick="rewardSelectBuild(&apos;'+key+'&apos;)" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid '+borderColor+';border-radius:3px;margin-bottom:5px;background:'+bgColor+';cursor:pointer">';
-    html += '<div style="flex:1">';
-    html += '<div style="font-size:13px;color:'+nameColor+'">'+b.name+topLabel+'</div>';
-    html += '<div style="font-size:9px;color:var(--text-muted);margin-top:2px">'+hits+'/'+b.cards.length+' cards — '+pct+'% match</div>';
-    html += '</div>'+checkmark+'</div>';
-  });
-  var disabledAttr = !rewardBuildKey ? ' disabled style="opacity:.35;cursor:default"' : '';
-  html += '<div style="display:flex;gap:6px;margin-top:8px">';
-  html += '<button onclick="rewardBack()" style="padding:7px 12px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-size:9px;text-transform:uppercase;cursor:pointer">&#8592; back</button>';
-  html += '<button onclick="rewardShowVerdict()"'+disabledAttr+' style="flex:1;padding:7px 12px;border:1px solid var(--amber);border-radius:3px;background:var(--amber-dim);color:var(--amber-bright);font-size:10px;text-transform:uppercase;cursor:pointer">get recommendation &#8594;</button>';
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-function renderRewardVerdict(el) {
+function renderRewardVerdictHtml() {
   var builds = BUILD_DATA[currentChar].builds;
   var allCards = getAllCardsForPicker();
   var stats = getDeckStats();
@@ -2197,27 +2178,27 @@ function renderRewardVerdict(el) {
     html += noteHtml+'</div>';
   });
 
-  html += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">';
-  html += '<button onclick="rewardBack()" style="padding:6px 10px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-size:9px;text-transform:uppercase;cursor:pointer">&#8592; back</button>';
+  html += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)">';
+  html += '<button onclick="rewardReset()" style="padding:6px 10px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-size:9px;text-transform:uppercase;cursor:pointer">&#8635; reset</button>';
   scored.filter(function(s){return s.verdict!=='skip';}).forEach(function(s) {
     var safeN = s.name.replace(/'/g,"&#39;");
     html += '<button onclick="rewardConfirm(&#39;'+safeN+'&#39;)" style="padding:6px 10px;border:1px solid '+s.vBorder+';border-radius:3px;background:'+s.vBg+';color:'+s.vColor+';font-size:9px;text-transform:uppercase;cursor:pointer">took '+s.name+'</button>';
   });
   html += '<button onclick="rewardReset()" style="padding:6px 10px;border:1px solid var(--border);border-radius:3px;background:none;color:var(--text-muted);font-size:9px;text-transform:uppercase;cursor:pointer">took nothing</button>';
   html += '</div>';
-  el.innerHTML = html;
+  return html;
 }
 
 function rewardAddOffered(name) {
   if (!rewardOffered.includes(name)) rewardOffered.push(name);
   const si = document.getElementById('pickerSearch');
   si.value = '';
-  renderRewardSelect(document.getElementById('pickerList'));
+  renderRewardUnified(document.getElementById('pickerList'));
   si.focus();
 }
 function rewardRemoveOffered(name) {
   rewardOffered = rewardOffered.filter(n=>n!==name);
-  renderRewardSelect(document.getElementById('pickerList'));
+  renderRewardUnified(document.getElementById('pickerList'));
 }
 function rewardProceed() {
   if (!rewardOffered.length) return;
@@ -2226,11 +2207,11 @@ function rewardProceed() {
   document.getElementById('pickerSearch').value = '';
   renderPickerReward();
 }
-function rewardSelectBuild(key) { rewardBuildKey = key; renderRewardBuildPick(document.getElementById('pickerList')); }
+function rewardSelectBuild(key) { rewardBuildKey = key; }
 function rewardShowVerdict() { if (!rewardBuildKey) return; rewardStage = 'verdict'; renderPickerReward(); }
 function rewardBack() {
-  if (rewardStage==='verdict') rewardStage='build';
-  else if (rewardStage==='build') { rewardStage='select'; document.getElementById('pickerSearch').value=''; }
+  rewardStage = 'select';
+  document.getElementById('pickerSearch').value = '';
   renderPickerReward();
 }
 function rewardConfirm(name) { addCard(name); rewardReset(); }
@@ -2306,7 +2287,7 @@ function renderPickerAdd() {
 }
 
 function renderPickerList() {
-  if (pickerTab === 'reward') { if (rewardStage === 'select') renderRewardSelect(document.getElementById('pickerList')); }
+  if (pickerTab === 'reward') { renderRewardUnified(document.getElementById('pickerList')); }
   else renderPickerAdd();
 }
 
