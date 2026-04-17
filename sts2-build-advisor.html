@@ -448,15 +448,15 @@ ironclad: [
   {name:"Bully",type:"atk",cost:1,note:"4 dmg + 2 extra per Vulnerable on enemy. Pairs with Vulnerable setup."},
   {name:"Burning Pact",type:"skl",cost:1,note:"Exhaust a card, draw 2. Good in Exhaust decks."},
   {name:"Dismantle",type:"atk",cost:1,note:"8 dmg, hits twice if enemy Vulnerable. Great Vulnerable payoff."},
-  {name:"Dominate",type:"skl",cost:1,note:"Gain 1 Strength per Vulnerable on enemy. Exhaust. Strength scaling."},
+  {name:"Dominate",type:"skl",cost:1,note:"Reworked in v0.103. Check in-game for current effect."},
   {name:"Drum of Battle",type:"pow",cost:1,note:"Draw 2 now. Exhaust top card each turn. Draw engine with tempo cost."},
   {name:"Evil Eye",type:"def_scl",cost:2,note:"8 Block + 8 more if Exhausted this turn. Weak all enemies. Exhaust synergy."},
-  {name:"Expect a Fight",type:"skl",cost:0,note:"Gain Energy per Attack in hand. Amazing for Perfected Strike."},
+  {name:"Expect a Fight",type:"skl",cost:0,note:"Reworked in v0.103. Check in-game for current effect."},
   {name:"Feel No Pain",type:"pow",cost:1,note:"Gain 3 Block whenever a card Exhausts. Core Exhaust."},
   {name:"Fight Me!",type:"atk",cost:1,note:"5 dmg twice + 2 Strength. Enemy gains 1 Strength. Great Strength generator."},
   {name:"Flame Barrier",type:"def",cost:2,note:"12 Block + deal 4 back whenever attacked. Expensive but strong."},
   {name:"Forgotten Ritual",type:"skl",cost:0,note:"Gain 3 Energy if you Exhausted a card this turn. Core Exhaust engine."},
-  {name:"Grapple",type:"atk",cost:1,note:"7 dmg. Whenever you Block this turn, deal 5 more. Block/atk hybrid."},
+
   {name:"Hemokinesis",type:"atk",cost:1,note:"Lose 2 HP, deal 14 dmg. Strong single target. Core Bloodletting."},
   {name:"Howl from Beyond",type:"atk",cost:2,note:"16 AoE. Plays from Exhaust at turn start. Great Exhaust payoff."},
   {name:"Infernal Blade",type:"skl",cost:1,note:"Add a random free Attack to hand. Exhaust. Flexible."},
@@ -468,7 +468,7 @@ ironclad: [
   {name:"Rampage",type:"atk",cost:1,note:"9 dmg. Increases this card's damage by 5 each combat. Scaling attack."},
   {name:"Rupture",type:"pow",cost:1,note:"Gain 1 Strength whenever you lose HP. Core Bloodletting."},
   {name:"Second Wind",type:"def",cost:1,note:"Exhaust all non-Attacks in hand. Gain 5 Block per card Exhausted. Great Exhaust/Block."},
-  {name:"Spite",type:"atk_scl",cost:0,note:"6 dmg. Draw 1 if you lost HP this turn. Bloodletting cycle."},
+  {name:"Spite",type:"atk_scl",cost:0,note:"Reworked in v0.103. Check in-game for current effect."},
   {name:"Stampede",type:"pow",cost:2,note:"At end of turn, play a random Attack from hand vs random enemy. Wild scaling."},
   {name:"Stomp",type:"atk",cost:1,note:"12 AoE. Costs 1 less per Attack played this turn. Combo finisher."},
   {name:"Stone Armor",type:"pow",cost:1,note:"Gain 4 Plating. Passive damage reduction scaling."},
@@ -495,12 +495,13 @@ ironclad: [
   {name:"Impervious",type:"def",cost:2,note:"30 Block. Exhaust. Massive panic button."},
   {name:"Juggernaut",type:"pow",cost:2,note:"Whenever you gain Block, deal 5 to random enemy. Block damage engine."},
   {name:"Mangle",type:"atk",cost:2,note:"15 dmg. Enemy loses 10 Strength this turn. Debuff attack."},
+  {name:"Not Yet",type:"def_scl",cost:2,note:"Heal 10 HP. Exhaust. Rare. Gives Ironclad survivability — strong when low on HP."},
   {name:"Offering",type:"skl",cost:0,note:"Lose 6 HP, gain 2 Energy, draw 3. Exhaust. High-value trade."},
   {name:"One-Two Punch",type:"skl",cost:1,note:"Next Attack is played an extra time this turn. Combo enabler."},
   {name:"Pact's End",type:"atk",cost:0,note:"17 AoE dmg. Needs 3+ Exhaust pile. 0-cost Exhaust finisher."},
   {name:"Primal Force",type:"skl",cost:2,note:"Transform all Attacks in hand into Giant Rocks. Situational nuke."},
   {name:"Pyre",type:"pow",cost:1,note:"Gain 1 Energy at start of each turn. Reliable energy engine."},
-  {name:"Stoke",type:"skl",cost:2,note:"Exhaust hand. Draw per card Exhausted. Exhaust. Redraw engine."},
+  {name:"Stoke",type:"skl",cost:2,note:"Reworked in v0.103. Check in-game for current effect."},
   {name:"Tear Asunder",type:"atk",cost:2,note:"5 dmg + 1 more per HP lost this combat. Bloodletting finisher."},
   {name:"Thrash",type:"atk",cost:0,note:"4 dmg twice. Exhaust a random Attack and add its damage. Exhaust synergy."},
   {name:"Unmovable",type:"pow",cost:2,note:"First Block gained per turn is doubled. Block scaling."},
@@ -521,7 +522,6 @@ silent: [
   {name:"Neutralize",type:"atk",cost:0,note:"Starter. 3 dmg + 1 Weak. 0-cost utility."},
   {name:"Survivor",type:"def_scl",cost:1,note:"Starter. 8 Block + discard 1. Great Sly activator."},
   // Common
-  {name:"Acrobatics",type:"skl",cost:1,note:"Draw 3, discard 1. Core Sly cycling card."},
   {name:"Anticipate",type:"skl",cost:0,note:"Gain 3 Dexterity this turn. 0-cost defensive boost."},
   {name:"Backflip",type:"def",cost:1,note:"5 Block + draw 2. Efficient early defense."},
   {name:"Blade Dance",type:"atk",cost:1,note:"Add 3 Shivs to hand. Exhaust. Core Shiv card."},
@@ -542,6 +542,7 @@ silent: [
   {name:"Sucker Punch",type:"atk",cost:1,note:"8 dmg + 1 Weak. Decent early attack."},
   {name:"Untouchable",type:"def",cost:1,note:"Sly. 9 Block. Core Sly block card."},
   // Uncommon
+  {name:"Acrobatics",type:"skl",cost:1,note:"Draw 3, discard 1. Core Sly cycling card. Moved to Uncommon in v0.103."},
   {name:"Accuracy",type:"pow",cost:1,note:"Shivs deal 4 more dmg. Core Shiv scaling. Take multiples."},
   {name:"Backstab",type:"atk",cost:0,note:"Innate. 11 dmg. Exhaust. Guaranteed first-turn damage."},
   {name:"Blur",type:"def",cost:1,note:"5 Block + Block not removed next turn. Persistent block."},
@@ -584,7 +585,7 @@ silent: [
   {name:"Adrenaline",type:"skl",cost:0,note:"Gain 1 Energy + draw 2. Exhaust. Explosive turn enabler."},
   {name:"Afterimage",type:"pow",cost:1,note:"Gain 1 Block per card played. Great passive block."},
   {name:"Assassinate",type:"atk",cost:1,note:"Innate. 10 dmg + 1 Vulnerable. Exhaust. Guaranteed opener."},
-  {name:"Blade of Ink",type:"skl",cost:1,note:"This turn, each Attack gives 2 Strength. Hybrid scaling."},
+  {name:"Blade of Ink",type:"skl",cost:1,note:"Reworked in v0.103. Now generates Shivs enchanted with Inky (+2 dmg, apply 1 Weak). Shiv/Sly crossover card."},
   {name:"Bullet Time",type:"skl",cost:3,note:"No extra draw this turn. All hand cards cost 0. Massive turn."},
   {name:"Burst",type:"skl",cost:1,note:"Next Skill is played twice. Amazing with Poison Skills."},
   {name:"Corrosive Wave",type:"skl",cost:1,note:"Each card drawn this turn applies 3 Poison to all. Poison burst."},
@@ -740,7 +741,7 @@ necrobinder: [
   {name:"Wisp",type:"skl",cost:1,note:"Gain 1 Energy. Exhaust. Energy gain."},
   // Uncommon
   {name:"Bone Shards",type:"atk_def",cost:1,note:"Osty deals 9 AoE + you gain 9 Block. Osty dies. Sacrifice payoff."},
-  {name:"Borrowed Time",type:"skl",cost:1,note:"Apply 3 Doom to yourself. Gain 1 Energy. Risk/reward energy."},
+  {name:"Borrowed Time",type:"skl",cost:1,note:"Gain 4 Energy. Cards cost 1 more this turn. Reworked in v0.103 — pairs well with high-cost cards like Reap and Bury."},
   {name:"Bury",type:"atk",cost:3,note:"52 dmg. Massive single-target nuke."},
   {name:"Calcify",type:"pow",cost:1,note:"Osty attacks deal 4 extra dmg. Passive Osty scaling."},
   {name:"Capture Spirit",type:"skl",cost:1,note:"Enemy loses 3 HP. Add 3 Souls to draw. Soul generator."},
@@ -870,7 +871,7 @@ regent: [
   {name:"Supermassive",type:"atk",cost:1,note:"5 dmg + 3 more per card created this combat. Creation scaling."},
   {name:"Terraforming",type:"skl",cost:1,note:"Gain 6 Vigor. Damage boost for next attack."},
   // Rare
-  {name:"Arsenal",type:"pow",cost:2,note:"Gain 1 Strength per Colorless card played. Colorless payoff."},
+  {name:"Arsenal",type:"pow",cost:2,note:"Gain 1 Strength per card created (any card, not just Colorless). Reworked in v0.103 — now synergises with all creation effects."},
   {name:"Beat into Shape",type:"atk_scl",cost:2,note:"5 dmg + Forge 5 + 5 extra Forge per prior hit this turn. Core Blade."},
   {name:"Big Bang",type:"skl",cost:2,note:"Draw 1 + 1 Energy + 1 Star + Forge 5. Exhaust. All-in-one."},
   {name:"Bombardment",type:"atk",cost:3,note:"18 dmg. Plays from Exhaust at turn start. Exhaust. Recurring nuke."},
@@ -1097,10 +1098,10 @@ necrobinder: {
     ethereal:{name:"Ethereal",fullName:"Ethereal Deck",color:"#c8922a",cards:["Seance","Banshee's Cry","Page Storm","Grave Blast","Defile","Reap","Eradicate","Borrowed Time"],recs:["Seance","Banshee's Cry","Page Storm","Grave Blast","Eradicate"],synergy:["Defile","Reap","Borrowed Time"],rank:"B",rankNote:"Powerful when it comes together — hard to force consistently."}
   },
   tips:{
-    doom:["Doom kills on the enemy's turn — you need Block to survive the wait.","Splash Souls for card draw to find Doom cards faster.","End of Days solves the waiting problem if you can afford 3 Energy.","Death's Door scales with Doom cards — take multiple Doom cards.","Time's Up is your best Elite and Boss answer in the late game.","Borrowed Time is exceptional Energy — take it every time you see it.","Neurosurge gives a massive Energy and draw boost — your turbo turn.","Reap retains and hits three times — great early damage before Doom scales."],
+    doom:["Doom kills on the enemy's turn — you need Block to survive the wait.","Splash Souls for card draw to find Doom cards faster.","End of Days solves the waiting problem if you can afford 3 Energy.","Death's Door scales with Doom cards — take multiple Doom cards.","Time's Up is your best Elite and Boss answer in the late game.","Borrowed Time gives 4 Energy but raises all card costs by 1 that turn — play it first, then spend on high-cost cards like Reap or Deathbringer.","Neurosurge gives a massive Energy and draw boost — your turbo turn.","Reap retains and hits three times — great early damage before Doom scales."],
     osty:["Keep Osty alive — their HP acts as your extra health pool.","Pull Aggro redirects attacks to Osty instead of you.","Rattle into Sic 'Em is your core damage combo.","Necro Mastery converts Block to attacks — incredible if Osty survives.","Don't mix sacrificial Osty cards (Bone Shards) with survival Osty cards.","Flatten combines with AI synergy for high-velocity attacks.","Scum is your best defensive card — summons block whenever AI hits."],
-    soul:["Captured Spirit, Severance, and Durge create Souls — 0-cost draw and exhaust cards.","Soul Storm damages all enemies based on how many Souls you have played.","Haunt deals passive HP loss to enemies each turn — scales with Soul count.","Devour Life grants passive Block per Soul — both offense and defense.","Undeath is 0-cost block that scales — core defensive piece.","Borrowed Time and Neurosurge are your Energy engine for big Soul turns."],
-    ethereal:["Seance, Banshee's Cry, and Page Storm all scale with ethereal cards played.","Grave Blast retrieves any card from your discard — use it to replay ethereal cards.","Eradicate does high damage and retains — your best single-target card.","Keep the deck thin so ethereal cards cycle back quickly.","Borrowed Time provides the Energy to play multiple ethereal cards in one turn."]
+    soul:["Captured Spirit, Severance, and Durge create Souls — 0-cost draw and exhaust cards.","Soul Storm damages all enemies based on how many Souls you have played.","Haunt deals passive HP loss to enemies each turn — scales with Soul count.","Devour Life grants passive Block per Soul — both offense and defense.","Undeath is 0-cost block that scales — core defensive piece.","Borrowed Time dumps 4 Energy into a turn — use it to chain multiple Soul plays in one burst."],
+    ethereal:["Seance, Banshee's Cry, and Page Storm all scale with ethereal cards played.","Grave Blast retrieves any card from your discard — use it to replay ethereal cards.","Eradicate does high damage and retains — your best single-target card.","Keep the deck thin so ethereal cards cycle back quickly.","Borrowed Time gives 4 Energy at the cost of +1 on all cards that turn — ideal for playing multiple Ethereal cards in one go."]
   }
 },
 regent: {
@@ -3016,7 +3017,7 @@ const ENGINES = {
     {name:'Hologram/TURBO loop',cards:['Hologram','TURBO','Claw'],note:'TURBO generates energy, Hologram retrieves Claw. Infinite-like turns with enough draw.'}
   ],
   necrobinder: [
-    {name:'Borrowed Time engine',cards:['Borrowed Time','Graveblast'],note:'Risk Doom on yourself for Energy. Graveblast retrieves from discard. Graveyard manipulation = endless turns.'},
+    {name:'Borrowed Time engine',cards:['Borrowed Time','Graveblast'],note:'Burst 4 Energy in one turn — cards cost 1 more but Graveblast retrieves key cards from discard. Big turn enabler.'},
     {name:'Doom engine',cards:['Deathbringer','Death\'s Door','Shroud'],note:'Stack Doom, then trigger. Need Block to survive the wait. End of Days solves timing.'},
     {name:'Osty engine',cards:['Rattle','Sic \'Em','Necro Mastery'],note:'Stack Osty HP. Rattle+Sic\'Em each turn. Necro Mastery converts Block to attacks.'},
     {name:'Soul deferral',cards:['Soul','Haunt','Devour Life'],note:'Bank Souls for future draw instead of playing immediately. Use when Energy is tight.'}
