@@ -1578,10 +1578,19 @@ function updatePriorityPanel() {
     const engData = (BUILD_ENGINES[currentChar] || {})[key];
     const missingEngCards = engData ? engData.cards.filter(n => !deckNames.has(n)) : [];
     const missingRecCards = (build.recs || []).filter(n => !deckNames.has(n));
-    return { key, build, hits, pct, engData, missingEngCards, missingRecCards };
+    // Engine completion: how many of the engine cards are already in deck
+    const engHave = engData ? engData.cards.filter(n => deckNames.has(n)).length : 0;
+    const engTotal = engData ? engData.cards.length : 0;
+    const engPct = engTotal > 0 ? engHave / engTotal : 0;
+    return { key, build, hits, pct, engData, missingEngCards, missingRecCards, engHave, engTotal, engPct };
   }).sort((a, b) => {
-    if (Math.abs(b.pct - a.pct) > 0.001) return b.pct - a.pct;
-    return (RANK_ORDER[b.build.rank] || 0) - (RANK_ORDER[a.build.rank] || 0);
+    // 1. Engine completion % descending (closest to a live engine first)
+    if (Math.abs(b.engPct - a.engPct) > 0.001) return b.engPct - a.engPct;
+    // 2. Build rank descending (S > A > B > C)
+    const rankDiff = (RANK_ORDER[b.build.rank] || 0) - (RANK_ORDER[a.build.rank] || 0);
+    if (rankDiff !== 0) return rankDiff;
+    // 3. Deck match % descending
+    return b.pct - a.pct;
   });
 
   // Only render groups that have at least something missing (engine or rec)
