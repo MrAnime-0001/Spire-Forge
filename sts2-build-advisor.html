@@ -1122,6 +1122,45 @@ regent: {
 }
 };
 
+// Per-build engine/cycle callouts — cards you need to make the core loop work.
+// Shown above "priority to find" in the build panel.
+const BUILD_ENGINES = {
+  ironclad: {
+    strength:   {cards:['Demon Form','Inflame','Rupture'],      label:'Strength engine — passive Strength every turn'},
+    block:      {cards:['Barricade','Juggernaut','Body Slam'],  label:'Block engine — Block never expires, converts to damage'},
+    exhaust:    {cards:['Corruption','Dark Embrace','Feel No Pain'], label:'Exhaust trinity — this is the core loop'},
+    selfdamage: {cards:['Rupture','Crimson Mantle','Inferno'],  label:'Self-damage cycle — HP loss becomes Strength and damage'},
+    strike:     {cards:['Perfected Strike','Expect a Fight','Pyre'], label:'Strike cycle — energy to fuel the big hit'},
+    infinite:   {cards:['Bloodletting','Dark Embrace','Burning Pact'], label:'Infinite loop — energy + draw until no hand limit'}
+  },
+  silent: {
+    shiv:   {cards:['Accuracy','Infinite Blades','Knife Trap'],          label:'Shiv engine — scale damage, generate, then dump'},
+    poison: {cards:['Noxious Fumes','Accelerant','Bubble Bubble'],       label:'Poison cycle — stack, then double'},
+    sly:    {cards:['Tactician','Tools of the Trade','Master Planner'],  label:'Sly cycle — discard = free Energy every turn'},
+    tank:   {cards:['Noxious Fumes','Footwork','Shadowmeld'],            label:'Survival loop — Dexterity + Poison while staying alive'}
+  },
+  defect: {
+    claw:     {cards:['Claw','All for One','Scrape'],              label:'Claw loop — play, retrieve, repeat'},
+    orb:      {cards:['Defragment','Loop','Multi-Cast'],           label:'Orb engine — stack Focus, evoke for massive output'},
+    frost:    {cards:['Glacier','Loop','Hailstorm'],               label:'Frost cycle — stack block passively, dump for damage'},
+    toolbox:  {cards:['Hologram','TURBO','Meteor Strike'],         label:'Toolbox loop — Energy from Plasma, retrieve with Hologram'},
+    darkness: {cards:['Darkness','Defragment','Multi-Cast'],       label:'Darkness engine — grow Dark Orbs, evoke for boss damage'}
+  },
+  necrobinder: {
+    doom:     {cards:["Deathbringer","Death's Door","End of Days"], label:'Doom cycle — apply, survive, then detonate'},
+    osty:     {cards:['Rattle',"Sic 'Em",'Necro Mastery'],         label:'Osty cycle — hit repeatedly, grow Osty, convert to damage'},
+    soul:     {cards:['Captured Spirit','Devour Life','Haunt'],     label:'Soul engine — generate Souls, passively drain enemies'},
+    ethereal: {cards:["Banshee's Cry",'Eradicate','Grave Blast'],  label:'Ethereal cycle — play, retrieve from discard, repeat'}
+  },
+  regent: {
+    blade:    {cards:['Summon Forth','Conqueror','Beat into Shape'], label:'Forge cycle — Forge the Blade every turn, double with Conqueror'},
+    star:     {cards:['Genesis','Alignment','Child of the Stars'],   label:'Star engine — generate Stars, convert to Energy and Block'},
+    starfall: {cards:['Radiate','Royal Gamble','Alignment'],         label:'Starfall burst — store Stars, dump into Radiate for nuke turn'},
+    midrange: {cards:['Genesis','Convergence','Comet'],              label:'Value cycle — Stars, Block, and draw for 0 Energy'},
+    infinite: {cards:['Guards','Alignment','Glow'],                  label:'Infinite loop — thin deck with Guards, cycle with Glow and Alignment'}
+  }
+};
+
 const SAFE_PICKS = {
   ironclad: {
     early: ['Pommel Strike','Headbutt','Feel No Pain','True Grit','Shrug It Off','Second Wind'],
@@ -1472,54 +1511,11 @@ function updatePriorityPanel() {
   // ---- Deck issues now handled by renderDeckHealth warnings ----
   const issues = [];
 
-  // ---- Cross-build priority card list ----
-  // For each missing priority card, track which builds want it and use the top build's color
-  const cardMap = {}; // name -> { builds: [{key, buildName, color}], card }
-  Object.entries(builds).forEach(([key, build]) => {
-    (build.recs || []).forEach(name => {
-      if (deckNames.has(name)) return; // already have it
-      if (!cardMap[name]) {
-        const card = allCards.find(c => c.name === name);
-        cardMap[name] = { builds: [], card };
-      }
-      cardMap[name].builds.push({ key, buildName: build.name, color: build.color });
-    });
-  });
-
-  // Sort: cards wanted by more builds first, then alphabetically
-  const priorityList = Object.entries(cardMap).sort((a, b) => {
-    if (b[1].builds.length !== a[1].builds.length) return b[1].builds.length - a[1].builds.length;
-    return a[0].localeCompare(b[0]);
-  });
-
-  // Group by which builds need them
-  // Section 1: needed by top build (highlight these)
-  // Section 2: needed by other builds only
-  const topPriority = priorityList.filter(([, v]) => v.builds.some(b => b.key === topBuildKey));
-  const otherPriority = priorityList.filter(([, v]) => !v.builds.some(b => b.key === topBuildKey));
-
   const typeTagHtml = (card) => {
     if (!card) return '';
     const t = card.type || 'skl';
     const cls = t.startsWith('atk') ? 'tag-atk' : t.startsWith('def') ? 'tag-def' : t==='pow' ? 'tag-pow' : 'tag-skl';
     return `<span class="deck-item-tag ${cls}" style="font-size:9px;padding:1px 5px">${t.replace(/_/g,'·').toUpperCase()}</span>`;
-  };
-
-  const buildDotsHtml = (buildList) => buildList.map(b =>
-    `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;padding:1px 6px;border-radius:2px;background:${b.color}18;color:${b.color};border:1px solid ${b.color}40">${b.buildName}</span>`
-  ).join('');
-
-  const cardRowHtml = (name, entry, isTop) => {
-    const safeN = name.replace(/'/g,"\\'");
-    const topColor = entry.builds[0]?.color || 'var(--amber)';
-    return `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid ${isTop ? topColor+'55' : 'var(--border)'};border-radius:3px;background:${isTop ? topColor+'0e' : 'var(--bg2)'};cursor:pointer;margin-bottom:5px;transition:all .12s" onmouseover="this.style.borderColor='${topColor}';this.style.background='${topColor}1a'" onmouseout="this.style.borderColor='${isTop ? topColor+'55' : 'var(--border)'  }';this.style.background='${isTop ? topColor+'0e' : 'var(--bg2)'}'">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;color:${isTop ? 'var(--text)' : 'var(--text-dim)'};margin-bottom:3px">${name}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:3px">${buildDotsHtml(entry.builds)}</div>
-      </div>
-      ${typeTagHtml(entry.card)}
-      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green-bright);opacity:.7;flex-shrink:0">+ add</span>
-    </div>`;
   };
 
   let html = '';
@@ -1565,7 +1561,7 @@ function updatePriorityPanel() {
         html += `</div>`;
       }
       html += `</div>`;
-      if (issues.length > 0 || topPriority.length > 0 || otherPriority.length > 0) {
+      if (issues.length > 0) {
         html += `<div class="divider" style="margin:.5rem 0"></div>`;
       }
     }
@@ -1573,20 +1569,94 @@ function updatePriorityPanel() {
 
 
 
-  if (topPriority.length > 0) {
-    const topBuild = builds[topBuildKey];
-    html += `<div class="recs-label" style="color:${topBuild?.color || 'var(--amber)'}">priority — ${topBuild?.name || 'top build'}</div>`;
-    topPriority.forEach(([name, entry]) => { html += cardRowHtml(name, entry, true); });
+  // ---- Engine-grouped priority section ----
+  // Each build becomes a mini-group sorted by: deck match % desc, then rank desc
+  const RANK_ORDER = {S:4, A:3, B:2, C:1};
+  const deckNames_arr = Object.keys(deck);
+
+  // Build a sorted list of all builds with their match % and rank
+  const buildGroups = Object.entries(builds).map(([key, build]) => {
+    const hits    = deckNames_arr.filter(n => build.cards.includes(n)).length;
+    const pct     = hits / build.cards.length;
+    const engData = (BUILD_ENGINES[currentChar] || {})[key];
+    const missingEngCards = engData ? engData.cards.filter(n => !deckNames.has(n)) : [];
+    const missingRecCards = (build.recs || []).filter(n => !deckNames.has(n));
+    return { key, build, hits, pct, engData, missingEngCards, missingRecCards };
+  }).sort((a, b) => {
+    if (Math.abs(b.pct - a.pct) > 0.001) return b.pct - a.pct;
+    return (RANK_ORDER[b.build.rank] || 0) - (RANK_ORDER[a.build.rank] || 0);
+  });
+
+  // Only render groups that have at least something missing (engine or rec)
+  const activeGroups = buildGroups.filter(g => g.missingEngCards.length > 0 || g.missingRecCards.length > 0);
+
+  const rankColors = {S:'#e8b84b', A:'#6aac5f', B:'#4a8cba', C:'#7a6a8a'};
+
+  if (activeGroups.length > 0) {
+    html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);opacity:.8;margin-bottom:.6rem">priority</div>`;
+
+    activeGroups.forEach((g, i) => {
+      const { key, build, pct, engData, missingEngCards, missingRecCards } = g;
+      const isTop  = key === topBuildKey;
+      const rankC  = rankColors[build.rank] || 'var(--text-muted)';
+      const pctStr = Math.round(pct * 100) + '%';
+
+      // Group header
+      html += `<div style="margin-bottom:.6rem">`;
+      html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:.35rem">`;
+      html += `<span style="font-size:12px;font-family:'Cinzel',serif;font-weight:600;color:${build.color}">${build.name}</span>`;
+      if (build.rank) html += `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;padding:1px 5px;border-radius:2px;border:1px solid ${rankC}50;background:${rankC}18;color:${rankC}">${build.rank}</span>`;
+      if (isTop)      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;padding:1px 5px;border-radius:2px;background:${build.color}18;color:${build.color};border:1px solid ${build.color}40">best match</span>`;
+      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:auto">${pctStr} match</span>`;
+      html += `</div>`;
+
+      // Engine pieces missing first (highlighted)
+      if (missingEngCards.length > 0 && engData) {
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;opacity:.8">engine pieces</div>`;
+        missingEngCards.forEach(name => {
+          const card  = allCards.find(c => c.name === name);
+          const safeN = name.replace(/'/g,"\\'");
+          html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--teal-bright)40;border-radius:3px;background:rgba(74,154,138,.07);cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='var(--teal-bright)';this.style.background='rgba(74,154,138,.14)'" onmouseout="this.style.borderColor='var(--teal-bright)40';this.style.background='rgba(74,154,138,.07)'">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;color:var(--text)">${name}</div>
+              ${card ? `<div style="font-size:10px;color:var(--text-muted);font-style:italic">${engData.label}</div>` : ''}
+            </div>
+            ${typeTagHtml(card)}
+            <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--teal-bright);opacity:.8;flex-shrink:0">+ add</span>
+          </div>`;
+        });
+      }
+
+      // Other priority (rec) cards below engine
+      if (missingRecCards.length > 0) {
+        if (missingEngCards.length > 0) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--green-bright);letter-spacing:.08em;text-transform:uppercase;margin:5px 0 3px;opacity:.8">other priority</div>`;
+        }
+        missingRecCards.slice(0, 5).forEach(name => {
+          const card  = allCards.find(c => c.name === name);
+          const safeN = name.replace(/'/g,"\\'");
+          html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid ${isTop ? build.color+'55' : 'var(--border)'};border-radius:3px;background:${isTop ? build.color+'0e' : 'var(--bg2)'};cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='${build.color}';this.style.background='${build.color}1a'" onmouseout="this.style.borderColor='${isTop ? build.color+'55' : 'var(--border)'}';this.style.background='${isTop ? build.color+'0e' : 'var(--bg2)'}'">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;color:${isTop ? 'var(--text)' : 'var(--text-dim)'}">${name}</div>
+              ${card?.note ? `<div style="font-size:10px;color:var(--text-muted);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${card.note}</div>` : ''}
+            </div>
+            ${typeTagHtml(card)}
+            <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green-bright);opacity:.7;flex-shrink:0">+ add</span>
+          </div>`;
+        });
+      }
+
+      html += `</div>`;
+
+      // Divider between groups (not after last)
+      if (i < activeGroups.length - 1) {
+        html += `<div class="divider" style="margin:.4rem 0 .7rem"></div>`;
+      }
+    });
   }
 
-  if (otherPriority.length > 0) {
-    if (topPriority.length > 0) html += `<div class="divider" style="margin:.7rem 0"></div>`;
-    html += `<div class="recs-label">other build priorities</div>`;
-    otherPriority.forEach(([name, entry]) => { html += cardRowHtml(name, entry, false); });
-  }
-
-  if (topPriority.length === 0 && otherPriority.length === 0 && issues.length === 0) {
-    html = '<p style="font-size:13px;color:var(--text-muted);font-style:italic">Your deck already has all priority cards. Use the right panel to check synergy options.</p>';
+  if (activeGroups.length === 0) {
+    html += '<p style="font-size:13px;color:var(--text-muted);font-style:italic">Your deck already has all priority cards. Use the right panel to check synergy options.</p>';
   }
 
   panel.innerHTML = html;
@@ -1668,6 +1738,30 @@ function updateResult() {
     if (haveCards.length > 0) {
       html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">in your deck</div>`;
       html += `<div class="mini-chips">${haveCards.map(n=>`<span class="mini-chip have">${n}</span>`).join('')}</div>`;
+    }
+
+    // Engine callout — core cycle cards for this build
+    const buildEngine = (BUILD_ENGINES[currentChar] || {})[key];
+    if (buildEngine) {
+      const engHave    = buildEngine.cards.filter(n => deckNameSet.has(n));
+      const engMissing = buildEngine.cards.filter(n => !deckNameSet.has(n));
+      const engPct = engHave.length / buildEngine.cards.length;
+      const engLive = engPct >= 1;
+      const engColor = engLive ? 'var(--green-bright)' : engPct > 0 ? 'var(--amber)' : 'var(--text-muted)';
+      const engStatus = engLive ? '✓ engine online' : engPct > 0 ? '⚙ engine forming' : '⚙ engine needed';
+      html += `<div style="margin-top:.6rem;padding:.5rem .7rem;border:1px solid ${engColor}35;border-radius:3px;background:${engColor}0a">`;
+      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${engColor};letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">${engStatus}</div>`;
+      html += `<div style="font-size:11px;color:var(--text-dim);margin-bottom:.35rem">${buildEngine.label}</div>`;
+      html += `<div style="display:flex;flex-wrap:wrap;gap:4px">`;
+      buildEngine.cards.forEach(n => {
+        const have = deckNameSet.has(n);
+        html += `<span style="font-size:10px;padding:1px 7px;border-radius:2px;border:1px solid ${have ? engColor+'80' : 'var(--border)'};background:${have ? engColor+'18' : 'transparent'};color:${have ? engColor : 'var(--text-muted)'}${have ? '' : ';opacity:.6'}">${n}${have ? ' ✓' : ''}</span>`;
+      });
+      html += `</div>`;
+      if (engMissing.length > 0 && !engLive) {
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:.3rem">need: <span style="color:${engColor}">${engMissing.join(', ')}</span></div>`;
+      }
+      html += `</div>`;
     }
 
     // Priority cards missing
