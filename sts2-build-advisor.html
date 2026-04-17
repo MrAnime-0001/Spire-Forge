@@ -448,6 +448,7 @@ ironclad: [
   {name:"Bully",type:"atk",cost:1,note:"4 dmg + 2 extra per Vulnerable on enemy. Pairs with Vulnerable setup."},
   {name:"Burning Pact",type:"skl",cost:1,note:"Exhaust a card, draw 2. Good in Exhaust decks."},
   {name:"Dismantle",type:"atk",cost:1,note:"8 dmg, hits twice if enemy Vulnerable. Great Vulnerable payoff."},
+  {name:"Demonic Shield",type:"def_scl",cost:1,note:"Lose 1 HP. Give another player Block equal to your Block. Exhaust. Coop defensive card."},
   {name:"Dominate",type:"skl",cost:1,note:"Reworked in v0.103. Check in-game for current effect."},
   {name:"Drum of Battle",type:"pow",cost:1,note:"Draw 2 now. Exhaust top card each turn. Draw engine with tempo cost."},
   {name:"Evil Eye",type:"def_scl",cost:2,note:"8 Block + 8 more if Exhausted this turn. Weak all enemies. Exhaust synergy."},
@@ -507,14 +508,10 @@ ironclad: [
   {name:"Unmovable",type:"pow",cost:2,note:"First Block gained per turn is doubled. Block scaling."},
   {name:"Tank",type:"pow",cost:2,note:"Take double damage; allies take half. Coop/solo specific."},
   // Ancient / Event
-  {name:"Break",type:"atk",cost:1,note:"20 dmg + 5 Vulnerable. Rare ancient card."},
+  {name:"Break",type:"atk",cost:1,note:"20 dmg + 5 Vulnerable. Ancient card."},
   {name:"Clash",type:"atk",cost:0,note:"14 dmg. Only if all hand cards are Attacks. 0-cost high damage."},
   {name:"Dual Wield",type:"skl",cost:1,note:"Add a copy of an Attack or Power from hand to hand. Duplication."},
   {name:"Entrench",type:"def",cost:2,note:"Double your current Block. Huge with Barricade."},
-  {name:"Brutality",type:"pow",cost:0,note:"Lose 1 HP per turn to draw a card. Bloodletting draw."},
-  {name:"Limit Break",type:"skl",cost:1,note:"Double your Strength. Exhaust. Late-game Strength nuke."},
-  {name:"Reaper",type:"atk",cost:2,note:"4 AoE dmg. Heal for damage dealt. Unique sustain."},
-  {name:"Brimstone",type:"pow",cost:2,note:"Gain 2 Strength but enemies gain 1. Risky Strength scaling."},
 ],
 silent: [
   {name:"Strike",type:"atk",cost:1,note:"Starter. Remove when possible."},
@@ -1044,11 +1041,11 @@ colorless: [
 const BUILD_DATA = {
 ironclad: {
   builds: {
-    strength:{name:"Strength",fullName:"Strength Build",color:"#c04040",cards:["Twin Strike","Fight Me!","Inflame","Rupture","Whirlwind","Demon Form","Brand","Thrash","Perfected Strike","Heavy Blade","Limit Break","Spot Weakness","Brimstone","Feed","Battle Trance","Offering"],recs:["Inflame","Demon Form","Whirlwind","Twin Strike","Rupture","Brand","Thrash","Fight Me!","Heavy Blade","Limit Break"],synergy:["Thunderclap","Uppercut","Sword Boomerang","Bludgeon","Carnage","Clothesline","Tremble","Feed","Pommel Strike","Headbutt"],rank:"A",rankNote:"Strong mid-game. Needs Demon Form to close out late."},
+    strength:{name:"Strength",fullName:"Strength Build",color:"#c04040",cards:["Twin Strike","Fight Me!","Inflame","Rupture","Whirlwind","Demon Form","Brand","Thrash","Perfected Strike","Feed","Battle Trance","Offering"],recs:["Inflame","Demon Form","Whirlwind","Twin Strike","Rupture","Brand","Thrash","Fight Me!","Offering"],synergy:["Thunderclap","Uppercut","Sword Boomerang","Bludgeon","Tremble","Feed","Pommel Strike","Headbutt"],rank:"A",rankNote:"Strong mid-game. Needs Demon Form to close out late."},
     block:{name:"Block",fullName:"Block Build",color:"#4a8cba",cards:["Body Slam","Shrug It Off","True Grit","Flame Barrier","Taunt","Stone Armor","Juggernaut","Barricade","Crimson Mantle","Impervious","Unmovable","Entrench"],recs:["Barricade","Juggernaut","Body Slam","Taunt","Impervious","Stone Armor","Entrench","Unmovable"],synergy:["Shrug It Off","True Grit","Ghostly Armor","Flame Barrier","Evil Eye"],rank:"B",rankNote:"Situational — requires Barricade and Impervious to function fully."},
     exhaust:{name:"Exhaust",fullName:"Exhaust Build",color:"#c8922a",cards:["Corruption","True Grit","Body Slam","Ashen Strike","Burning Pact","Evil Eye","Feel No Pain","Forgotten Ritual","Dark Embrace","Brand","Offering","Pact's End","Thrash","Juggernaut","Anger","Second Wind","Stoke","Vicious","Spite"],recs:["Corruption","Dark Embrace","Feel No Pain","Juggernaut","Ashen Strike","Pact's End","Offering","Brand","Forgotten Ritual","Second Wind"],synergy:["Burning Pact","True Grit","Body Slam","Anger","Thrash","Stoke","Vicious","Spite","Bloodletting"],rank:"A",rankNote:"Powerful engine once all three pieces are assembled."},
-    selfdamage:{name:"Self-Damage",fullName:"Self-Damage Build",color:"#9a6aba",cards:["Bloodletting","Rupture","Inferno","Hemokinesis","Crimson Mantle","Brand","Offering","Feed","Tear Asunder","Brutality","Breakthrough","Spite"],recs:["Rupture","Inferno","Crimson Mantle","Bloodletting","Tear Asunder","Brand","Offering","Hemokinesis","Spite"],synergy:["Brutality","Feed","Reaper","Breakthrough"],rank:"B",rankNote:"Scales well but fragile — needs Rupture online fast."},
-    strike:{name:"Strike",fullName:"Strike Build",color:"#6aac5f",cards:["Perfected Strike","Twin Strike","Pommel Strike","Breakthrough","Tremble","Taunt","Expect a Fight","Pyre","Hellraiser","Colossus","Cruelty"],recs:["Perfected Strike","Twin Strike","Pommel Strike","Expect a Fight","Taunt","Pyre","Hellraiser","Colossus"],synergy:["Tremble","Cruelty","Clothesline","Uppercut"],rank:"C",rankNote:"Inconsistent scaling. Fun but outperformed by other builds."},
+    selfdamage:{name:"Self-Damage",fullName:"Self-Damage Build",color:"#9a6aba",cards:["Bloodletting","Rupture","Inferno","Hemokinesis","Crimson Mantle","Brand","Offering","Feed","Tear Asunder","Breakthrough","Spite"],recs:["Rupture","Inferno","Crimson Mantle","Bloodletting","Tear Asunder","Brand","Offering","Hemokinesis","Spite"],synergy:["Feed","Breakthrough"],rank:"B",rankNote:"Scales well but fragile — needs Rupture online fast."},
+    strike:{name:"Strike",fullName:"Strike Build",color:"#6aac5f",cards:["Perfected Strike","Twin Strike","Pommel Strike","Breakthrough","Tremble","Taunt","Expect a Fight","Pyre","Hellraiser","Colossus","Cruelty"],recs:["Perfected Strike","Twin Strike","Pommel Strike","Expect a Fight","Taunt","Pyre","Hellraiser","Colossus"],synergy:["Tremble","Cruelty","Uppercut"],rank:"C",rankNote:"Inconsistent scaling. Fun but outperformed by other builds."},
     infinite:{name:"Infinite",fullName:"Infinite Engine",color:"#4a9a8a",cards:["True Grit","Fiend Fire","Second Wind","Stoke","Vicious","Dark Embrace","Burning Pact","Bloodletting","Expect a Fight","Spite","Offering","Battle Trance"],recs:["Fiend Fire","Dark Embrace","Burning Pact","Bloodletting","Expect a Fight","Stoke","Battle Trance","Offering"],synergy:["True Grit","Second Wind","Vicious","Spite","Corruption","Feel No Pain"],rank:"S",rankNote:"Best Ironclad build. Easy to force, no current counters."}
   },
   tips:{
