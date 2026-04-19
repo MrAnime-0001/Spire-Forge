@@ -271,6 +271,23 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 .rar-ancient{color:#9a6aba;border-color:#9a6aba50;background:#9a6aba18;}
 .rar-event{color:#6a9a9a;border-color:#6a9a9a50;background:#6a9a9a18;}
 .rar-token{color:#4a4438;border-color:#4a443850;background:none;}
+
+/* Card check search bar */
+.card-check-wrap{margin-top:.85rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);overflow:hidden;}
+.card-check-header{padding:.55rem .9rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+.card-check-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);opacity:.8;}
+.card-check-sub{font-size:11px;color:var(--text-muted);font-style:italic;margin-top:2px;}
+.card-check-search-wrap{padding:8px 10px;border-bottom:1px solid var(--border);}
+.card-check-input{width:100%;background:var(--bg2);border:1px solid var(--border-bright);border-radius:3px;padding:6px 9px;color:var(--text);font-family:'Crimson Pro',serif;font-size:13px;outline:none;}
+.card-check-input:focus{border-color:var(--amber);}
+.card-check-input::placeholder{color:var(--text-muted);}
+.card-check-results{padding:6px 10px 8px;}
+.card-check-match{padding:7px 9px;border-radius:3px;margin-bottom:4px;border:1px solid;}
+.card-check-match-name{font-size:13px;font-weight:400;margin-bottom:3px;}
+.card-check-match-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
+.card-check-match-note{font-size:11px;color:var(--text-muted);font-style:italic;}
+.card-check-empty{font-size:12px;color:var(--text-muted);font-style:italic;padding:4px 2px;}
+.card-check-verdict{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:2px;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -1576,7 +1593,17 @@ function updatePriorityPanel() {
     }
   }
 
-
+  // ---- Card reward check search (below safe picks) ----
+  html += `<div class="card-check-wrap" id="cardCheckWrap" style="margin-bottom:.85rem">
+    <div class="card-check-header">
+      <div class="card-check-label">card reward check</div>
+      <div class="card-check-sub">Type a card name to see if it fits your build</div>
+    </div>
+    <div class="card-check-search-wrap">
+      <input class="card-check-input" id="cardCheckInput" type="text" placeholder="e.g. Demon Form, Barricade, Noxious Fumes..." oninput="renderCardCheck()">
+    </div>
+    <div class="card-check-results" id="cardCheckResults"></div>
+  </div>`;
 
   // ---- Engine-grouped priority section ----
   // Each build becomes a mini-group sorted by: deck match % desc, then rank desc
@@ -3365,6 +3392,160 @@ function importDeckFile(event) {
     }
   };
   reader.readAsText(file);
+}
+
+// ============================================================
+// CARD REWARD CHECK SEARCH
+// ============================================================
+function renderCardCheck() {
+  const input = document.getElementById('cardCheckInput');
+  const resultsEl = document.getElementById('cardCheckResults');
+  if (!input || !resultsEl) return;
+
+  const q = input.value.trim().toLowerCase();
+  if (!q || !currentChar) {
+    resultsEl.innerHTML = '';
+    return;
+  }
+
+  const allCards = getAllCardsForPicker();
+  const builds = BUILD_DATA[currentChar].builds;
+  const engines = BUILD_ENGINES[currentChar] || {};
+  const spData = SAFE_PICKS[currentChar] || { early: [], generic: [] };
+  const allSafePicks = new Set([...spData.early, ...spData.generic]);
+
+  // Find matching cards
+  const matches = allCards.filter(c => c.name.toLowerCase().includes(q)).slice(0, 8);
+
+  if (!matches.length) {
+    resultsEl.innerHTML = '<div class="card-check-empty">No cards match.</div>';
+    return;
+  }
+
+  let html = '';
+
+  matches.forEach(card => {
+    const name = card.name;
+    const alreadyInDeck = deck[name] ? deck[name] : 0;
+
+    // Check engine membership across all builds
+    const engineMatches = [];
+    Object.entries(engines).forEach(([buildKey, engData]) => {
+      if (engData.cards.includes(name)) {
+        const build = builds[buildKey];
+        engineMatches.push({ buildKey, buildName: build ? build.name : buildKey, buildColor: build ? build.color : 'var(--teal-bright)', label: engData.label });
+      }
+    });
+
+    // Check priority/rec card membership
+    const priorityMatches = [];
+    Object.entries(builds).forEach(([buildKey, build]) => {
+      if ((build.recs || []).includes(name) || (build.cards || []).includes(name)) {
+        if (!engineMatches.find(e => e.buildKey === buildKey)) {
+          priorityMatches.push({ buildKey, buildName: build.name, buildColor: build.color, rank: build.rank });
+        }
+      }
+    });
+
+    // Check safe pick
+    const isSafeEarly = spData.early.includes(name);
+    const isSafeGeneric = spData.generic.includes(name);
+    const isSafe = isSafeEarly || isSafeGeneric;
+
+    // Determine top-level verdict and colour
+    let borderColor, bgColor, verdictLabel, verdictStyle;
+    if (engineMatches.length > 0) {
+      borderColor = 'rgba(74,154,138,.5)';
+      bgColor = 'rgba(74,154,138,.08)';
+      verdictLabel = 'ENGINE PIECE';
+      verdictStyle = 'background:rgba(74,154,138,.2);color:var(--teal-bright);border:1px solid rgba(74,154,138,.4)';
+    } else if (priorityMatches.length > 0) {
+      borderColor = 'rgba(106,172,95,.45)';
+      bgColor = 'rgba(74,124,63,.08)';
+      verdictLabel = 'PRIORITY';
+      verdictStyle = 'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)';
+    } else if (isSafe) {
+      borderColor = 'rgba(200,146,42,.35)';
+      bgColor = 'rgba(200,146,42,.06)';
+      verdictLabel = isSafeEarly ? 'SAFE — TAKE EARLY' : 'SAFE PICK';
+      verdictStyle = 'background:rgba(200,146,42,.15);color:var(--amber-bright);border:1px solid rgba(200,146,42,.3)';
+    } else {
+      borderColor = 'var(--border)';
+      bgColor = 'var(--bg2)';
+      verdictLabel = 'NOT A PRIORITY';
+      verdictStyle = 'background:rgba(100,90,70,.15);color:var(--text-muted);border:1px solid var(--border)';
+    }
+
+    const typeTag = (() => {
+      const t = card.type || 'skl';
+      const cls = t.startsWith('atk') ? 'tag-atk' : t.startsWith('def') ? 'tag-def' : t === 'pow' ? 'tag-pow' : 'tag-skl';
+      return `<span class="deck-item-tag ${cls}" style="font-size:9px;padding:1px 5px">${t.replace(/_/g, '·').toUpperCase()}</span>`;
+    })();
+
+    const deckTag = alreadyInDeck > 0
+      ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×${alreadyInDeck}</span>`
+      : '';
+
+    const crossTag = card.crossChar
+      ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">${card.crossCharName}</span>`
+      : '';
+
+    html += `<div class="card-check-match" style="border-color:${borderColor};background:${bgColor}">`;
+    html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">`;
+    html += `<span class="card-check-match-name">${name}</span>`;
+    html += `${typeTag}${deckTag}${crossTag}`;
+    html += card.rarity ? rarityBadgeHtml(card.rarity) : '';
+    html += `<span class="card-check-verdict" style="${verdictStyle}">${verdictLabel}</span>`;
+    html += `</div>`;
+
+    // Engine detail rows
+    if (engineMatches.length > 0) {
+      engineMatches.forEach(e => {
+        const haveCount = e.buildKey && engines[e.buildKey] ? engines[e.buildKey].cards.filter(n => deck[n]).length : 0;
+        const totalCount = e.buildKey && engines[e.buildKey] ? engines[e.buildKey].cards.length : 0;
+        html += `<div style="font-size:11px;margin-bottom:2px">`;
+        html += `<span style="color:${e.buildColor};font-family:'Cinzel',serif;font-size:11px">${e.buildName}</span>`;
+        html += ` <span style="color:var(--text-muted)">— ${e.label}</span>`;
+        html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--teal-bright)">(${haveCount}/${totalCount} engine cards in deck)</span>`;
+        html += `</div>`;
+      });
+    }
+
+    // Priority build rows
+    if (priorityMatches.length > 0) {
+      priorityMatches.forEach(p => {
+        html += `<div style="font-size:11px;margin-bottom:2px">`;
+        html += `<span style="color:${p.buildColor};font-family:'Cinzel',serif;font-size:11px">${p.buildName}</span>`;
+        if (p.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">[${p.rank}]</span>`;
+        html += `</div>`;
+      });
+    }
+
+    // Safe pick context
+    if (isSafe && engineMatches.length === 0 && priorityMatches.length === 0) {
+      html += `<div style="font-size:11px;color:var(--text-muted)">Useful across most builds — safe to take regardless of your path.</div>`;
+    }
+
+    // No match explanation
+    if (engineMatches.length === 0 && priorityMatches.length === 0 && !isSafe) {
+      html += `<div style="font-size:11px;color:var(--text-muted)">Not on the priority list for any ${currentChar.charAt(0).toUpperCase() + currentChar.slice(1)} build. Skip unless you have a specific reason.</div>`;
+    }
+
+    // Card note
+    if (card.note) {
+      html += `<div class="card-check-match-note">${card.note}</div>`;
+    }
+
+    // Quick add button if not already in deck
+    if (alreadyInDeck === 0) {
+      const safeN = name.replace(/'/g, "\\'");
+      html += `<div style="margin-top:5px"><button onclick="addCard('${safeN}');renderCardCheck();" style="padding:3px 9px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber-bright)'" onmouseout="this.style.borderColor='var(--border-bright)';this.style.color='var(--text-muted)'">+ add to deck</button></div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  resultsEl.innerHTML = html;
 }
 
 init();
