@@ -20,9 +20,9 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 .slabel{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:.6rem;opacity:.7;}
 
 /* Character row */
-.char-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:2rem;}
+.char-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:2rem;}
 @media(max-width:600px){.char-grid{grid-template-columns:repeat(3,1fr);}}
-.char-btn{padding:.9rem .4rem;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);font-family:'Cinzel',serif;font-size:12px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden;}
+.char-btn{padding:.9rem .4rem;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);font-family:'Cinzel',serif;font-size:12px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden;min-width:0;word-break:break-word;height:80px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .char-btn::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--amber);transform:scaleX(0);transition:transform .18s;}
 .char-btn:hover{border-color:var(--border-bright);color:var(--text);background:var(--surface2);}
 .char-btn:hover::after{transform:scaleX(1);}
@@ -324,6 +324,13 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
     </span>
   </div>
 
+  <!-- Ascension row -->
+  <div class="act-row" style="margin-bottom:1rem">
+    <span class="act-label">ascension</span>
+    <span id="ascBtnRow" style="display:flex;gap:4px;flex-wrap:wrap"></span>
+    <span class="act-advice" id="ascAdvice" style="margin-left:8px"></span>
+  </div>
+
   <div class="health-row">
     <span class="health-label">HP</span>
     <div class="health-inputs">
@@ -368,6 +375,8 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
     <!-- Middle: deck balance + priorities -->
     <div>
       <div class="panel-title">deck analysis</div>
+      <!-- Threshold check (damage/block vs act requirements) -->
+      <div id="thresholdCheck"></div>
       <!-- Deck health (merged axes + balance) -->
       <div id="deckHealth"></div>
       <!-- Engine tracker -->
@@ -1214,6 +1223,525 @@ const ACT_ADVICE = [
 ];
 
 // Confirmed starting decks (STS2 Early Access)
+// ============================================================
+// CARD TIER RATINGS (from v0.103.2 research dossier)
+// Tiers: S (must pick), A (strong), B (situational), C (weak), D (trap)
+// Format: { cardName: {tier, note} }
+// note is optional - shown for context-dependent picks
+// ============================================================
+const CARD_TIERS = {
+  ironclad: {
+    // S-tier
+    'Offering':{tier:'S', note:'Best Ironclad card - 70% pick rate'},
+    'Feed':{tier:'S', note:'Permanent Max HP scaling on kill'},
+    'Hellraiser':{tier:'S', note:'Drawn Strikes auto-play - enables infinite'},
+    'Corruption':{tier:'S', note:'Skills cost 0 - core Exhaust engine'},
+    'Bloodletting':{tier:'S', note:'Best 0-cost energy generator'},
+    'Pyre':{tier:'S', note:'Permanent +1 energy/turn - new in v0.103'},
+    'Battle Trance':{tier:'S', note:'Elite draw - forbidden in Hellraiser infinite'},
+    // A-tier
+    'Impervious':{tier:'A', note:'30 Block panic button'},
+    'Crimson Mantle':{tier:'A', note:'Reliable self-damage Block trigger'},
+    'Taunt':{tier:'A', note:'7 Block + Vuln - top common pick'},
+    'Brand':{tier:'A', note:'Permanent Strength + Exhaust + HP loss'},
+    'Pommel Strike':{tier:'A', note:'Best common - damage + draw, infinite enabler'},
+    'Inflame':{tier:'A', note:'Cheap permanent +2 Strength'},
+    'Colossus':{tier:'A', note:'Now Uncommon - 41% pick rate'},
+    'Shrug It Off':{tier:'A', note:'8 Block + draw - universal common'},
+    'Burning Pact':{tier:'A', note:'Exhaust trigger + draw 2'},
+    'Cruelty':{tier:'A', note:'Vuln enemies take +25%/+50% - run-defining'},
+    'Thrash':{tier:'A', note:'Scales with Exhausted Attacks'},
+    'Cascade':{tier:'A', note:'Plays top X - explosive combo'},
+    'Fiend Fire':{tier:'A', note:'Nuke finisher in Exhaust decks'},
+    'Demon Form':{tier:'A', note:'S in pure Strength but out-competed by Rupture'},
+    'Not Yet':{tier:'A', note:'New v0.103.2 - only Ironclad heal card'},
+    'Rupture':{tier:'A', note:'Cheaper than Demon Form, scales faster'},
+    // B-tier
+    'Stomp':{tier:'B'}, 'Flame Barrier':{tier:'B'}, 'Conflagration':{tier:'B'},
+    'Expect a Fight':{tier:'B', note:'Reworked in v0.103'}, 'Dismantle':{tier:'B'},
+    'Rage':{tier:'B'}, 'Uppercut':{tier:'B'}, 'One-Two Punch':{tier:'B'},
+    'Feel No Pain':{tier:'B', note:'A-tier in Exhaust decks only'},
+    'Dark Embrace':{tier:'B', note:'A-tier in Exhaust decks only'},
+    'Whirlwind':{tier:'B'}, 'Pillage':{tier:'B'}, 'Spite':{tier:'B', note:'Reworked in v0.103'},
+    'Stoke':{tier:'B', note:'Reworked in v0.103'}, 'Barricade':{tier:'B', note:'A only with Body Slam/Entrench'},
+    "Pact's End":{tier:'B'}, 'Tear Asunder':{tier:'B'}, 'Second Wind':{tier:'B'},
+    'Aggression':{tier:'B'}, 'Unmovable':{tier:'B'}, 'Setup Strike':{tier:'B'},
+    'Blood Wall':{tier:'B'}, 'Twin Strike':{tier:'B'}, 'Fight Me!':{tier:'B', note:'Also buffs enemy'},
+    'Headbutt':{tier:'B'}, 'Anger':{tier:'B'}, 'Mangle':{tier:'B'},
+    'Howl from Beyond':{tier:'B'}, 'Infernal Blade':{tier:'B'},
+    'Hemokinesis':{tier:'B'}, 'Inferno':{tier:'B', note:'A-tier in Bloodletting only'},
+    'Stone Armor':{tier:'B'}, 'Vicious':{tier:'B'}, 'Evil Eye':{tier:'B'},
+    'Armaments':{tier:'B'}, 'Juggernaut':{tier:'B', note:'A-tier with Barricade'},
+    'Ashen Strike':{tier:'B', note:'A-tier in Exhaust decks'},
+    'Perfected Strike':{tier:'B', note:'Falls off without Inflame support'},
+    'Break':{tier:'B'}, 'Dominate':{tier:'B', note:'Reworked in v0.103'},
+    'Rampage':{tier:'B'}, 'Thunderclap':{tier:'B'}, 'Breakthrough':{tier:'B'},
+    'Drum of Battle':{tier:'B'}, 'Forgotten Ritual':{tier:'B', note:'A in Exhaust'},
+    'Bludgeon':{tier:'B'}, 'Tank':{tier:'B', note:'Co-op only'},
+    'Primal Force':{tier:'B'}, 'Clash':{tier:'B'}, 'Entrench':{tier:'B'},
+    'Dual Wield':{tier:'B'}, 'Demonic Shield':{tier:'B', note:'Co-op'},
+    // C/D traps
+    'Body Slam':{tier:'C', note:'8% pick rate - trap outside Barricade decks'},
+    'Juggling':{tier:'C'}, 'Iron Wave':{tier:'C'}, 'Tremble':{tier:'C'},
+    'Cinder':{tier:'C'}, 'Havoc':{tier:'C', note:'4% pick rate - usually wasted'},
+    'Sword Boomerang':{tier:'C'}, 'True Grit':{tier:'B', note:'Random Exhaust adds variance'},
+    'Bully':{tier:'C'}, 'Stampede':{tier:'C'},
+    'Molten Fist':{tier:'B', note:'A with Vuln stacking'}
+  },
+  silent: {
+    // S-tier
+    'Adrenaline':{tier:'S', note:'Arguably best card in the game'},
+    'Wraith Form':{tier:'S', note:'Game-winning Intangible'},
+    'Afterimage':{tier:'S', note:'Best Silent Block - triggers off Sly'},
+    'Well-Laid Plans':{tier:'S', note:'Free Retain 1-2'},
+    'Speedster':{tier:'S', note:'Innate on upgrade - buffed'},
+    'Tools of the Trade':{tier:'S', note:'Core Sly engine'},
+    'Acrobatics':{tier:'S', note:'Now Uncommon - elite draw'},
+    'Piercing Wail':{tier:'S', note:'6/8 Str drop AoE - Common pricing error'},
+    'Calculated Gamble':{tier:'S', note:'Best Sly activator'},
+    'Footwork':{tier:'S', note:'+2 Dex - permanent Block scaling'},
+    'Burst':{tier:'S', note:'Next Skill played extra time'},
+    'Serpent Form':{tier:'S', note:'Buffed to 4/6 damage - Poison core'},
+    // A-tier
+    'Bullet Time':{tier:'A', note:'Free cards but no draw - burst turn'},
+    'Abrasive':{tier:'A', note:'+1 Dex + Thorns on Sly'},
+    'Backflip':{tier:'A'}, 'Fan of Knives':{tier:'A', note:'Shivs hit all - Shiv decks'},
+    'Malaise':{tier:'A'}, 'The Hunt':{tier:'A', note:'Extra reward on kill'},
+    'Pinpoint':{tier:'A', note:'-1 cost per Skill'},
+    'Echoing Slash':{tier:'A'}, 'Hidden Daggers':{tier:'A', note:'Silent sleeper pick'},
+    'Knife Trap':{tier:'A', note:'Shiv Exhaust nuke'},
+    'Blur':{tier:'A'}, 'Expose':{tier:'A'}, 'Noxious Fumes':{tier:'A'},
+    'Envenom':{tier:'A', note:'Poison on every Attack'},
+    'Accuracy':{tier:'A', note:'+4/6 to all Shivs'}, 'Master Planner':{tier:'A', note:'Makes Skills Sly'},
+    'Dagger Throw':{tier:'A', note:'Much better now with Sly'},
+    'Hand Trick':{tier:'A'}, 'Accelerant':{tier:'A', note:'Poison no longer decreases'},
+    'Bouncing Flask':{tier:'A'}, 'Corrosive Wave':{tier:'A', note:'Draw = Poison AoE'},
+    'Deadly Poison':{tier:'A'}, 'Infinite Blades':{tier:'A', note:'Shiv generator'},
+    'Bubble Bubble':{tier:'A', note:'Doubles Poison'},
+    // B-tier
+    'Tactician':{tier:'B', note:'S-tier with Sly, unplayable raw'},
+    'Reflex':{tier:'B', note:'S-tier with Sly, unplayable raw'},
+    'Prepared':{tier:'B', note:'Reworked'}, 'Flick-Flack':{tier:'B'},
+    'Ricochet':{tier:'B'}, 'Untouchable':{tier:'B', note:'Nerfed but still premium'},
+    'Blade Dance':{tier:'B', note:'Now Exhausts - nerf from StS1'},
+    'Cloak and Dagger':{tier:'B'}, 'Strangle':{tier:'B'},
+    'Assassinate':{tier:'B'}, 'Precise Cut':{tier:'B'}, 'Finisher':{tier:'B'},
+    'Shadow Step':{tier:'B'}, 'Leg Sweep':{tier:'B'}, 'Tracking':{tier:'B'},
+    'Escape Plan':{tier:'B'}, 'Haze':{tier:'B'}, 'Mirage':{tier:'B'},
+    'Nightmare':{tier:'B'}, 'Blade of Ink':{tier:'B', note:'Reworked - Inky Shivs'},
+    'Follow Through':{tier:'B'}, 'Memento Mori':{tier:'B', note:'Buffed'},
+    'Dash':{tier:'B'}, 'Predator':{tier:'B'}, 'Anticipate':{tier:'B'},
+    'Up My Sleeve':{tier:'B'}, 'Skewer':{tier:'B', note:'Buffed'},
+    'Poisoned Stab':{tier:'B'}, 'Leading Strike':{tier:'B'},
+    'Sucker Punch':{tier:'B'}, 'Dodge and Roll':{tier:'B'}, 'Deflect':{tier:'B'},
+    'Outbreak':{tier:'B'}, 'Phantom Blades':{tier:'B', note:'A in Shiv decks'},
+    'Storm of Steel':{tier:'B'}, 'Flechettes':{tier:'B'},
+    'Tools of the Trade':{tier:'S'}, 'Sneaky':{tier:'B', note:'Co-op'},
+    'Expertise':{tier:'B'}, 'Flanking':{tier:'B', note:'Co-op'},
+    'Shadowmeld':{tier:'B'}, 'Grand Finale':{tier:'B', note:'S in dedicated Finale decks'},
+    'Suppress':{tier:'A'}, 'Backstab':{tier:'B'}, 'Slice':{tier:'C'},
+    'Murder':{tier:'B'}, 'Caltrops':{tier:'B'}, 'Distraction':{tier:'B'},
+    'Outmaneuver':{tier:'B'},
+    // C/D
+    'Snakebite':{tier:'D', note:'Worst card in the game - Retain clogs hand'}
+  },
+  defect: {
+    // S-tier
+    'Defragment':{tier:'S', note:'Permanent Focus - pick every copy'},
+    'Echo Form':{tier:'S', note:'Doubles first card - Ethereal cost'},
+    'Glacier':{tier:'S', note:'Best Block value in the game'},
+    'Capacitor':{tier:'S', note:'+2 Orb Slots'},
+    'Hologram':{tier:'S', note:'Upgrade removes Exhaust'},
+    'Biased Cognition':{tier:'S', note:'Ancient - fastest Focus spike'},
+    'Biased Cog':{tier:'S', note:'Ancient - fastest Focus spike'},
+    'Boot Sequence':{tier:'S', note:'Innate 10 Block - free turn 1'},
+    'Coolheaded':{tier:'S', note:'Channel Frost + draw'},
+    'Buffer':{tier:'S', note:'Prevents next HP loss'},
+    'Creative AI':{tier:'S', note:'Random Power/turn'},
+    'Synchronize':{tier:'S'}, 'Modded':{tier:'S', note:'+1 Orb Slot + draw'},
+    // A-tier
+    'All for One':{tier:'A', note:'Core Claw combo'},
+    'Supercritical':{tier:'A', note:'+4 Energy + Exhaust'},
+    'Hyperbeam':{tier:'A', note:'26 AoE - loses Focus'},
+    'Genetic Algorithm':{tier:'A', note:'Permanent Block scaling'},
+    'Shatter':{tier:'A', note:'Evokes all Orbs'},
+    'Ball Lightning':{tier:'A'}, 'Cold Snap':{tier:'A'}, 'Lightning Rod':{tier:'A'},
+    'Compile Driver':{tier:'A', note:'Up to 4 draws with Glass'},
+    'Voltaic':{tier:'A', note:'Exhaust unless upgraded'},
+    'Thunder':{tier:'A'}, 'Tesla Coil':{tier:'A'}, 'Darkness':{tier:'A'},
+    'Hotfix':{tier:'A', note:'Now Exhausts unless upgraded'},
+    'Hot Fix':{tier:'A', note:'Now Exhausts unless upgraded'},
+    'Focused Strike':{tier:'A'}, 'Quadcast':{tier:'A'}, 'Dualcast':{tier:'A'},
+    'Dual Cast':{tier:'A'}, 'Rocket Punch':{tier:'A', note:'Buffed - cost reduction persists'},
+    'Signal Boost':{tier:'A', note:'Persists across turns'},
+    'Ignition':{tier:'A', note:'Co-op star'},
+    // B-tier
+    'Chill':{tier:'B'}, 'Charge Battery':{tier:'B'}, 'Claw':{tier:'B', note:'A in Claw deck'},
+    'FTL':{tier:'B'}, 'Scrape':{tier:'B'}, 'Skim':{tier:'B'}, 'Feral':{tier:'B'},
+    'Machine Learning':{tier:'B'}, 'Consuming Shadow':{tier:'B'},
+    'Glasswork':{tier:'B'}, 'Shadow Shield':{tier:'B'}, 'Multi-Cast':{tier:'B', note:'A with Dark'},
+    'Energy Surge':{tier:'B'}, 'TURBO':{tier:'B'}, 'Turbo':{tier:'B'},
+    'Fusion':{tier:'B'}, 'Iteration':{tier:'B'}, 'Fight Through':{tier:'B'},
+    'Gunk Up':{tier:'B'}, 'Overclock':{tier:'B'}, 'Spinner':{tier:'B'},
+    'Double Energy':{tier:'B'}, 'Tempest':{tier:'B', note:'Buffed - no longer Exhausts'},
+    'Reboot':{tier:'B'}, 'Rip and Tear':{tier:'B'}, 'Leap':{tier:'B'},
+    'Null':{tier:'B'}, 'Sweeping Beam':{tier:'B'}, 'Helix Drill':{tier:'B'},
+    'Sunder':{tier:'B'}, 'Subroutine':{tier:'B'}, 'Storm':{tier:'B'},
+    'Meteor Strike':{tier:'B', note:'Trap in Frost Turtle'},
+    'Rainbow':{tier:'B'}, 'Uproar':{tier:'B', note:'S in Uproar decks, C elsewhere'},
+    'Flak Cannon':{tier:'B'}, 'Zap':{tier:'B'}, 'Smokestack':{tier:'B'},
+    'Loop':{tier:'A', note:'Core Orb engine'}, 'Barrage':{tier:'B'},
+    'White Noise':{tier:'B'}, 'Adaptive Strike':{tier:'B'},
+    'Coolant':{tier:'A'}, 'Trash to Treasure':{tier:'B'},
+    'Ice Lance':{tier:'A'}, 'Hailstorm':{tier:'A'}, 'Chaos':{tier:'B'},
+    'Go for the Eyes':{tier:'B'}, 'Beam Cell':{tier:'B'}, 'Momentum Strike':{tier:'B'},
+    'Flash of Steel':{tier:'B'}, 'BoostAway':{tier:'C'}, 'Boost Away':{tier:'C'},
+    'Bulk Up':{tier:'B'}, 'Compact':{tier:'B'}, 'Synthesis':{tier:'C'},
+    'Rebound':{tier:'B'}, 'Stack':{tier:'B'}, 'Hello World':{tier:'B'},
+    'Reinforce':{tier:'B'}, 'Rip the Ether':{tier:'B'}
+  },
+  necrobinder: {
+    // S-tier
+    'Neurosurge':{tier:'S', note:'Free energy + cards at HP cost'},
+    'Friendship':{tier:'S', note:'Universal - +1 energy, Osty unaffected'},
+    'Dirge':{tier:'S', note:'Defines Osty AND Soul builds'},
+    // A-tier
+    'Hang':{tier:'A'}, 'Eradicate':{tier:'A', note:'Retain + X damage'},
+    'Borrowed Time':{tier:'A', note:'Reworked - +4/6 energy'},
+    'Necro Mastery':{tier:'A', note:'Osty core'},
+    'No Escape':{tier:'A', note:'Exponential Doom'},
+    'Glimpse Beyond':{tier:'A', note:'Ethereal draw 3'},
+    'Squeeze':{tier:'A', note:'Osty nuke'}, 'Undeath':{tier:'A', note:'0-cost Block engine'},
+    "Banshee's Cry":{tier:'A', note:'Ethereal AoE'},
+    'Fetch':{tier:'A', note:'Osty attack + draw'},
+    'Oblivion':{tier:'A'}, 'Spirit of Ash':{tier:'A', note:'Ethereal Block'},
+    'Protector':{tier:'A', note:'Ancient'}, 'Transfigure':{tier:'A', note:'Adds Replay'},
+    'The Scythe':{tier:'A', note:'Permanent +3 damage'},
+    'Capture Spirit':{tier:'A', note:'3 Souls + HP'},
+    'Captured Spirit':{tier:'A', note:'3 Souls + HP'},
+    'End of Days':{tier:'A', note:'Executes Doomed enemies'},
+    // B-tier
+    'Demesne':{tier:'B', note:'Ethereal Power'}, 'Deathbringer':{tier:'B'},
+    'Lethality':{tier:'B'}, 'Flatten':{tier:'B'}, 'Reanimate':{tier:'B'},
+    'High Five':{tier:'B'}, "Death's Door":{tier:'B'}, 'Misery':{tier:'B'},
+    'Grave Warden':{tier:'B'}, 'Haunt':{tier:'B', note:'A in Soul decks'},
+    'Calcify':{tier:'B'}, 'Debilitate':{tier:'B'}, 'Negative Pulse':{tier:'B'},
+    "Time's Up":{tier:'B'}, 'Call of the Void':{tier:'B'},
+    'Scourge':{tier:'B'}, 'Rattle':{tier:'B', note:'A in Osty decks'},
+    'Sleight of Flesh':{tier:'B'}, 'Bone Shards':{tier:'B', note:'Kills Osty!'},
+    'Veilpiercer':{tier:'B'}, 'Melancholy':{tier:'B'}, 'Soul Storm':{tier:'B', note:'A in Soul decks'},
+    'Reaper Form':{tier:'B'}, 'Forbidden Grimoire':{tier:'B', note:'Ancient'},
+    'Shared Fate':{tier:'B'}, 'Dredge':{tier:'B'}, 'Seance':{tier:'B', note:'Nerfed to 1E'},
+    'Pull from Below':{tier:'B'}, 'Cleanse':{tier:'B'}, 'Parse':{tier:'B'},
+    'Wisp':{tier:'B'}, 'Bury':{tier:'B'}, 'Afterlife':{tier:'B'},
+    'Countdown':{tier:'B'}, 'Danse Macabre':{tier:'B'}, 'Severance':{tier:'B'},
+    'Devour Life':{tier:'B', note:'A in Soul decks'}, 'Defile':{tier:'B'},
+    'Defy':{tier:'B'}, 'Pull Aggro':{tier:'B'}, 'Putrefy':{tier:'B'},
+    'Graveblast':{tier:'B'}, 'Grave Blast':{tier:'B'},
+    'Fear':{tier:'B'}, 'Reave':{tier:'B'}, 'Drain Power':{tier:'B'},
+    'Invoke':{tier:'B'}, 'Bodyguard':{tier:'B'}, 'Snap':{tier:'B', note:'Free Retain'},
+    'Unleash':{tier:'B'}, 'Reap':{tier:'B', note:'Retain + 27 damage'},
+    'Sentry Mode':{tier:'B'}, 'Spur':{tier:'B'}, 'Blight Strike':{tier:'B'},
+    'Pagestorm':{tier:'B'}, 'Page Storm':{tier:'B'}, "Sic 'Em":{tier:'B'},
+    'Right Hand Hand':{tier:'B'}, 'Sculpting Strike':{tier:'B'}, 'Sow':{tier:'B'},
+    'Poke':{tier:'B'}, 'Death March':{tier:'B'}, 'Durge':{tier:'S', note:'Defines Osty AND Soul'},
+    'Legion of Bone':{tier:'B'}, 'Shroud':{tier:'B'}, 'Delay':{tier:'B'},
+    'Enfeebling Touch':{tier:'D', note:'Trap pick'},
+    'Sacrifice':{tier:'D', note:'Trap pick'}
+  },
+  regent: {
+    // S-tier
+    'Comet':{tier:'S', note:'33 dmg + debuffs - nerf expected'},
+    'Reflect':{tier:'S', note:'17 Block + reflects'},
+    'The Sealed Throne':{tier:'S', note:'Ancient - Star per play'},
+    'Big Bang':{tier:'S', note:'Near-Adrenaline - all-in-one'},
+    'Meteor Shower':{tier:'S', note:'Upgraded Falling Star'},
+    'Convergence':{tier:'S', note:'Retain + refund energy'},
+    // A-tier
+    'Void Form':{tier:'A', note:'Act 3 only - never Act 1'},
+    'Bulwark':{tier:'A', note:'13 Block + Forge 10'},
+    'Astral Pulse':{tier:'A', note:'0E/3 Stars AoE 14'},
+    'Child of the Stars':{tier:'A', note:'Stars to Block'},
+    'Make It So':{tier:'A'}, 'Make it So':{tier:'A'},
+    'The Smith':{tier:'A', note:'Forge 30'},
+    'GUARDS!!!':{tier:'A', note:'Minion transformation'},
+    'Guards':{tier:'A', note:'Minion transformation'},
+    'Decisions Decisions':{tier:'A', note:'Draw 3 + triple skill'},
+    'CHARGE!!':{tier:'A'}, 'Particle Wall':{tier:'A', note:'Returns to hand'},
+    'Glow':{tier:'A', note:'Nerfed - no longer draws 2 immediately'},
+    'BEGONE!':{tier:'A'}, 'Guiding Star':{tier:'A', note:'Buffed - draws 2 immediately'},
+    'Venerate':{tier:'A'},
+    // B-tier
+    'Dying Star':{tier:'B'}, 'Gamma Blast':{tier:'B'}, 'Kingly Punch':{tier:'B'},
+    'Royal Gamble':{tier:'B'}, 'Royal Gambit':{tier:'B'}, 'Hidden Cache':{tier:'B'},
+    'Alignment':{tier:'B', note:'S in Infinite decks'}, 'Tyranny':{tier:'B'},
+    'Orbit':{tier:'B'}, 'Gather Light':{tier:'B'},
+    'Genesis':{tier:'A', note:'Star engine - 2 Stars/turn'},
+    'Pale Blue Dot':{tier:'B'}, 'Black Hole':{tier:'B'}, 'Royalties':{tier:'B'},
+    'Falling Star':{tier:'B'}, 'Cloak of Stars':{tier:'B'}, 'Know Thy Place':{tier:'B'},
+    'I Am Invincible':{tier:'B'}, 'Radiate':{tier:'B', note:'S in Starfall'},
+    'Photon Cut':{tier:'B'}, 'Heavenly Drill':{tier:'B'}, 'Shining Strike':{tier:'B'},
+    'Bombardment':{tier:'B'}, 'Glitterstream':{tier:'B'}, 'Kingly Kick':{tier:'B'},
+    'Glimmer':{tier:'B'}, 'Patter':{tier:'B'}, 'Beat into Shape':{tier:'B'},
+    'Stardust':{tier:'B'}, 'Crush Under':{tier:'B'}, 'Cosmic Indifference':{tier:'B'},
+    'Celestial Might':{tier:'B'}, 'Manifest Authority':{tier:'B'},
+    'Spectrum Shift':{tier:'B'}, 'Pillar of Creation':{tier:'B'}, 'Solar Strike':{tier:'B'},
+    'Monarch\'s Gaze':{tier:'B'}, "Monarch's Gaze":{tier:'B'},
+    'Parry':{tier:'B'}, 'Prophesize':{tier:'A', note:'Draw 6'}, 'Quasar':{tier:'B'},
+    'Resonance':{tier:'B'}, 'Hegemony':{tier:'B'}, 'Furnace':{tier:'A', note:'Passive Forge'},
+    'Supermassive':{tier:'B'}, 'Terraforming':{tier:'B'}, 'Largesse':{tier:'B', note:'Co-op'},
+    'Lunar Blast':{tier:'B'}, 'Monologue':{tier:'B'}, 'Seven Stars':{tier:'A', note:'S with Sealed Throne'},
+    'Neutron Aegis':{tier:'B'}, 'Crescent Spear':{tier:'C'},
+    'Devastate':{tier:'C', note:'Trap - needs generation'},
+    // Traps
+    'Wrought in War':{tier:'C'},
+    'Hammer Time':{tier:'C'}, 'Conqueror':{tier:'C', note:'D without Retain chain'},
+    'Heirloom Hammer':{tier:'C', note:'Needs Colorless pool'},
+    'Refine Blade':{tier:'C'}, 'Arsenal':{tier:'B', note:'Reworked - any creation'},
+    'Bundle of Joy':{tier:'C'}, 'Summon Forth':{tier:'B', note:'A in Forge decks'},
+    'Sword Sage':{tier:'C', note:'Buggy Blade interactions'},
+    'Sword Stage':{tier:'C'}, 'Foregone Conclusion':{tier:'B'},
+    'Crash Landing':{tier:'B'}
+  },
+  colorless: {
+    // Generally good
+    'Discovery':{tier:'A', note:'Choose 1 of 3 free cards'},
+    'Master of Strategy':{tier:'A', note:'Draw 3 exhaust'},
+    'Apotheosis':{tier:'S', note:'Upgrade ALL cards - Ancient'},
+    'Apparition':{tier:'A', note:'1 Intangible - Ancient'},
+    'Brightest Flame':{tier:'S', note:'Burst turn'},
+    'Wish':{tier:'A', note:'Universal tutor'},
+    'Hand of Greed':{tier:'B'}, 'Bandage Up':{tier:'B'},
+    'Panic Button':{tier:'B'}, 'Bolas':{tier:'B'}, 'Neow\'s Fury':{tier:'A'},
+    "Neow's Fury":{tier:'A'}, 'Secret Technique':{tier:'A'}, 'Secret Weapon':{tier:'A'},
+    'Thinking Ahead':{tier:'A'}, 'Finesse':{tier:'B'}, 'Impatience':{tier:'B'},
+    'Mind Blast':{tier:'B'}, 'Dramatic Entrance':{tier:'B'},
+    'Transmutation':{tier:'B'}, 'Flash of Steel':{tier:'B'}, 'Ritual Dagger':{tier:'B'},
+    'Swift Strike':{tier:'B'}, 'Prepared':{tier:'B'}, 'Fame and Fortune':{tier:'B'},
+    'Violence':{tier:'B'}, 'The Bomb':{tier:'B'}, 'Mayhem':{tier:'A'},
+    'Scrawl':{tier:'A'}, 'Fisticuffs':{tier:'B'}, 'Chrysalis':{tier:'B'},
+    'Metamorphosis':{tier:'B'}, 'Maul':{tier:'B', note:'Ancient scaling'},
+    'Relax':{tier:'A', note:'Huge tempo'}, 'Whistle':{tier:'A', note:'33 + Stun'},
+    'Insight':{tier:'A'}, 'Good Instincts':{tier:'B'}, 'Purity':{tier:'B'},
+    'Bite':{tier:'B'}, 'Blind':{tier:'B'}, 'Deep Breath':{tier:'B'},
+    'J.A.X.':{tier:'B'}, 'Madness':{tier:'C'}, 'Miracle':{tier:'A'},
+    'Ring of Fire':{tier:'B'}, 'Safety':{tier:'A'}, 'Chrysalis':{tier:'B'},
+    'The Hoard':{tier:'B'}, 'Trip':{tier:'B'}, 'Omniscience':{tier:'S'},
+    'Enlightenment':{tier:'A'}, 'Automation':{tier:'B'}, 'Believe in You':{tier:'B'},
+    'Catastrophe':{tier:'A'}, 'Coordinate':{tier:'B'}, 'Dark Shackles':{tier:'B'},
+    'Equilibrium':{tier:'B'}, 'Fasten':{tier:'B'}, 'Gang Up':{tier:'B', note:'Co-op'},
+    'Huddle Up':{tier:'B', note:'Co-op'}, 'Intercept':{tier:'B', note:'Co-op'},
+    'Jack of All Trades':{tier:'B'}, 'Lift':{tier:'B', note:'Co-op'},
+    'Panache':{tier:'A', note:'Great in Claw'}, 'Prep Time':{tier:'B'},
+    'Production':{tier:'A', note:'+2 Energy exhaust'}, 'Prolong':{tier:'B'},
+    'Prowess':{tier:'B'}, 'Restlessness':{tier:'B'}, 'Seeker Strike':{tier:'B'},
+    'Shockwave':{tier:'A', note:'3 Weak + Vuln AoE'}, 'Splash':{tier:'B'},
+    'Stratagem':{tier:'B'}, 'Tag Team':{tier:'B', note:'Co-op'},
+    'Thrumming Hatchet':{tier:'B'}, 'Ultimate Defend':{tier:'B'},
+    'Ultimate Strike':{tier:'B'}, 'Volley':{tier:'B'},
+    'Alchemize':{tier:'A', note:'Random potion'}, 'Anointed':{tier:'A'},
+    'Beacon of Hope':{tier:'B', note:'Co-op'}, 'Beat Down':{tier:'A'},
+    'Calamity':{tier:'B'}, 'Entropy':{tier:'B'}, 'Eternal Armor':{tier:'A'},
+    'Gold Axe':{tier:'A'}, 'Hidden Gem':{tier:'A', note:'Reworked v0.103'},
+    'Jackpot':{tier:'A'}, 'Knockdown':{tier:'B', note:'Co-op'}, 'Mimic':{tier:'B', note:'Co-op'},
+    'Nostalgia':{tier:'B'}, 'Rally':{tier:'B', note:'Co-op'}, 'Rend':{tier:'B'},
+    'Rolling Boulder':{tier:'B'}, 'Salvo':{tier:'A'}, 'The Gambit':{tier:'C', note:'Die on unblocked'},
+    'Byrd Swoop':{tier:'B'}, 'Exterminate':{tier:'B'}, 'Feeding Frenzy':{tier:'B'},
+    'Mad Science':{tier:'B'}, 'Peck':{tier:'C'}, 'Squash':{tier:'B'}, 'Toric Toughness':{tier:'B'}
+  }
+};
+
+// ============================================================
+// ASCENSION DATA (StS2 uses 10 levels, not 20)
+// ============================================================
+const ASCENSION_DATA = [
+  {level:0, name:'Base',            modifier:'Normal difficulty',                                                       hpMult:1.00, dmgAdd:0},
+  {level:1, name:'Swarming Elites', modifier:'Elites spawn more often',                                                  hpMult:1.00, dmgAdd:0},
+  {level:2, name:'Weary Traveler',  modifier:'Ancients heal only 80% of missing HP',                                     hpMult:1.00, dmgAdd:0},
+  {level:3, name:'Poverty',         modifier:'Enemies/chests drop 25% less gold',                                        hpMult:1.00, dmgAdd:0},
+  {level:4, name:'Tight Belt',      modifier:'-1 potion slot at run start',                                              hpMult:1.00, dmgAdd:0},
+  {level:5, name:"Ascender's Bane", modifier:"Start with Ascender's Bane curse",                                         hpMult:1.00, dmgAdd:0},
+  {level:6, name:'Inflation',       modifier:'Merchant removal starts at 100g, +50g each use (replaced Gloom in v0.102)',hpMult:1.00, dmgAdd:0},
+  {level:7, name:'Scarcity',        modifier:'Rare + Upgraded cards in rewards 50% less often',                          hpMult:1.00, dmgAdd:0},
+  {level:8, name:'Tough Enemies',   modifier:'All enemies gain +3-8% HP',                                                hpMult:1.05, dmgAdd:0},
+  {level:9, name:'Deadly Enemies',  modifier:'All enemies deal +1-3 more damage per attack',                             hpMult:1.05, dmgAdd:2},
+  {level:10,name:'Double Boss',     modifier:'Act 3 ends with two bosses back-to-back, no rest',                         hpMult:1.05, dmgAdd:2}
+];
+
+// ============================================================
+// ACT THRESHOLDS (damage and block targets per act)
+// Community heuristics from sts2front, switchbladegaming, KeenGamer, Phrasemaker
+// ============================================================
+const ACT_THRESHOLDS = {
+  1: {
+    name: 'Act 1 — Ascent',
+    normal:  {dmg:'8-15',  block:'5-10',  note:'Kill normals in 2-3 turns'},
+    elite:   {dmg:'20-30', block:'10-18', note:''},
+    boss:    {dmg:'35-50', block:'15-25', note:'Ceremonial needs 100+ HP swung by turn 3-4; Vantom spikes turn 3'},
+    dmgTarget: 12,    // rough per-turn damage deck should output
+    blockTarget: 8,   // rough per-turn block deck should output
+    killWindow: 4,    // turns to kill a boss
+  },
+  2: {
+    name: 'Act 2 — City',
+    normal:  {dmg:'15-25', block:'10-18', note:''},
+    elite:   {dmg:'30-45', block:'15-25', note:''},
+    boss:    {dmg:'50-70', block:'20-35', note:'Knowledge Demon 60+; Crab ~50 across two bodies; Insatiable is timer-capped'},
+    dmgTarget: 22,
+    blockTarget: 18,
+    killWindow: 5,
+  },
+  3: {
+    name: 'Act 3 — Beyond',
+    normal:  {dmg:'20-35', block:'15-25', note:''},
+    elite:   {dmg:'45-60', block:'20-35', note:''},
+    boss:    {dmg:'60-90', block:'30-45', note:'Doormaker wants 80+ on pressure turns; Queen needs 50 burst on Torch Head'},
+    dmgTarget: 35,
+    blockTarget: 28,
+    killWindow: 7,
+  }
+};
+
+// Returns effective target given ascension adjustments
+function getActTargets(act, ascLevel) {
+  const base = ACT_THRESHOLDS[act];
+  if (!base) return null;
+  const asc = ASCENSION_DATA[ascLevel] || ASCENSION_DATA[0];
+  const hpMult = asc.hpMult || 1.0;
+  const dmgAdd = asc.dmgAdd || 0;
+  return {
+    ...base,
+    dmgTarget: Math.round(base.dmgTarget * hpMult),
+    blockTarget: base.blockTarget + dmgAdd,
+    enemyHpMult: hpMult,
+    extraEnemyDmg: dmgAdd
+  };
+}
+
+// ============================================================
+// ENHANCED BOSS ADAPTATION MATRIX (from research dossier)
+// punishes: archetypes/card-types that lose
+// rewards:  archetypes/card-types that win
+// ============================================================
+const BOSS_MATRIX = {
+  // Act 1
+  'Ceremonial Beast': {
+    punishes:['slow scaling','multi-play combos (Ringing phase 2)'],
+    rewards: ['burst windows','Strength stacking','Sovereign Blade retain','Body Slam finishers'],
+    difficulty: 'Easiest Act 1 boss',
+    killWindow: 'Sub-150 HP by turn 3-4 or Plow spirals'
+  },
+  'Kin Priest': {
+    punishes:['single-target only','no AoE'],
+    rewards: ['AoE (Whirlwind, Shockwave, Seven Stars)','Poison (ticks all 3)','hard burst ignoring Followers'],
+    difficulty: 'Medium',
+    killWindow: '≤5 turns before Dark Ritual spiral'
+  },
+  'Vantom': {
+    punishes:['heavy single-hit decks (Slippery wastes big swings)','slow decks (Strength ramp + Wound pollution)','entering below 40 HP'],
+    rewards: ['multi-hit (Shivs, Anger, Twin Strike, Pommel spam)','Weak application','fast decks'],
+    difficulty: 'Hardest Act 1',
+    killWindow: '≤4 cycles. SKIP ALL ELITES if you\'re below 40 HP'
+  },
+  'Lagavulin Matriarch': {
+    punishes:['Strength-based decks','Dex-based decks','raw damage'],
+    rewards: ['Poison, Doom, Shivs (bypass Str/Dex debuffs)','multi-hit to strip Plating'],
+    difficulty: 'Hard',
+    killWindow: '≤5 turns after wake'
+  },
+  'Soul Fysh': {
+    punishes:['pure burst (wasted in Intangible)','block-only (Calls bypass armor)','heavy decks that can\'t cycle'],
+    rewards: ['Silent Sly-discard hands','Exhaust to nuke Calls','Discard/cycle engines'],
+    difficulty: 'Medium-Hard',
+    killWindow: '≤6 - Call flood accelerates'
+  },
+  'Waterfall Giant': {
+    punishes:['kill-and-done decks with no final-turn cushion'],
+    rewards: ['25+ block buffer on kill turn','Poison/Doom to finish during invuln'],
+    difficulty: 'Medium',
+    killWindow: '≤4-5'
+  },
+  // Act 2
+  'Knowledge Demon': {
+    punishes:['slow decks','draw-heavy decks','wide decks','4+ cards-per-turn decks'],
+    rewards: ['burst that ignores horizon','Demon Form turn','No Escape execution','pre-forged Sovereign Blade','Seven Stars nuke','Poison (ticks regardless of debuffs)'],
+    difficulty: 'Biggest Act 2 wall',
+    killWindow: '≤6-8 before debuff floor'
+  },
+  'Kaiser Crab': {
+    punishes:['low single-target damage','Ironclad forced facing changes'],
+    rewards: ['balanced AoE','staggered single-target','Silent/Defect high-tempo'],
+    difficulty: 'Medium',
+    killWindow: 'Rush Crusher first, laser turn telegraphed'
+  },
+  'The Insatiable': {
+    punishes:['pure Poison (Sandpit resolves before tick)','slow scaling','Fairy in a Bottle does NOT save you from Sandpit'],
+    rewards: ['fast burst','Frenzy/Catalyst tempo','Shiv spam','Seven Stars','anything pushing 500+ damage in 4-6 turns'],
+    difficulty: 'Timer-capped (4-turn instant kill)',
+    killWindow: '4-5 turns MAX regardless of HP'
+  },
+  // Act 3
+  'The Queen': {
+    punishes:['draw-starved decks','mono-Doom Necrobinder without draw','no-AoE decks'],
+    rewards: ['draw-spam decks','AoE to pressure both','4+ cards per turn decks'],
+    difficulty: 'Hard',
+    killWindow: 'Torch Head by turn 4, Queen by turn 8'
+  },
+  'Test Subject #C8': {
+    punishes:['pure Poison/Doom (Intangible negates)','wasteful skill spam in early phases','no saved burst'],
+    rewards: ['sustain + one preserved burst turn','Barricade + Body Slam','save Catalyst/Limit Break/Void Form/Seven Stars/No Escape for phase 3'],
+    difficulty: 'Easiest A3 IF you plan for phase 3',
+    killWindow: 'Phase 1 in 2 turns, phase 2 in 3, save big turn for phase 3'
+  },
+  'Doormaker': {
+    punishes:['library/card-cycle decks (Hunger permanently exhausts)','Necrobinder Soul cycles (Scrutiny stops draw)','slow scaling','no compressed lethal'],
+    rewards: ['compressed burst winning in 2-3 turns','Seven Stars (49 AoE)','pre-forged Sovereign Blade one-shots','Corruption big turns','No Escape at threshold'],
+    difficulty: 'Hardest A3 boss',
+    killWindow: 'Door in 2-3 per cycle, full kill 8-12 turns'
+  }
+};
+
+// Deck archetype detection - scan deck for these patterns
+// Used to match against BOSS_MATRIX punishes/rewards
+function detectDeckArchetypes(deck) {
+  const tags = new Set();
+  const has = name => deck[name] > 0;
+  const count = names => names.filter(n => deck[n]).length;
+
+  // Generic tags
+  if (count(['Noxious Fumes','Accelerant','Deadly Poison','Envenom','Bubble Bubble','Bouncing Flask','Haze','Malaise','Corrosive Wave','Poisoned Stab','Outbreak'])>=2) tags.add('poison');
+  if (count(['Accuracy','Infinite Blades','Knife Trap','Blade Dance','Hidden Daggers','Fan of Knives','Cloak and Dagger','Leading Strike','Up My Sleeve','Finisher'])>=2) tags.add('shiv');
+  if (count(['Tactician','Tools of the Trade','Master Planner','Reflex','Calculated Gamble','Acrobatics','Prepared','Well-Laid Plans'])>=2) tags.add('sly');
+  if (count(['Corruption','Dark Embrace','Feel No Pain',"Pact's End",'Ashen Strike','Burning Pact','Fiend Fire','Forgotten Ritual','Second Wind'])>=2) tags.add('exhaust');
+  if (count(['Demon Form','Inflame','Rupture','Brand','Fight Me!','Whirlwind','Bludgeon','Twin Strike'])>=2) tags.add('strength');
+  if (count(['Barricade','Juggernaut','Body Slam','Impervious','Stone Armor','Entrench','Unmovable'])>=2) tags.add('block');
+  if (count(['Bloodletting','Rupture','Inferno','Hemokinesis','Crimson Mantle','Brand','Feed','Tear Asunder'])>=2) tags.add('self-damage');
+  if (count(['Perfected Strike','Pommel Strike','Twin Strike','Hellraiser','Strike','Pyre','Expect a Fight'])>=3) tags.add('strike');
+  if (count(['Hellraiser','Bloodletting','Dark Embrace','Burning Pact','Pommel Strike','Battle Trance'])>=3) tags.add('infinite');
+  // Defect
+  if (count(['Defragment','Capacitor','Modded','Loop','Coolheaded','Hotfix','Hot Fix','Chaos','Multi-Cast'])>=2) tags.add('orb');
+  if (count(['Glacier','Coolheaded','Cold Snap','Hailstorm','Chill','Loop','Frost'])>=2) tags.add('frost');
+  if (count(['Claw','All for One','Scrape','Feral','Panache','Hologram'])>=2) tags.add('claw');
+  if (count(['Darkness','Shadow Shield','Consuming Shadow','Multi-Cast'])>=2) tags.add('darkness');
+  // Necrobinder
+  if (count(['No Escape','Countdown','Deathbringer',"Death's Door",'Negative Pulse','Scourge','Blight Strike'])>=2) tags.add('doom');
+  if (count(['Rattle',"Sic 'Em",'Necro Mastery','Fetch','Poke','Squeeze','Flatten','Calcify'])>=2) tags.add('osty');
+  if (count(['Grave Warden','Capture Spirit','Captured Spirit','Severance','Durge','Dirge','Haunt','Devour Life','Soul Storm'])>=2) tags.add('soul');
+  if (count(["Banshee's Cry",'Defy','Defile','Call of the Void','Pagestorm','Page Storm','Spirit of Ash','Demesne','Parse','Pull from Below'])>=2) tags.add('ethereal');
+  // Regent
+  if (count(['Venerate','Glow','Hidden Cache','Genesis','Royal Gamble','Solar Strike','Shining Strike','Gather Light'])>=2) tags.add('stars');
+  if (count(['Bulwark','Seeking Edge','Conqueror','Summon Forth','The Smith','Furnace','Beat into Shape','Refine Blade','Wrought in War'])>=2) tags.add('forge');
+  if (count(['Radiate','Stardust','Royal Gamble','Terraforming','Big Bang'])>=2) tags.add('starfall');
+
+  // Generic traits
+  const deckArray = Object.keys(deck);
+  if (deckArray.length <= 15) tags.add('small-deck');
+  if (deckArray.length >= 25) tags.add('big-deck');
+
+  return tags;
+}
+
+
 const STARTING_DECKS = {
   ironclad:   {Strike:5, Defend:4, Bash:1},
   silent:     {Strike:5, Defend:5, Neutralize:1, Survivor:1},
@@ -1229,7 +1757,52 @@ const CHAR_HP = {ironclad:80, silent:70, defect:75, necrobinder:66, regent:75};
 // ============================================================
 let currentChar = null;
 let currentAct = 1;
+let currentAsc = 0; // ascension level 0-10
 let deck = {}; // card name -> count
+
+// ============================================================
+// TIER BADGE HELPER — returns HTML for colored S/A/B/C/D badge
+// ============================================================
+function getCardTier(cardName) {
+  if (!currentChar) return null;
+  // Check character-specific tier first, then colorless pool
+  const charTiers = CARD_TIERS[currentChar] || {};
+  const colorlessTiers = CARD_TIERS.colorless || {};
+  const crossChars = ['ironclad','silent','defect','necrobinder','regent'].filter(c => c !== currentChar);
+  let tierData = charTiers[cardName] || colorlessTiers[cardName];
+  // Check other character pools too (for cross-char color display)
+  if (!tierData) {
+    for (const c of crossChars) {
+      if ((CARD_TIERS[c] || {})[cardName]) {
+        tierData = CARD_TIERS[c][cardName];
+        break;
+      }
+    }
+  }
+  return tierData || null;
+}
+
+function tierBadgeHtml(cardName, size) {
+  const t = getCardTier(cardName);
+  if (!t || !t.tier) return '';
+  const colors = {
+    S: {bg:'rgba(232,184,75,.18)', border:'rgba(232,184,75,.55)', fg:'#e8b84b'},
+    A: {bg:'rgba(106,172,95,.18)', border:'rgba(106,172,95,.55)', fg:'#6aac5f'},
+    B: {bg:'rgba(74,140,186,.18)', border:'rgba(74,140,186,.55)', fg:'#6aacda'},
+    C: {bg:'rgba(122,106,138,.18)', border:'rgba(122,106,138,.55)', fg:'#a090b0'},
+    D: {bg:'rgba(192,64,64,.18)', border:'rgba(192,64,64,.55)', fg:'#c06060'}
+  };
+  const c = colors[t.tier] || colors.C;
+  const fs = size === 'sm' ? '8px' : '9px';
+  const pad = size === 'sm' ? '1px 4px' : '1px 5px';
+  const title = t.note ? ` title="${t.note.replace(/"/g,'&quot;')}"` : '';
+  return `<span class="tier-badge" style="font-family:'Share Tech Mono',monospace;font-size:${fs};font-weight:700;padding:${pad};border-radius:2px;background:${c.bg};border:1px solid ${c.border};color:${c.fg};letter-spacing:.04em;white-space:nowrap;flex-shrink:0"${title}>${t.tier}</span>`;
+}
+
+function getCardTierNote(cardName) {
+  const t = getCardTier(cardName);
+  return (t && t.note) ? t.note : '';
+}
 
 // ============================================================
 // INIT
@@ -1242,11 +1815,45 @@ function init() {
     btn.className = 'char-btn';
     btn.id = 'char-' + key;
     const label = key.charAt(0).toUpperCase() + key.slice(1);
-    btn.innerHTML = `<span style="display:block;font-size:20px;margin-bottom:5px">${icons[key]}</span>${label}`;
+    btn.innerHTML = `<span style="display:block;font-size:18px;margin-bottom:5px;width:24px;text-align:center;overflow:hidden;flex-shrink:0">${icons[key]}</span><span style="display:block;width:100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${label}</span>`;
     btn.onclick = () => selectChar(key);
     grid.appendChild(btn);
   });
+  // Build ascension buttons A0-A10
+  const ascRow = document.getElementById('ascBtnRow');
+  for (let i = 0; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'act-btn';
+    btn.id = 'asc' + i + 'btn';
+    btn.textContent = 'A' + i;
+    btn.onclick = () => setAsc(i);
+    const ascData = ASCENSION_DATA[i];
+    if (ascData) btn.title = ascData.name + ' — ' + ascData.modifier;
+    if (i === 0) btn.classList.add('active');
+    ascRow.appendChild(btn);
+  }
   updateActUI();
+  updateAscUI();
+}
+
+function setAsc(n) {
+  currentAsc = n;
+  updateAscUI();
+  updateResult();
+  renderBossAlert();
+}
+
+function updateAscUI() {
+  for (let i = 0; i <= 10; i++) {
+    const el = document.getElementById('asc' + i + 'btn');
+    if (el) el.classList.toggle('active', currentAsc === i);
+  }
+  const asc = ASCENSION_DATA[currentAsc];
+  const advEl = document.getElementById('ascAdvice');
+  if (asc && advEl) {
+    const color = currentAsc === 0 ? 'var(--text-dim)' : currentAsc >= 8 ? '#c06060' : 'var(--amber)';
+    advEl.innerHTML = `<span style="color:${color}"><strong>${asc.name}</strong> — ${asc.modifier}</span>`;
+  }
 }
 
 function selectChar(key) {
@@ -1400,8 +2007,10 @@ function renderDeck() {
     const c = charCards.find(x=>x.name===name) || colorlessCards.find(x=>x.name===name) || allOtherDeckCards.find(x=>x.name===name);
     const type = c ? c.type : 'skl';
     const tl = typeLabel[type] || type.toUpperCase();
-    return `<div class="deck-item">
+    const tierB = tierBadgeHtml(name, 'sm');
+    return `<div class="deck-item" style="grid-template-columns:1fr auto auto auto;gap:6px">
       <span class="deck-item-name">${name}</span>
+      ${tierB}
       <span class="deck-item-tag ${typeCls(type)}">${tl}</span>
       <div class="qty-ctrl">
         <button class="qty-btn" onclick="adjustQty('${name}',-1)">−</button>
@@ -1498,9 +2107,10 @@ function renderModalCards() {
     groups[g].forEach(c => {
       const inDeck = deck[c.name] ? ` <span style="font-size:10px;color:var(--amber);font-family:'Share Tech Mono',monospace">(×${deck[c.name]} in deck)</span>` : '';
       const recommended = (g==='take'||g==='synergy') ? ' recommended' : (g==='skip'?' skip-flag':'');
+      const tierB = tierBadgeHtml(c.name, 'sm');
       html += `<div class="card-option${recommended}" onclick="addCard('${c.name.replace(/'/g,"\\'")}')">
         <div>
-          <div class="card-opt-name">${c.name}${inDeck}</div>
+          <div class="card-opt-name">${c.name}${inDeck} ${tierB}</div>
           <div class="card-opt-reason">${c.cat.reason}. ${c.note||''}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
@@ -2386,6 +2996,7 @@ function renderRewardVerdictHtml() {
     var sRarity = getRarity(s.card);
     html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap">';
     html += '<span style="font-size:14px;color:'+(isBest?'var(--text)':'var(--text-dim)')+'">'+s.name+'</span>';
+    html += tierBadgeHtml(s.name);
     html += '<span class="deck-item-tag '+typeCls(s.card.type)+'" style="font-size:9px;padding:1px 5px">'+typeTag+'</span>';
     html += rarityBadgeHtml(sRarity);
     if (s.isSafePick) html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid var(--amber-dim);color:var(--amber);background:rgba(200,146,42,.1)">safe pick</span>';
@@ -2547,11 +3158,13 @@ function pickerRowHtmlAdd(c, typeCls, vs) {
   const rowCls = c.cat.v==='rec'?' rec':c.cat.v==='syn'?' syn':'';
   const safeN = c.name.replace(/'/g,"&#39;");
   const noteText = [c.cat.reason, c.note].filter(Boolean).join('. ');
-  return `<div class="picker-card-row${rowCls}" onclick="pickerAddCard('${safeN}')">
+  const tierB = tierBadgeHtml(c.name, 'sm');
+  return `<div class="picker-card-row${rowCls}" onclick="pickerAddCard('${safeN}')" style="grid-template-columns:1fr auto auto auto;gap:5px">
     <div style="min-width:0">
       <div class="picker-card-name">${c.name}${inDeck}${crossTag}</div>
       ${noteText ? `<div class="picker-card-note">${noteText}</div>` : ''}
     </div>
+    ${tierB}
     <span class="deck-item-tag ${typeCls(c.type)}" style="font-size:9px;padding:1px 5px;white-space:nowrap">${(c.type||'skl').replace(/_/g,'·').toUpperCase()}</span>
     ${c.cat.label ? `<span class="picker-verdict" style="${vs[c.cat.v]||''}">${c.cat.label}</span>` : '<span style="width:20px"></span>'}
   </div>`;
@@ -3186,6 +3799,123 @@ function renderBossAlert() {
         html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
         html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${boss.killOrder}</div>`;
       }
+
+      // Punish/reward matrix from research dossier
+      const matrix = BOSS_MATRIX[selectedBoss];
+      if (matrix) {
+        html += `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed ${rd.color}30">`;
+        if (matrix.difficulty) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">difficulty</div>`;
+          html += `<div style="font-size:11px;color:${rd.color};margin-bottom:6px;font-style:italic">${matrix.difficulty}</div>`;
+        }
+        if (matrix.killWindow) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">kill window</div>`;
+          html += `<div style="font-size:11px;color:var(--text-dim);margin-bottom:6px">${matrix.killWindow}</div>`;
+        }
+        if (matrix.punishes) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c06060;letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">punishes</div>`;
+          html += `<ul style="margin:0 0 6px 1rem;padding:0;font-size:11px;color:#c88080;line-height:1.45">`;
+          matrix.punishes.forEach(p => { html += `<li style="margin-bottom:1px">${p}</li>`; });
+          html += `</ul>`;
+        }
+        if (matrix.rewards) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green-bright);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">rewards</div>`;
+          html += `<ul style="margin:0 0 6px 1rem;padding:0;font-size:11px;color:#80b080;line-height:1.45">`;
+          matrix.rewards.forEach(r => { html += `<li style="margin-bottom:1px">${r}</li>`; });
+          html += `</ul>`;
+        }
+
+        // Deck archetype check: compare deck tags against punishes/rewards
+        const deckTags = detectDeckArchetypes(deck);
+        if (deckTags.size > 0) {
+          const punishedBy = [];
+          const rewardedBy = [];
+          // Simple keyword matching
+          const tagMap = {
+            'heavy single-hit decks (Slippery wastes big swings)':['strength','block','forge'],
+            'slow decks':['poison','doom','ethereal'],
+            'slow scaling':['poison','doom','ethereal'],
+            'multi-play combos (Ringing phase 2)':['sly','shiv','claw'],
+            'pure burst (wasted in Intangible)':['strength','forge','starfall'],
+            'block-only (Calls bypass armor)':['block'],
+            'Strength-based decks':['strength'],
+            'Dex-based decks':['sly','shiv'],
+            'pure Poison (Sandpit resolves before tick)':['poison'],
+            'pure Poison/Doom (Intangible negates)':['poison','doom'],
+            'draw-heavy decks':['sly'],
+            'wide decks':['big-deck'],
+            '4+ cards-per-turn decks':['sly','infinite','claw'],
+            'draw-starved decks':[],
+            'library/card-cycle decks (Hunger permanently exhausts)':['exhaust','infinite'],
+            'Necrobinder Soul cycles (Scrutiny stops draw)':['soul'],
+            'no compressed lethal':[],
+            'no-AoE decks':[],
+            'Ironclad forced facing changes':[],
+            'single-target only':[],
+            'kill-and-done decks with no final-turn cushion':[],
+            'entering below 40 HP':[],
+          };
+          const rewardMap = {
+            'multi-hit (Shivs, Anger, Twin Strike, Pommel spam)':['shiv','strength'],
+            'multi-hit to strip Plating':['shiv','sly'],
+            'Weak application':['silent','shiv'],
+            'fast decks':['infinite','sly'],
+            'AoE (Whirlwind, Shockwave, Seven Stars)':['stars','strength'],
+            'Poison (ticks all 3)':['poison'],
+            'Poison, Doom, Shivs (bypass Str/Dex debuffs)':['poison','doom','shiv'],
+            'Poison (ticks regardless of debuffs)':['poison'],
+            'hard burst ignoring Followers':['strength','forge','starfall'],
+            'Silent Sly-discard hands':['sly'],
+            'Exhaust to nuke Calls':['exhaust'],
+            'Discard/cycle engines':['sly'],
+            'burst windows':['strength','forge','starfall','infinite'],
+            'Strength stacking':['strength'],
+            'Sovereign Blade retain':['forge'],
+            'Body Slam finishers':['block'],
+            'burst that ignores horizon':['strength','forge','starfall','infinite'],
+            'fast burst':['infinite','sly','claw'],
+            'Shiv spam':['shiv'],
+            'Seven Stars':['stars','starfall'],
+            'draw-spam decks':['sly'],
+            '4+ cards per turn decks':['sly','infinite','claw'],
+            'sustain + one preserved burst turn':['forge','starfall'],
+            'Barricade + Body Slam':['block'],
+            'compressed burst winning in 2-3 turns':['infinite','starfall','forge'],
+            'pre-forged Sovereign Blade one-shots':['forge'],
+            'Corruption big turns':['exhaust','infinite'],
+            'No Escape at threshold':['doom'],
+            'No Escape execution':['doom'],
+            'balanced AoE':['stars'],
+            'staggered single-target':[],
+            'Silent/Defect high-tempo':['sly','orb'],
+            'Demon Form turn':['strength'],
+            'pre-forged Sovereign Blade':['forge'],
+            'save Catalyst/Limit Break/Void Form/Seven Stars/No Escape for phase 3':['stars','doom','starfall'],
+          };
+          matrix.punishes.forEach(p => {
+            const tags = tagMap[p] || [];
+            const matched = tags.filter(t => deckTags.has(t));
+            if (matched.length > 0) punishedBy.push({text:p, tags:matched});
+          });
+          matrix.rewards.forEach(r => {
+            const tags = rewardMap[r] || [];
+            const matched = tags.filter(t => deckTags.has(t));
+            if (matched.length > 0) rewardedBy.push({text:r, tags:matched});
+          });
+          if (punishedBy.length > 0 || rewardedBy.length > 0) {
+            html += `<div style="margin-top:6px;padding:6px 8px;border:1px solid ${rd.color}30;border-radius:3px;background:${rd.color}08">`;
+            html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase">deck matchup</div>`;
+            if (rewardedBy.length > 0) {
+              html += `<div style="font-size:11px;color:var(--green-bright);margin-bottom:3px">✓ Your deck is favoured: <em>${rewardedBy.map(r=>r.tags.join('/')).join(', ')}</em></div>`;
+            }
+            if (punishedBy.length > 0) {
+              html += `<div style="font-size:11px;color:#c08060">⚠ Watch out — this boss punishes: <em>${punishedBy.map(p=>p.tags.join('/')).join(', ')}</em></div>`;
+            }
+            html += `</div>`;
+          }
+        }
+        html += `</div>`;
+      }
       html += `</div>`;
 
       // Elites for this region
@@ -3309,6 +4039,183 @@ function renderEngineTracker() {
   el.innerHTML = html;
 }
 
+// ============================================================
+// DECK DAMAGE / BLOCK ESTIMATION (for threshold check)
+// Rough per-turn estimates based on expected draw of 5 cards
+// Uses TIER data plus per-card heuristics
+// ============================================================
+
+// Explicit damage values for common cards (per play, pre-modifiers)
+const CARD_DMG_ESTIMATES = {
+  // Ironclad
+  'Strike':6, 'Bash':8, 'Anger':6, 'Cinder':18, 'Clash':14, 'Feed':10, 'Twin Strike':10,
+  'Pommel Strike':9, 'Perfected Strike':12, 'Bludgeon':32, 'Hemokinesis':15, 'Uppercut':13,
+  'Headbutt':9, 'Breakthrough':9, 'Setup Strike':7, 'Molten Fist':10, 'Thunderclap':4,
+  'Sword Boomerang':9, 'Iron Wave':5, 'Whirlwind':10, 'Fiend Fire':28, 'Stomp':12,
+  'Body Slam':15, 'Pact\'s End':17, 'Tear Asunder':15, 'Mangle':15, 'Break':20,
+  'Inferno':12, 'Thrash':8, 'Howl from Beyond':16, 'Rampage':14,
+  // Silent
+  'Neutralize':3, 'Backstab':11, 'Dagger Throw':9, 'Leading Strike':3,
+  'Sucker Punch':8, 'Slice':6, 'Flick-Flack':6, 'Ricochet':12, 'Dagger Spray':8,
+  'Skewer':16, 'Dash':10, 'Predator':15, 'Pounce':12, 'Precise Cut':13,
+  'Finisher':18, 'Follow Through':14, 'Poisoned Stab':6, 'Assassinate':10,
+  'Memento Mori':9, 'Murder':10, 'Strangle':8, 'Blade Dance':12, 'Echoing Slash':10,
+  // Defect
+  'Ball Lightning':7, 'Barrage':10, 'Beam Cell':3, 'Cold Snap':6, 'Compile Driver':7,
+  'Focused Strike':9, 'Go for the Eyes':3, 'Gunk Up':12, 'Momentum Strike':10,
+  'Sweeping Beam':6, 'Uproar':10, 'Claw':6, 'FTL':5, 'Rocket Punch':13,
+  'Scrape':7, 'Hyperbeam':26, 'Ice Lance':19, 'Meteor Strike':24, 'Null':10,
+  'Refract':18, 'Sunder':24, 'Tesla Coil':6, 'Adaptive Strike':18, 'Helix Drill':12,
+  'Shatter':11, 'All for One':10, 'Rip and Tear':14, 'Rebound':9,
+  // Necrobinder
+  'Blight Strike':8, 'Defile':13, 'Drain Power':10, 'Fear':7, 'Sculpting Strike':9,
+  'Reap':27, 'Reave':9, 'Sow':8, 'Death March':14, 'Severance':13,
+  'Debilitate':10, 'Bury':52, 'Graveblast':4, 'Hang':10, 'Misery':7,
+  'Veilpiercer':10, 'Flatten':12, 'Poke':6, 'Rattle':7, 'Snap':7, 'Fetch':3,
+  'Squeeze':25, 'Bone Shards':9, 'Unleash':8, 'Soul Storm':12, 'Protector':15,
+  'The Scythe':13, 'Pull from Below':12, 'Eradicate':22,
+  // Regent
+  'Falling Star':8, 'Crescent Spear':8, 'Crush Under':7, 'Collision Course':11,
+  'Photon Cut':10, 'Solar Strike':9, 'Astral Pulse':14, 'Celestial Might':18,
+  'Guiding Star':12, 'Wrought in War':7, 'Gamma Blast':13, 'Hegemony':15,
+  'Stardust':15, 'Devastate':30, 'Kingly Kick':27, 'Kingly Punch':12,
+  'Knockout Blow':30, 'Shining Strike':8, 'Supermassive':14, 'Beat into Shape':10,
+  'Comet':33, 'Crash Landing':21, 'Dying Star':9, 'Heavenly Drill':24,
+  'Heirloom Hammer':20, 'Make It So':6, 'Bombardment':18, 'Seven Stars':49,
+  'Meteor Shower':14, 'Lunar Blast':12, 'Radiate':15,
+  // Status/curse = 0
+};
+const CARD_BLK_ESTIMATES = {
+  // Ironclad
+  'Defend':5, 'Armaments':5, 'Blood Wall':16, 'Iron Wave':5, 'Shrug It Off':8,
+  'True Grit':7, 'Flame Barrier':12, 'Second Wind':20, 'Evil Eye':8, 'Rage':6,
+  'Colossus':5, 'Impervious':30, 'Crimson Mantle':8,
+  // Silent
+  'Survivor':8, 'Backflip':5, 'Cloak and Dagger':6, 'Deflect':4, 'Dodge and Roll':8,
+  'Untouchable':6, 'Blur':5, 'Dash':10, 'Leg Sweep':11, 'Hand Trick':7,
+  'Shadowmeld':10, 'Mirage':6,
+  // Defect
+  'Boost Away':6, 'BoostAway':6, 'Charge Battery':7, 'Hologram':3, 'Leap':9,
+  'Lightning Rod':4, 'Glacier':6, 'Glasswork':5, 'Shadow Shield':11, 'Stack':10,
+  'Compact':6, 'Fight Through':13, 'Boot Sequence':10, 'Genetic Algorithm':4,
+  // Necrobinder
+  'Bodyguard':0, 'Defy':6, 'Grave Warden':8, 'Pull Aggro':7, 'Delay':11,
+  'Death\'s Door':6, 'Melancholy':13, 'Bone Shards':9, 'Sacrifice':30, 'Undeath':7,
+  'Negative Pulse':5, 'Spirit of Ash':4,
+  // Regent
+  'Venerate':0, 'Cloak of Stars':7, 'Gather Light':8, 'Glitterstream':11,
+  'Patter':9, 'Cosmic Indifference':6, 'I Am Invincible':10, 'Manifest Authority':7,
+  'Particle Wall':9, 'Reflect':17, 'Bulwark':13, 'Neutron Aegis':8, 'Parry':10
+};
+
+function estimateDeckDamagePerTurn() {
+  // Simple model: sum top 5 damage cards, weight by deck size for draw probability
+  const total = getDeckSize();
+  if (total === 0) return 0;
+  const sampleSize = Math.min(5, total);
+  const cardDmgs = [];
+  Object.entries(deck).forEach(([name, count]) => {
+    let dmg = CARD_DMG_ESTIMATES[name];
+    if (dmg === undefined) {
+      // Try without upgrade suffix etc
+      const base = name.replace(/\+$/, '');
+      dmg = CARD_DMG_ESTIMATES[base] || 0;
+    }
+    for (let i = 0; i < count; i++) cardDmgs.push(dmg);
+  });
+  cardDmgs.sort((a, b) => b - a);
+  // Expected damage per turn = sum of top N cards × draw probability
+  const drawProb = sampleSize / total;
+  let total_dmg = 0;
+  cardDmgs.forEach(d => total_dmg += d * drawProb);
+  return Math.round(total_dmg * 0.75); // 0.75 factor for energy limits
+}
+
+function estimateDeckBlockPerTurn() {
+  const total = getDeckSize();
+  if (total === 0) return 0;
+  const sampleSize = Math.min(5, total);
+  const cardBlks = [];
+  Object.entries(deck).forEach(([name, count]) => {
+    let blk = CARD_BLK_ESTIMATES[name];
+    if (blk === undefined) {
+      const base = name.replace(/\+$/, '');
+      blk = CARD_BLK_ESTIMATES[base] || 0;
+    }
+    for (let i = 0; i < count; i++) cardBlks.push(blk);
+  });
+  cardBlks.sort((a, b) => b - a);
+  const drawProb = sampleSize / total;
+  let total_blk = 0;
+  cardBlks.forEach(b => total_blk += b * drawProb);
+  // Barricade/Juggernaut/Afterimage bonus
+  if (deck['Barricade']) total_blk *= 1.4;
+  if (deck['Afterimage']) total_blk += 4;
+  return Math.round(total_blk * 0.75);
+}
+
+function renderThresholdCheck() {
+  const el = document.getElementById('thresholdCheck');
+  if (!el || !currentChar) { if(el) el.innerHTML=''; return; }
+  if (getDeckSize() < 3) { el.innerHTML=''; return; }
+
+  const targets = getActTargets(currentAct, currentAsc);
+  if (!targets) { el.innerHTML=''; return; }
+
+  const deckDmg = estimateDeckDamagePerTurn();
+  const deckBlk = estimateDeckBlockPerTurn();
+  const dmgOk = deckDmg >= targets.dmgTarget;
+  const blkOk = deckBlk >= targets.blockTarget;
+  const dmgPct = Math.min(100, Math.round((deckDmg / targets.dmgTarget) * 100));
+  const blkPct = Math.min(100, Math.round((deckBlk / targets.blockTarget) * 100));
+
+  const dmgColor = dmgOk ? 'var(--green-bright)' : dmgPct > 60 ? 'var(--amber)' : '#c06060';
+  const blkColor = blkOk ? 'var(--green-bright)' : blkPct > 60 ? 'var(--amber)' : '#c06060';
+
+  const ascLabel = currentAsc > 0 ? ` (A${currentAsc})` : '';
+  let html = `<div class="axes-wrap" style="margin-bottom:.75rem">
+    <div class="axes-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>act ${currentAct} threshold check${ascLabel}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.04em;text-transform:none">est. per turn</span>
+    </div>
+    <div class="axis-row">
+      <span class="axis-label" style="width:55px">damage</span>
+      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${dmgPct}%;background:${dmgColor}"></div></div>
+      <span class="axis-val" style="color:${dmgColor}">${deckDmg}/${targets.dmgTarget}</span>
+    </div>
+    <div class="axis-row">
+      <span class="axis-label" style="width:55px">block</span>
+      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${blkPct}%;background:${blkColor}"></div></div>
+      <span class="axis-val" style="color:${blkColor}">${deckBlk}/${targets.blockTarget}</span>
+    </div>`;
+
+  // Show enemy context
+  html += `<div style="margin-top:6px;font-size:11px;color:var(--text-muted);line-height:1.4">
+    <div><span style="color:var(--text-dim)">normals:</span> ${targets.normal.dmg} dmg / ${targets.normal.block} blk</div>
+    <div><span style="color:var(--text-dim)">elites:</span> ${targets.elite.dmg} dmg / ${targets.elite.block} blk</div>
+    <div><span style="color:var(--text-dim)">boss:</span> ${targets.boss.dmg} dmg / ${targets.boss.block} blk</div>
+  </div>`;
+
+  // Ascension adjustments note
+  if (currentAsc >= 8) {
+    html += `<div style="margin-top:6px;padding:4px 7px;border:1px solid rgba(192,64,64,.3);border-radius:3px;background:rgba(192,64,64,.08);font-size:10px;color:#c08060">⚠ A${currentAsc}: enemies +${Math.round((targets.enemyHpMult - 1) * 100)}% HP${targets.extraEnemyDmg ? ', +' + targets.extraEnemyDmg + ' dmg per attack' : ''}</div>`;
+  }
+
+  // Warnings
+  if (!dmgOk && !blkOk) {
+    html += `<div style="margin-top:6px;padding:4px 7px;border:1px solid rgba(192,64,64,.3);border-radius:3px;background:rgba(192,64,64,.08);font-size:11px;color:#c08060">⚠ Both damage and block below Act ${currentAct} target. Take damage cards first, then block.</div>`;
+  } else if (!dmgOk) {
+    html += `<div style="margin-top:6px;padding:4px 7px;border:1px solid rgba(200,146,42,.3);border-radius:3px;background:rgba(200,146,42,.08);font-size:11px;color:var(--amber)">⚠ Damage below Act ${currentAct} target. You may struggle to kill in time.</div>`;
+  } else if (!blkOk) {
+    html += `<div style="margin-top:6px;padding:4px 7px;border:1px solid rgba(200,146,42,.3);border-radius:3px;background:rgba(200,146,42,.08);font-size:11px;color:var(--amber)">⚠ Block below Act ${currentAct} target. You may take too much damage.</div>`;
+  } else {
+    html += `<div style="margin-top:6px;padding:4px 7px;border:1px solid rgba(106,172,95,.3);border-radius:3px;background:rgba(106,172,95,.08);font-size:11px;color:var(--green-bright)">✓ Deck meets Act ${currentAct} targets.</div>`;
+  }
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
 
 // Hook new renders into the update cycle
 const _origUpdateResult = updateResult;
@@ -3316,6 +4223,7 @@ updateResult = function() {
   _origUpdateResult();
   renderDeckHealth();
   renderEngineTracker();
+  renderThresholdCheck();
   renderBossAlert();
 };
 const _origUpdatePriorityPanel = updatePriorityPanel;
@@ -3323,6 +4231,7 @@ updatePriorityPanel = function() {
   _origUpdatePriorityPanel();
   renderDeckHealth();
   renderEngineTracker();
+  renderThresholdCheck();
 };
 
 // ============================================================
@@ -3493,10 +4402,19 @@ function renderCardCheck() {
     html += `<div class="card-check-match" style="border-color:${borderColor};background:${bgColor}">`;
     html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">`;
     html += `<span class="card-check-match-name">${name}</span>`;
+    html += tierBadgeHtml(name);
     html += `${typeTag}${deckTag}${crossTag}`;
     html += card.rarity ? rarityBadgeHtml(card.rarity) : '';
     html += `<span class="card-check-verdict" style="${verdictStyle}">${verdictLabel}</span>`;
     html += `</div>`;
+
+    // Tier context note (from v0.103.2 research)
+    const tierNote = getCardTierNote(name);
+    if (tierNote) {
+      const tierInfo = getCardTier(name);
+      const tierColor = {S:'#e8b84b',A:'#6aac5f',B:'#6aacda',C:'#a090b0',D:'#c06060'}[tierInfo.tier] || 'var(--text-muted)';
+      html += `<div style="font-size:11px;color:${tierColor};margin-bottom:4px;font-style:italic;opacity:.9">${tierInfo.tier}-tier: ${tierNote}</div>`;
+    }
 
     // Engine detail rows
     if (engineMatches.length > 0) {
