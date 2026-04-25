@@ -272,19 +272,9 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 .rar-event{color:#6a9a9a;border-color:#6a9a9a50;background:#6a9a9a18;}
 .rar-token{color:#4a4438;border-color:#4a443850;background:none;}
 
-/* Card check search bar */
-.card-check-wrap{margin-top:.85rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);overflow:hidden;}
-.card-check-header{padding:.55rem .9rem;border-bottom:1px solid var(--border);background:var(--surface2);}
-.card-check-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);opacity:.8;}
-.card-check-sub{font-size:11px;color:var(--text-muted);font-style:italic;margin-top:2px;}
-.card-check-search-wrap{padding:8px 10px;border-bottom:1px solid var(--border);}
-.card-check-input{width:100%;background:var(--bg2);border:1px solid var(--border-bright);border-radius:3px;padding:6px 9px;color:var(--text);font-family:'Crimson Pro',serif;font-size:13px;outline:none;}
-.card-check-input:focus{border-color:var(--amber);}
-.card-check-input::placeholder{color:var(--text-muted);}
-.card-check-results{padding:6px 10px 8px;}
+/* Card check rows — used inside reward verdict */
 .card-check-match{padding:7px 9px;border-radius:3px;margin-bottom:4px;border:1px solid;}
 .card-check-match-name{font-size:13px;font-weight:400;margin-bottom:3px;}
-.card-check-match-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
 .card-check-match-note{font-size:11px;color:var(--text-muted);font-style:italic;}
 .card-check-empty{font-size:12px;color:var(--text-muted);font-style:italic;padding:4px 2px;}
 .card-check-verdict{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:2px;white-space:nowrap;}
@@ -1619,6 +1609,171 @@ function getActTargets(act, ascLevel) {
 }
 
 // ============================================================
+// NEW SCORING DATA — boss tags, act scaling, anti-synergy
+// ============================================================
+
+// Maps card names to the boss-relevant tag keywords that appear
+// in BOSS_MATRIX punishes[] and rewards[]. Keywords must be
+// substrings of the actual punish/reward strings (case-insensitive match).
+const CARD_BOSS_TAGS = {
+  // --- Multi-hit / Shiv ---
+  'Whirlwind':        ['multi-hit','AoE','burst'],
+  'Twin Strike':      ['multi-hit','burst'],
+  'Anger':            ['multi-hit'],
+  'Pommel Strike':    ['multi-hit','burst'],
+  'Sword Boomerang':  ['multi-hit'],
+  'Blade Dance':      ['multi-hit','Shiv','fast'],
+  'Finisher':         ['multi-hit','Shiv'],
+  'Infinite Blades':  ['Shiv','fast'],
+  'Accuracy':         ['Shiv'],
+  'Leading Strike':   ['Shiv'],
+  'Hidden Daggers':   ['Shiv'],
+  'Cloak and Dagger': ['Shiv'],
+  'Knife Trap':       ['Shiv'],
+  'Up My Sleeve':     ['Shiv'],
+  // --- Weak application ---
+  'Neutralize':       ['Weak'],
+  'Leg Sweep':        ['Weak'],
+  'Sucker Punch':     ['Weak'],
+  'Malaise':          ['Weak','Poison'],
+  'Expose':           ['Weak'],
+  // --- Poison ---
+  'Noxious Fumes':    ['Poison'],
+  'Deadly Poison':    ['Poison'],
+  'Poisoned Stab':    ['Poison'],
+  'Bouncing Flask':   ['Poison'],
+  'Bubble Bubble':    ['Poison'],
+  'Haze':             ['Poison'],
+  'Corrosive Wave':   ['Poison'],
+  'Accelerant':       ['Poison','fast'],
+  // --- Doom / No Escape ---
+  'No Escape':        ['No Escape','Doom','threshold'],
+  'Deathbringer':     ['Doom'],
+  "Death's Door":     ['Doom'],
+  'Scourge':          ['Doom'],
+  'End of Days':      ['Doom'],
+  // --- Exhaust ---
+  'Corruption':       ['Exhaust','Corruption','big turn'],
+  'Dark Embrace':     ['Exhaust'],
+  'Feel No Pain':     ['Exhaust'],
+  'Fiend Fire':       ['Exhaust','big turn','burst'],
+  "Pact's End":       ['Exhaust'],
+  'Second Wind':      ['Exhaust'],
+  'Forgotten Ritual': ['Exhaust'],
+  // --- Single big hits ---
+  'Bludgeon':         ['single-hit','burst'],
+  'Reap':             ['single-hit'],
+  'Bury':             ['single-hit','burst'],
+  'Devastate':        ['single-hit','burst'],
+  'Kingly Kick':      ['single-hit','burst'],
+  'Comet':            ['single-hit','burst'],
+  'Heavenly Drill':   ['single-hit','burst'],
+  'Hyperbeam':        ['single-hit','burst'],
+  'Ice Lance':        ['single-hit'],
+  // --- Strength / Demon Form ---
+  'Demon Form':       ['Strength','Demon Form','scaling'],
+  'Inflame':          ['Strength','burst'],
+  'Fight Me!':        ['Strength'],
+  'Rupture':          ['Strength','self-damage'],
+  'Limit Break':      ['Strength','burst'],
+  'Conqueror':        ['Sovereign Blade','forge','burst'],
+  'Sovereign Blade':  ['Sovereign Blade','forge','burst'],
+  'The Smith':        ['forge'],
+  'Summon Forth':     ['forge'],
+  // --- Barricade / Body Slam ---
+  'Barricade':        ['Barricade','block'],
+  'Body Slam':        ['Body Slam','block'],
+  'Juggernaut':       ['block'],
+  'Impervious':       ['block'],
+  // --- AoE ---
+  'Thunderclap':      ['AoE'],
+  'Shockwave':        ['AoE'],
+  'Seven Stars':      ['Seven Stars','AoE','burst'],
+  'Gamma Blast':      ['AoE','burst'],
+  'Radiate':          ['AoE','burst'],
+  'Meteor Strike':    ['AoE','burst'],
+  // --- Fast / cycle / draw ---
+  'Acrobatics':       ['fast','cycle','draw'],
+  'Adrenaline':       ['fast','cycle','draw'],
+  'Expertise':        ['draw','fast'],
+  'Tactician':        ['fast','cycle','Sly-discard'],
+  'Reflex':           ['fast','cycle','Sly-discard'],
+  'Tools of the Trade':['fast','cycle','Sly-discard'],
+  'Master Planner':   ['fast','cycle','Sly-discard'],
+  'Prepared':         ['fast','Sly-discard'],
+  'Calculated Gamble':['fast','Sly-discard'],
+  // --- Compress / burst ---
+  'Offering':         ['burst','compressed'],
+  'Battle Trance':    ['burst','draw'],
+  'Bloodletting':     ['burst','self-damage'],
+  // --- Sly discard ---
+  'Dagger Throw':     ['Sly-discard','fast'],
+  'Memento Mori':     ['Sly-discard'],
+  // --- Stars / Regent ---
+  'Genesis':          ['stars','scaling'],
+  'Alignment':        ['stars','fast','compressed'],
+  'Stardust':         ['stars','burst'],
+  'Terraforming':     ['stars','burst'],
+  // --- Osty / Necrobinder ---
+  'Rattle':           ['Osty','multi-hit'],
+  "Sic 'Em":          ['Osty','multi-hit'],
+  'Necro Mastery':    ['Osty'],
+  // --- Soul cycle ---
+  'Haunt':            ['soul','cycle','draw'],
+  'Devour Life':      ['soul'],
+  // --- Sustained damage ---
+  'Catalyst':         ['Catalyst','Poison','burst'],
+  'Claw':             ['multi-hit','fast'],
+  'All for One':      ['multi-hit','fast'],
+  'Loop':             ['scaling','orb'],
+  'Defragment':       ['scaling','orb'],
+  'Echo Form':        ['scaling','burst'],
+};
+
+// Cards that gain value in Act 2-3 (scale well)
+const ACT_SCALES_INTO = new Set([
+  'Demon Form','Rupture','Accuracy','Accelerant','Defragment','Haunt',
+  'No Escape','Genesis','Echo Form','Loop','Limit Break','Barricade',
+  'Body Slam','Juggernaut','Noxious Fumes','Corruption','Dark Embrace',
+  'Feel No Pain','Conqueror','Radiate','Alignment','Seven Stars',
+  'Infinite Blades','Claw','All for One','Necro Mastery',
+]);
+
+// Cards that are strong in Act 1 but actively fall off by Act 3
+const ACT_CARRY_FALLOFF = new Set([
+  'Shrug It Off','Poisoned Stab','Ball Lightning','Solar Strike',
+  'Bodyguard','Perfected Strike','Thunderclap','Dagger Spray',
+  'Slice','Deflect','Iron Wave','Dodge and Roll','Sucker Punch',
+  'Leading Strike','Setup Strike','Tremble','Armaments',
+]);
+
+// Anti-synergy: cards that actively hurt a detected archetype
+// Key = archetype tag from detectDeckArchetypes
+// Value = card names that clash with that archetype
+const ARCHETYPE_ANTI_SYNERGY = {
+  exhaust:   ['Battle Trance'],                             // Battle Trance in Hellraiser Infinite wastes Exhaust turns
+  infinite:  ['Battle Trance'],                             // same — locks draw mid-infinite loop
+  osty:      ['Bone Shards'],                               // Bone Shards hurts HP you want for Osty scaling
+  block:     ['Brimstone'],                                 // Brimstone at low HP in block deck is dangerous
+  doom:      ['Defy','Defile','Call of the Void'],          // ethereal spam slows Doom count
+  sly:       ['Impervious','Barricade'],                    // Barricade in Sly wastes the discard cycling
+  claw:      ['Genetic Algorithm'],                         // Genetic Algorithm in Claw deck inflates deck size
+};
+
+// Returns 0.0-1.0 commitment to the lead engine for a given card
+function getEngineCommitment(cardName) {
+  const engines = BUILD_ENGINES[currentChar] || {};
+  var best = 0;
+  Object.values(engines).forEach(function(eng) {
+    if (eng.cards.includes(cardName)) {
+      var have = eng.cards.filter(function(n){ return deck[n]; }).length;
+      best = Math.max(best, have / eng.cards.length);
+    }
+  });
+  return best;
+}
+
+// ============================================================
 // ENHANCED BOSS ADAPTATION MATRIX (from research dossier)
 // punishes: archetypes/card-types that lose
 // rewards:  archetypes/card-types that win
@@ -2203,17 +2358,7 @@ function updatePriorityPanel() {
     }
   }
 
-  // ---- Card reward check search (below safe picks) ----
-  html += `<div class="card-check-wrap" id="cardCheckWrap" style="margin-bottom:.85rem">
-    <div class="card-check-header">
-      <div class="card-check-label">card reward check</div>
-      <div class="card-check-sub">Type a card name to see if it fits your build</div>
-    </div>
-    <div class="card-check-search-wrap">
-      <input class="card-check-input" id="cardCheckInput" type="text" placeholder="e.g. Demon Form, Barricade, Noxious Fumes..." oninput="renderCardCheck()">
-    </div>
-    <div class="card-check-results" id="cardCheckResults"></div>
-  </div>`;
+
 
   // ---- Engine-grouped priority section ----
   // Each build becomes a mini-group sorted by: deck match % desc, then rank desc
@@ -2679,7 +2824,7 @@ function switchPickerTab(tab) {
   document.getElementById('ptab-reward').classList.toggle('active', tab === 'reward');
   document.getElementById('ptab-add').classList.toggle('active', tab === 'add');
   document.getElementById('pickerSearch').value = '';
-  document.getElementById('pickerSearch').placeholder = tab === 'reward' ? 'Search cards being offered...' : 'Search cards to add...';
+  document.getElementById('pickerSearch').placeholder = tab === 'reward' ? 'Search cards being offered...' : 'Search to see build details, or browse below...';
   if (tab === 'reward') {
     rewardOffered = []; rewardBuildKey = null; rewardStage = 'select';
     renderPickerReward();
@@ -2799,8 +2944,10 @@ function renderRewardVerdictHtml() {
     var isSafePick  = sp.generic.includes(name);
     var isSafeEarly = sp.early.includes(name);
 
-    // Score — priority order: tips > priority rec > fits > synergy > safe pick > balance
-    var score = 0; var reasons = [];
+    // Score — starts from base tier value (S=10, A=7, B=5, C=3, D=1)
+    var _tierInfo = getCardTier(name);
+    var _tierBase = _tierInfo ? ({S:10,A:7,B:5,C:3,D:1}[_tierInfo.tier] || 3) : 3;
+    var score = _tierBase; var reasons = [];
 
     // --- Tips mention (named in how-to-play) ---
     if (tipsBuilds.length > 0) {
@@ -2875,7 +3022,82 @@ function renderRewardVerdictHtml() {
     if (currentAct === 1 && total < 10 && (card.type==='atk'||card.type==='def'||card.type.includes('atk')||card.type.includes('def'))) { score += 6; }
     if (currentAct === 3 && tipsBuilds.length===0 && priorityBuilds.length===0 && fitsBuilds.length===0 && synergyBuilds.length===0 && !isSafePick && !isVelCard) { score -= 20; reasons.push('Act 3: only take core cards'); }
     if (name==='Strike'||name==='Defend') { score -= 35; reasons.push('starter card — never add more'); }
-    if (alreadyHave >= 2) { score -= 15; reasons.push('already have '+alreadyHave+' copies'); }
+    // Redundancy: engine cards tolerate 2 copies, non-engine cards penalised at 1+
+    var _isEngineCard = Object.values(BUILD_ENGINES[currentChar]||{}).some(function(e){ return e.cards.includes(name); });
+    if (alreadyHave === 1 && !_isEngineCard) { score -= 5; reasons.push('already have 1 copy'); }
+    if (alreadyHave >= 2) { score -= 12; reasons.push('already have '+alreadyHave+' copies'); }
+
+    // ── Act scaling bonus / penalty ──────────────────────────
+    if (currentAct >= 2 && ACT_SCALES_INTO.has(name)) {
+      score += 4;
+      reasons.push('scales into Act 3');
+    }
+    if (currentAct === 3 && ACT_CARRY_FALLOFF.has(name)) {
+      score -= 4;
+      reasons.push('Act 1 carry — loses value here');
+    }
+
+    // ── Engine commitment bonus ───────────────────────────────
+    // Scales 0→+8 based on how many engine pieces you already own.
+    // Rewards committing deeper to an engine you've started building.
+    var engCommit = getEngineCommitment(name);
+    if (engCommit > 0) {
+      var engBonus = Math.round(engCommit * 8);
+      score += engBonus;
+      if (engCommit >= 0.6) reasons.push('deepens engine you\'re '+Math.round(engCommit*100)+'% into');
+    }
+
+    // ── Archetype anti-synergy penalty ───────────────────────
+    var deckTags = detectDeckArchetypes(deck);
+    var antiSynPenalty = 0;
+    deckTags.forEach(function(tag) {
+      var badCards = ARCHETYPE_ANTI_SYNERGY[tag] || [];
+      if (badCards.includes(name)) {
+        antiSynPenalty = Math.max(antiSynPenalty, 5);
+      }
+    });
+    if (antiSynPenalty > 0) {
+      score -= antiSynPenalty;
+      reasons.push('trap pick for your archetype');
+    }
+
+    // ── Boss adaptation bonus / penalty ──────────────────────
+    if (selectedBoss && BOSS_MATRIX[selectedBoss]) {
+      var bMatrix = BOSS_MATRIX[selectedBoss];
+      var cardTags = CARD_BOSS_TAGS[name] || [];
+      if (cardTags.length > 0) {
+        // Check rewards
+        var rewardHit = bMatrix.rewards.some(function(r) {
+          return cardTags.some(function(t){ return r.toLowerCase().includes(t.toLowerCase()); });
+        });
+        // Check punishes
+        var punishHit = bMatrix.punishes.some(function(p) {
+          return cardTags.some(function(t){ return p.toLowerCase().includes(t.toLowerCase()); });
+        });
+        if (rewardHit) {
+          score += 5;
+          reasons.push('strong vs '+selectedBoss);
+        }
+        if (punishHit) {
+          score -= 5;
+          reasons.push('weak vs '+selectedBoss+' — boss punishes this');
+        }
+      }
+    }
+
+    // ── Threshold fit bonus ───────────────────────────────────
+    // Awards cards that close your current damage or block deficit.
+    var threshTargets = getActTargets(currentAct, currentAsc);
+    if (threshTargets && total > 5) {
+      var curDmg = estimateTurnOutput(0.6, 'damage').dmg;
+      var curBlk = estimateTurnOutput(0.6, 'block').blk;
+      var dmgGap = threshTargets.dmgTarget - curDmg;
+      var blkGap = threshTargets.blockTarget - curBlk;
+      var isAtkType = (card.type||'').includes('atk');
+      var isDefType = (card.type||'').includes('def');
+      if (isAtkType && dmgGap > 5)  { score += 3; if (dmgGap > 10) score += 1; reasons.push('closes damage gap vs Act '+currentAct+' targets'); }
+      if (isDefType && blkGap > 5)  { score += 3; if (blkGap > 10) score += 1; reasons.push('closes block gap vs Act '+currentAct+' targets'); }
+    }
 
     // --- Rarity modifier ---
     var cardRarity = getRarity(card);
@@ -2928,11 +3150,53 @@ function renderRewardVerdictHtml() {
       }
     }
 
+    // ── 7-tier contextual verdict label ──────────────────────
+    // Priority: engine > boss counter > threshold closer > build core > act scale > safe pick > skip
     var verdict, vLabel, vBorder, vBg, vColor;
-    if (score >= 40) {
+
+    var _inEngine   = Object.values(BUILD_ENGINES[currentChar]||{}).some(function(e){ return e.cards.includes(name); });
+    var _bossReward = selectedBoss && BOSS_MATRIX[selectedBoss] && (CARD_BOSS_TAGS[name]||[]).length > 0 &&
+                      BOSS_MATRIX[selectedBoss].rewards.some(function(r){
+                        return (CARD_BOSS_TAGS[name]||[]).some(function(t){ return r.toLowerCase().includes(t.toLowerCase()); });
+                      });
+    var _threshClose = (function(){
+      var tt = getActTargets(currentAct, currentAsc);
+      if (!tt || total <= 5) return false;
+      var cd = estimateTurnOutput(0.6,'damage').dmg;
+      var cb = estimateTurnOutput(0.6,'block').blk;
+      var isA = (card.type||'').includes('atk');
+      var isD = (card.type||'').includes('def');
+      return (isA && tt.dmgTarget - cd > 5) || (isD && tt.blockTarget - cb > 5);
+    })();
+    var _buildCore  = tipsBuilds.length > 0 || priorityBuilds.length > 0;
+    var _actScale   = currentAct >= 2 && ACT_SCALES_INTO.has(name);
+    var _antiSyn    = antiSynPenalty > 0;
+
+    if (score < 15 || _antiSyn) {
+      verdict='skip'; vLabel='SKIP';
+      vBorder='var(--border)'; vBg='rgba(100,90,70,.12)'; vColor='var(--text-muted)';
+    } else if (_inEngine && engCommit >= 0.33) {
+      verdict='pick'; vLabel='ENGINE PIECE';
+      vBorder='rgba(74,154,138,.5)'; vBg='rgba(74,154,138,.15)'; vColor='var(--teal-bright)';
+    } else if (_bossReward && score >= 30) {
+      verdict='pick'; vLabel='BOSS COUNTER';
+      vBorder='rgba(192,66,26,.5)'; vBg='rgba(192,66,26,.12)'; vColor='#e07050';
+    } else if (_threshClose && score >= 30) {
+      verdict='pick'; vLabel='THRESHOLD CLOSER';
+      vBorder='rgba(106,172,95,.45)'; vBg='rgba(74,124,63,.15)'; vColor='var(--green-bright)';
+    } else if (_buildCore && score >= 30) {
+      verdict='pick'; vLabel='BUILD CORE';
+      vBorder='rgba(106,172,95,.4)'; vBg='rgba(74,124,63,.12)'; vColor='var(--green-bright)';
+    } else if (_actScale && score >= 20) {
+      verdict='consider'; vLabel='ACT 3 SCALE';
+      vBorder='rgba(154,106,186,.45)'; vBg='rgba(154,106,186,.1)'; vColor='var(--purple-bright)';
+    } else if ((isSafePick || isSafeEarly) && score >= 20) {
+      verdict='consider'; vLabel='SAFE PICK';
+      vBorder='rgba(200,146,42,.35)'; vBg='rgba(200,146,42,.12)'; vColor='var(--amber-bright)';
+    } else if (score >= 40) {
       verdict='pick'; vLabel='PICK THIS';
       vBorder='rgba(106,172,95,.4)'; vBg='rgba(74,124,63,.2)'; vColor='var(--green-bright)';
-    } else if (score >= 15) {
+    } else if (score >= 20) {
       verdict='consider'; vLabel='CONSIDER';
       vBorder='rgba(200,146,42,.35)'; vBg='rgba(200,146,42,.15)'; vColor='var(--amber-bright)';
     } else {
@@ -2962,7 +3226,8 @@ function renderRewardVerdictHtml() {
   if (rAtk > 65 && total > 7) deckStateChips.push({t:'atk-heavy draws', c:'#c06060'});
   if (rAtk < 35 && total > 7) deckStateChips.push({t:'def-heavy draws', c:'#6aacda'});
 
-  var html = '<div style="font-size:9px;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:4px 2px 6px;border-bottom:1px solid var(--border);margin-bottom:6px">card reward — all builds considered</div>';
+  var bossCtx = selectedBoss ? ' · vs '+selectedBoss : '';
+  var html = '<div style="font-size:9px;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:4px 2px 6px;border-bottom:1px solid var(--border);margin-bottom:6px">card reward — all builds considered'+bossCtx+'</div>';
   // Deck size chip
   var szp = getDeckSizeProfile();
   var szChipColor = szp.zone==='sweet' ? 'var(--green-bright)' : szp.zone==='danger' ? '#c06060' : 'var(--amber)';
@@ -2982,13 +3247,15 @@ function renderRewardVerdictHtml() {
     html += '<div style="font-size:12px;color:var(--text-dim)">None of these fit your core build. Adding off-build cards now increases bad draw risk.</div></div>';
   }
 
+  // Pull engine data once for the card-check detail rows
+  var enginesData = BUILD_ENGINES[currentChar] || {};
+
   scored.forEach(function(s, i) {
     var isBest = i===0 && !allSkip;
     var outerBorder = isBest ? (s.verdict==='pick'?'rgba(106,172,95,.5)':'rgba(200,146,42,.4)') : 'var(--border)';
     var outerBg = isBest ? (s.verdict==='pick'?'rgba(74,124,63,.1)':'rgba(200,146,42,.07)') : 'var(--bg2)';
     var borderW = isBest ? '1.5px' : '1px';
     var typeTag = (s.card.type||'skl').replace(/_/g,'·').toUpperCase();
-    var noteHtml = s.card.note ? '<div style="font-size:10px;color:var(--text-muted);margin-top:3px;opacity:.65">'+s.card.note+'</div>' : '';
 
     html += '<div style="padding:9px 10px;border:'+borderW+' solid '+outerBorder+';border-radius:4px;background:'+outerBg+';margin-bottom:6px">';
 
@@ -3001,17 +3268,26 @@ function renderRewardVerdictHtml() {
     html += rarityBadgeHtml(sRarity);
     if (s.isSafePick) html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid var(--amber-dim);color:var(--amber);background:rgba(200,146,42,.1)">safe pick</span>';
     if (s.isSafeEarly && total < 12) html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid rgba(200,120,40,.4);color:#c88040;background:rgba(200,120,40,.1)">early value</span>';
+    if (deck[s.name]) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×'+deck[s.name]+'</span>';
     html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;margin-left:auto;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+'">'+s.vLabel+'</span>';
     html += '</div>';
+
     // Rarity context line
     var rCtx = rarityContext(sRarity, s.verdict);
     if (rCtx) html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;opacity:.8">'+rCtx+'</div>';
 
-    // Build indicators
+    // Tier note (from card-check)
+    var tierNote = getCardTierNote(s.name);
+    if (tierNote) {
+      var tierInfo = getCardTier(s.name);
+      var tierColor = {S:'#e8b84b',A:'#6aac5f',B:'#6aacda',C:'#a090b0',D:'#c06060'}[tierInfo.tier] || 'var(--text-muted)';
+      html += '<div style="font-size:11px;color:'+tierColor+';margin-bottom:5px;font-style:italic;opacity:.9">'+tierInfo.tier+'-tier: '+tierNote+'</div>';
+    }
+
+    // Build indicators (tips > priority > fits > synergy)
     var hasIndicators = s.tipsBuilds.length>0 || s.priorityBuilds.length>0 || s.synergyBuilds.length>0 || s.fitsBuilds.length>0;
     if (hasIndicators) {
       html += '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">';
-      // Tips mentions — highest signal, shown first with star
       var tipsShown = new Set();
       s.tipsBuilds.forEach(function(entry){
         tipsShown.add(entry.key);
@@ -3033,10 +3309,39 @@ function renderRewardVerdictHtml() {
       html += '</div>';
     }
 
+    // Engine progress rows (from card-check) — shows X/N engine cards in deck
+    var engineMatches = [];
+    Object.entries(enginesData).forEach(function(pair) {
+      var buildKey = pair[0]; var engData = pair[1];
+      if (engData.cards.includes(s.name)) {
+        var build = builds[buildKey];
+        var haveCount = engData.cards.filter(function(n){ return deck[n]; }).length;
+        engineMatches.push({ buildName: build ? build.name : buildKey, buildColor: build ? build.color : 'var(--teal-bright)', label: engData.label, have: haveCount, total: engData.cards.length });
+      }
+    });
+    if (engineMatches.length > 0) {
+      html += '<div style="margin-bottom:5px">';
+      engineMatches.forEach(function(e) {
+        html += '<div style="font-size:11px;margin-bottom:2px">';
+        html += '<span style="color:'+e.buildColor+';font-family:\'Cinzel\',serif;font-size:11px">'+e.buildName+'</span>';
+        html += ' <span style="color:var(--text-muted)">engine — '+e.label+'</span>';
+        html += ' <span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--teal-bright)">('+e.have+'/'+e.total+' in deck)</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Score reasons
     if (s.reasons.length > 0) {
       html += '<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.55">'+s.reasons.join(' · ')+'</div>';
     }
-    html += noteHtml+'</div>';
+
+    // Card note
+    if (s.card.note) {
+      html += '<div style="font-size:10px;color:var(--text-muted);margin-top:3px;opacity:.65">'+s.card.note+'</div>';
+    }
+
+    html += '</div>';
   });
 
   html += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)">';
@@ -3083,17 +3388,139 @@ function rewardReset() {
 }
 
 // --- ADD TAB ---
+// When no query: show build-priority grouped list (quick add by click).
+// When searching: show full card-check detail rows — engine progress, tier note,
+// build membership — same information as the reward tab, for shop/event/removal use.
 function renderPickerAdd() {
   const el = document.getElementById('pickerList');
   if (!currentChar) { el.innerHTML = '<div class="picker-empty">Select a character first.</div>'; return; }
   const q = (document.getElementById('pickerSearch').value || '').toLowerCase();
   const allCards = getAllCardsForPicker();
   const builds = BUILD_DATA[currentChar].builds;
+  const engines = BUILD_ENGINES[currentChar] || {};
+  const spData = SAFE_PICKS[currentChar] || { early: [], generic: [] };
   const topBuildKey = getTopBuild();
   const topBuild = topBuildKey ? builds[topBuildKey] : null;
   const stats = getDeckStats();
   const typeCls = t => t&&t.startsWith('atk')?'tag-atk':t&&t.startsWith('def')?'tag-def':t==='pow'?'tag-pow':t==='other'?'tag-other':'tag-skl';
 
+  // When searching: full card-check detail view
+  if (q) {
+    const matches = allCards.filter(c => c.name.toLowerCase().includes(q)).slice(0, 8);
+    if (!matches.length) { el.innerHTML = '<div class="picker-empty">No cards match.</div>'; return; }
+
+    let html = '';
+    matches.forEach(card => {
+      const name = card.name;
+      const alreadyInDeck = deck[name] || 0;
+
+      // Engine membership
+      const engineMatches = [];
+      Object.entries(engines).forEach(([buildKey, engData]) => {
+        if (engData.cards.includes(name)) {
+          const build = builds[buildKey];
+          const haveCount = engData.cards.filter(n => deck[n]).length;
+          engineMatches.push({ buildName: build ? build.name : buildKey, buildColor: build ? build.color : 'var(--teal-bright)', label: engData.label, have: haveCount, total: engData.cards.length });
+        }
+      });
+
+      // Priority / fits build membership
+      const priorityMatches = [];
+      Object.entries(builds).forEach(([buildKey, build]) => {
+        if ((build.recs || []).includes(name) || (build.cards || []).includes(name)) {
+          if (!engineMatches.find(e => e.buildName === (builds[buildKey] ? builds[buildKey].name : buildKey))) {
+            priorityMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
+          }
+        }
+      });
+
+      const isSafeEarly = spData.early.includes(name);
+      const isSafeGeneric = spData.generic.includes(name);
+      const isSafe = isSafeEarly || isSafeGeneric;
+
+      // Verdict colour
+      let borderColor, bgColor, verdictLabel, verdictStyle;
+      if (engineMatches.length > 0) {
+        borderColor = 'rgba(74,154,138,.5)'; bgColor = 'rgba(74,154,138,.08)';
+        verdictLabel = 'ENGINE PIECE';
+        verdictStyle = 'background:rgba(74,154,138,.2);color:var(--teal-bright);border:1px solid rgba(74,154,138,.4)';
+      } else if (priorityMatches.length > 0) {
+        borderColor = 'rgba(106,172,95,.45)'; bgColor = 'rgba(74,124,63,.08)';
+        verdictLabel = 'PRIORITY';
+        verdictStyle = 'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)';
+      } else if (isSafe) {
+        borderColor = 'rgba(200,146,42,.35)'; bgColor = 'rgba(200,146,42,.06)';
+        verdictLabel = isSafeEarly ? 'SAFE — TAKE EARLY' : 'SAFE PICK';
+        verdictStyle = 'background:rgba(200,146,42,.15);color:var(--amber-bright);border:1px solid rgba(200,146,42,.3)';
+      } else {
+        borderColor = 'var(--border)'; bgColor = 'var(--bg2)';
+        verdictLabel = 'NOT A PRIORITY';
+        verdictStyle = 'background:rgba(100,90,70,.15);color:var(--text-muted);border:1px solid var(--border)';
+      }
+
+      const t = card.type || 'skl';
+      const tCls = t.startsWith('atk')?'tag-atk':t.startsWith('def')?'tag-def':t==='pow'?'tag-pow':'tag-skl';
+      const typeTag = `<span class="deck-item-tag ${tCls}" style="font-size:9px;padding:1px 5px">${t.replace(/_/g,'·').toUpperCase()}</span>`;
+      const crossTag = card.crossChar ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">${card.crossCharName}</span>` : '';
+      const deckTag = alreadyInDeck > 0 ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×${alreadyInDeck}</span>` : '';
+
+      html += `<div style="padding:7px 9px;border:1px solid ${borderColor};border-radius:3px;background:${bgColor};margin-bottom:4px">`;
+      // Name row
+      html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">`;
+      html += `<span style="font-size:13px;color:var(--text)">${name}</span>`;
+      html += tierBadgeHtml(name);
+      html += typeTag + deckTag + crossTag;
+      html += card.rarity ? rarityBadgeHtml(card.rarity) : '';
+      html += `<span class="card-check-verdict" style="${verdictStyle}">${verdictLabel}</span>`;
+      html += `</div>`;
+
+      // Tier note
+      const tierNote = getCardTierNote(name);
+      if (tierNote) {
+        const tierInfo = getCardTier(name);
+        const tierColor = {S:'#e8b84b',A:'#6aac5f',B:'#6aacda',C:'#a090b0',D:'#c06060'}[tierInfo.tier] || 'var(--text-muted)';
+        html += `<div style="font-size:11px;color:${tierColor};margin-bottom:4px;font-style:italic;opacity:.9">${tierInfo.tier}-tier: ${tierNote}</div>`;
+      }
+
+      // Engine rows
+      if (engineMatches.length > 0) {
+        engineMatches.forEach(e => {
+          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${e.buildColor};font-family:'Cinzel',serif;font-size:11px">${e.buildName}</span> <span style="color:var(--text-muted)">engine — ${e.label}</span> <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--teal-bright)">(${e.have}/${e.total} in deck)</span></div>`;
+        });
+      }
+
+      // Priority build rows
+      if (priorityMatches.length > 0) {
+        priorityMatches.forEach(p => {
+          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${p.buildColor};font-family:'Cinzel',serif;font-size:11px">${p.buildName}</span>`;
+          if (p.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">[${p.rank}]</span>`;
+          html += `</div>`;
+        });
+      }
+
+      // Safe / no-match context
+      if (isSafe && engineMatches.length === 0 && priorityMatches.length === 0) {
+        html += `<div style="font-size:11px;color:var(--text-muted)">Useful across most builds — safe to take regardless of path.</div>`;
+      }
+      if (!isSafe && engineMatches.length === 0 && priorityMatches.length === 0) {
+        html += `<div style="font-size:11px;color:var(--text-muted)">Not a priority for any ${currentChar.charAt(0).toUpperCase()+currentChar.slice(1)} build. Skip unless you have a specific reason.</div>`;
+      }
+
+      // Card note
+      if (card.note) html += `<div style="font-size:10px;color:var(--text-muted);margin-top:3px;opacity:.65">${card.note}</div>`;
+
+      // Add button
+      const safeN = name.replace(/'/g,"\\'");
+      html += `<div style="margin-top:5px"><button onclick="pickerAddCard('${safeN}')" style="padding:3px 9px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber-bright)'" onmouseout="this.style.borderColor='var(--border-bright)';this.style.color='var(--text-muted)'">${alreadyInDeck > 0 ? '+ add another' : '+ add to deck'}</button></div>`;
+
+      html += `</div>`;
+    });
+
+    el.innerHTML = html;
+    return;
+  }
+
+  // No query: grouped priority list for quick browsing
   function categorise(card) {
     const inTop = topBuild && topBuild.cards.includes(card.name);
     const inTopSyn = topBuild && topBuild.synergy && topBuild.synergy.includes(card.name);
@@ -3108,8 +3535,7 @@ function renderPickerAdd() {
     return {v:'skip', label:'', reason:''};
   }
 
-  let items = allCards.filter(c => !q || c.name.toLowerCase().includes(q));
-  if (!q) items = items.filter(c => categorise(c).v !== 'skip');
+  let items = allCards.filter(c => categorise(c).v !== 'skip');
   items = items.map(c => ({...c, cat:categorise(c)}));
   const order = {rec:0,syn:1,other:2,skip:3};
   items.sort((a,b)=>{
@@ -3118,33 +3544,22 @@ function renderPickerAdd() {
     return va-vb || a.name.localeCompare(b.name);
   });
 
-  if (!items.length) { el.innerHTML=`<div class="picker-empty">${q?'No cards match.':'No priority cards — try searching.'}</div>`; return; }
+  if (!items.length) { el.innerHTML='<div class="picker-empty">No priority cards — try searching.</div>'; return; }
 
   const vs = {rec:'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)',syn:'background:rgba(200,146,42,.15);color:var(--amber-bright);border:1px solid rgba(200,146,42,.3)',other:'',skip:''};
-  let html = '';
-  if (!q) {
-    [{key:'rec',label:'recommended'},{key:'syn',label:'synergy'},{key:'other',label:'other cards'}].forEach(g=>{
-      const ownCards = items.filter(c=>c.cat.v===g.key && !c.crossChar);
-      const crossCards = items.filter(c=>c.cat.v===g.key && c.crossChar);
-      if (!ownCards.length && !crossCards.length) return;
-      html += `<div class="picker-group-label">${g.label}</div>`;
-      ownCards.forEach(c=>{ html += pickerRowHtmlAdd(c, typeCls, vs); });
-      if (crossCards.length > 0) {
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--text-muted);opacity:.6;text-transform:uppercase;padding:4px 2px 2px;margin-top:2px">from other characters</div>`;
-        crossCards.forEach(c=>{ html += pickerRowHtmlAdd(c, typeCls, vs); });
-      }
-    });
-  } else {
-    // When searching: show own char cards first, then cross-char with a separator
-    const ownItems = items.filter(c=>!c.crossChar);
-    const crossItems = items.filter(c=>c.crossChar);
-    ownItems.forEach(c=>{ html += pickerRowHtmlAdd(c, typeCls, vs); });
-    if (crossItems.length > 0) {
-      if (ownItems.length > 0) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--text-muted);opacity:.6;text-transform:uppercase;padding:4px 2px 2px;margin-top:4px">from other characters</div>`;
-      crossItems.forEach(c=>{ html += pickerRowHtmlAdd(c, typeCls, vs); });
+  let html = '<div style="font-size:10px;color:var(--text-muted);font-style:italic;padding:2px 2px 6px">Search a card name for full build details.</div>';
+  [{key:'rec',label:'recommended'},{key:'syn',label:'synergy'},{key:'other',label:'other cards'}].forEach(g=>{
+    const ownCards = items.filter(c=>c.cat.v===g.key && !c.crossChar);
+    const crossCards = items.filter(c=>c.cat.v===g.key && c.crossChar);
+    if (!ownCards.length && !crossCards.length) return;
+    html += `<div class="picker-group-label">${g.label}</div>`;
+    ownCards.forEach(c=>{ html += pickerRowHtmlAdd(c, typeCls, vs); });
+    if (crossCards.length > 0) {
+      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--text-muted);opacity:.6;text-transform:uppercase;padding:4px 2px 2px;margin-top:2px">from other characters</div>`;
+      crossCards.forEach(c=>{ html += pickerRowHtmlAdd(c, typeCls, vs); });
     }
-  }
-  el.innerHTML = html || '<div class="picker-empty">No cards match.</div>';
+  });
+  el.innerHTML = html || '<div class="picker-empty">No priority cards — try searching.</div>';
 }
 
 function renderPickerList() {
@@ -4789,169 +5204,6 @@ function importDeckFile(event) {
     }
   };
   reader.readAsText(file);
-}
-
-// ============================================================
-// CARD REWARD CHECK SEARCH
-// ============================================================
-function renderCardCheck() {
-  const input = document.getElementById('cardCheckInput');
-  const resultsEl = document.getElementById('cardCheckResults');
-  if (!input || !resultsEl) return;
-
-  const q = input.value.trim().toLowerCase();
-  if (!q || !currentChar) {
-    resultsEl.innerHTML = '';
-    return;
-  }
-
-  const allCards = getAllCardsForPicker();
-  const builds = BUILD_DATA[currentChar].builds;
-  const engines = BUILD_ENGINES[currentChar] || {};
-  const spData = SAFE_PICKS[currentChar] || { early: [], generic: [] };
-  const allSafePicks = new Set([...spData.early, ...spData.generic]);
-
-  // Find matching cards
-  const matches = allCards.filter(c => c.name.toLowerCase().includes(q)).slice(0, 8);
-
-  if (!matches.length) {
-    resultsEl.innerHTML = '<div class="card-check-empty">No cards match.</div>';
-    return;
-  }
-
-  let html = '';
-
-  matches.forEach(card => {
-    const name = card.name;
-    const alreadyInDeck = deck[name] ? deck[name] : 0;
-
-    // Check engine membership across all builds
-    const engineMatches = [];
-    Object.entries(engines).forEach(([buildKey, engData]) => {
-      if (engData.cards.includes(name)) {
-        const build = builds[buildKey];
-        engineMatches.push({ buildKey, buildName: build ? build.name : buildKey, buildColor: build ? build.color : 'var(--teal-bright)', label: engData.label });
-      }
-    });
-
-    // Check priority/rec card membership
-    const priorityMatches = [];
-    Object.entries(builds).forEach(([buildKey, build]) => {
-      if ((build.recs || []).includes(name) || (build.cards || []).includes(name)) {
-        if (!engineMatches.find(e => e.buildKey === buildKey)) {
-          priorityMatches.push({ buildKey, buildName: build.name, buildColor: build.color, rank: build.rank });
-        }
-      }
-    });
-
-    // Check safe pick
-    const isSafeEarly = spData.early.includes(name);
-    const isSafeGeneric = spData.generic.includes(name);
-    const isSafe = isSafeEarly || isSafeGeneric;
-
-    // Determine top-level verdict and colour
-    let borderColor, bgColor, verdictLabel, verdictStyle;
-    if (engineMatches.length > 0) {
-      borderColor = 'rgba(74,154,138,.5)';
-      bgColor = 'rgba(74,154,138,.08)';
-      verdictLabel = 'ENGINE PIECE';
-      verdictStyle = 'background:rgba(74,154,138,.2);color:var(--teal-bright);border:1px solid rgba(74,154,138,.4)';
-    } else if (priorityMatches.length > 0) {
-      borderColor = 'rgba(106,172,95,.45)';
-      bgColor = 'rgba(74,124,63,.08)';
-      verdictLabel = 'PRIORITY';
-      verdictStyle = 'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)';
-    } else if (isSafe) {
-      borderColor = 'rgba(200,146,42,.35)';
-      bgColor = 'rgba(200,146,42,.06)';
-      verdictLabel = isSafeEarly ? 'SAFE — TAKE EARLY' : 'SAFE PICK';
-      verdictStyle = 'background:rgba(200,146,42,.15);color:var(--amber-bright);border:1px solid rgba(200,146,42,.3)';
-    } else {
-      borderColor = 'var(--border)';
-      bgColor = 'var(--bg2)';
-      verdictLabel = 'NOT A PRIORITY';
-      verdictStyle = 'background:rgba(100,90,70,.15);color:var(--text-muted);border:1px solid var(--border)';
-    }
-
-    const typeTag = (() => {
-      const t = card.type || 'skl';
-      const cls = t.startsWith('atk') ? 'tag-atk' : t.startsWith('def') ? 'tag-def' : t === 'pow' ? 'tag-pow' : 'tag-skl';
-      return `<span class="deck-item-tag ${cls}" style="font-size:9px;padding:1px 5px">${t.replace(/_/g, '·').toUpperCase()}</span>`;
-    })();
-
-    const deckTag = alreadyInDeck > 0
-      ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×${alreadyInDeck}</span>`
-      : '';
-
-    const crossTag = card.crossChar
-      ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">${card.crossCharName}</span>`
-      : '';
-
-    html += `<div class="card-check-match" style="border-color:${borderColor};background:${bgColor}">`;
-    html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">`;
-    html += `<span class="card-check-match-name">${name}</span>`;
-    html += tierBadgeHtml(name);
-    html += `${typeTag}${deckTag}${crossTag}`;
-    html += card.rarity ? rarityBadgeHtml(card.rarity) : '';
-    html += `<span class="card-check-verdict" style="${verdictStyle}">${verdictLabel}</span>`;
-    html += `</div>`;
-
-    // Tier context note (from v0.103.2 research)
-    const tierNote = getCardTierNote(name);
-    if (tierNote) {
-      const tierInfo = getCardTier(name);
-      const tierColor = {S:'#e8b84b',A:'#6aac5f',B:'#6aacda',C:'#a090b0',D:'#c06060'}[tierInfo.tier] || 'var(--text-muted)';
-      html += `<div style="font-size:11px;color:${tierColor};margin-bottom:4px;font-style:italic;opacity:.9">${tierInfo.tier}-tier: ${tierNote}</div>`;
-    }
-
-    // Engine detail rows
-    if (engineMatches.length > 0) {
-      engineMatches.forEach(e => {
-        const haveCount = e.buildKey && engines[e.buildKey] ? engines[e.buildKey].cards.filter(n => deck[n]).length : 0;
-        const totalCount = e.buildKey && engines[e.buildKey] ? engines[e.buildKey].cards.length : 0;
-        html += `<div style="font-size:11px;margin-bottom:2px">`;
-        html += `<span style="color:${e.buildColor};font-family:'Cinzel',serif;font-size:11px">${e.buildName}</span>`;
-        html += ` <span style="color:var(--text-muted)">— ${e.label}</span>`;
-        html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--teal-bright)">(${haveCount}/${totalCount} engine cards in deck)</span>`;
-        html += `</div>`;
-      });
-    }
-
-    // Priority build rows
-    if (priorityMatches.length > 0) {
-      priorityMatches.forEach(p => {
-        html += `<div style="font-size:11px;margin-bottom:2px">`;
-        html += `<span style="color:${p.buildColor};font-family:'Cinzel',serif;font-size:11px">${p.buildName}</span>`;
-        if (p.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">[${p.rank}]</span>`;
-        html += `</div>`;
-      });
-    }
-
-    // Safe pick context
-    if (isSafe && engineMatches.length === 0 && priorityMatches.length === 0) {
-      html += `<div style="font-size:11px;color:var(--text-muted)">Useful across most builds — safe to take regardless of your path.</div>`;
-    }
-
-    // No match explanation
-    if (engineMatches.length === 0 && priorityMatches.length === 0 && !isSafe) {
-      html += `<div style="font-size:11px;color:var(--text-muted)">Not on the priority list for any ${currentChar.charAt(0).toUpperCase() + currentChar.slice(1)} build. Skip unless you have a specific reason.</div>`;
-    }
-
-    // Card note
-    if (card.note) {
-      html += `<div class="card-check-match-note">${card.note}</div>`;
-    }
-
-    // Quick add button if not already in deck
-    if (alreadyInDeck === 0) {
-      const safeN = name.replace(/'/g, "\\'");
-      html += `<div style="margin-top:5px"><button onclick="addCard('${safeN}');renderCardCheck();" style="padding:3px 9px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber-bright)'" onmouseout="this.style.borderColor='var(--border-bright)';this.style.color='var(--text-muted)'">+ add to deck</button></div>`;
-    }
-
-    html += `</div>`;
-  });
-
-  resultsEl.innerHTML = html;
 }
 
 init();
