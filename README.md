@@ -24,10 +24,6 @@ The engine calculates a complex `card_score` based on:
 3. **Synergy Modeling:** Bonus points for card-to-card dependencies.
 4. **Boss Adaptation:** Tips tailored to the specific boss encounter.
 
-## 📁 Project Structure
-- `sts2-build-advisor.html` : The main web application.
-- `/docs` : Technical research, scoring formulas, and engine definitions.
-
 ## 🤝 Contributing
 Feedback, bug reports, and pull requests are welcome! If you notice an incorrect interaction or want to suggest a new synergy pair, please [open an issue](https://github.com/MrAnime-0001/Spire-Forge/issues).
 
