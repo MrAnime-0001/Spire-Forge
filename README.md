@@ -5,7 +5,7 @@ A high-performance, web-based **Build Advisor and Strategy Tool** for *Slay the 
 ---
 
 ## 🚀 Live Demo
-Access the advisor directly: [https://mranime-0001.github.io/Spire-Forge/](https://mranime-0001.github.io/Spire-Forge/)
+Access the advisor directly: [https://mranime-0001.github.io/Spire-Forge/](https://mranime-0001.github.io/Spire-Forge/sts2-build-advisor.html)
 
 ---
 
