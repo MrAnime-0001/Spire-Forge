@@ -279,6 +279,8 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 .card-check-match-note{font-size:11px;color:var(--text-muted);font-style:italic;}
 .card-check-empty{font-size:12px;color:var(--text-muted);font-style:italic;padding:4px 2px;}
 .card-check-verdict{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:2px;white-space:nowrap;}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+#restoreToast{animation:fadeSlideIn .3s ease;}
 </style>
 </head>
 <body>
@@ -302,7 +304,7 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
     <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:auto;flex-shrink:0">
       <span style="display:flex;align-items:center;gap:6px">
         <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.06em">gold</span>
-        <input type="number" id="goldInput" value="0" min="0" max="9999" oninput="updateGoldAdvice()" style="width:60px;background:var(--bg2);border:1px solid var(--border-bright);border-radius:3px;padding:3px 6px;color:var(--amber-bright);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;text-align:center">
+        <input type="number" id="goldInput" value="0" min="0" max="9999" oninput="updateGoldAdvice();autoSave()" style="width:60px;background:var(--bg2);border:1px solid var(--border-bright);border-radius:3px;padding:3px 6px;color:var(--amber-bright);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;text-align:center">
         <span style="display:flex;gap:3px">
           <button onclick="setGold(0)" class="gold-preset">0</button>
           <button onclick="setGold(100)" class="gold-preset">100</button>
@@ -325,9 +327,9 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
   <div class="health-row">
     <span class="health-label">HP</span>
     <div class="health-inputs">
-      <input type="number" id="hpCur" value="80" min="1" max="999" oninput="updateResult()">
+      <input type="number" id="hpCur" value="80" min="1" max="999" oninput="updateResult();autoSave()">
       <span class="health-sep">/</span>
-      <input type="number" id="hpMax" value="80" min="1" max="999" oninput="updateResult()">
+      <input type="number" id="hpMax" value="80" min="1" max="999" oninput="updateResult();autoSave()">
     </div>
     <span style="font-size:12px;color:var(--text-muted);margin-left:6px;" id="hpAdvice"></span>
   </div>
@@ -2359,6 +2361,7 @@ function init() {
   }
   updateActUI();
   updateAscUI();
+  autoRestore();
 }
 
 function setAsc(n) {
@@ -2366,6 +2369,7 @@ function setAsc(n) {
   updateAscUI();
   updateResult();
   renderBossAlert();
+  autoSave();
 }
 
 function updateAscUI() {
@@ -2397,6 +2401,7 @@ function selectChar(key) {
   updateResult();
   updatePriorityPanel();
   renderPickerList();
+  autoSave();
 }
 
 function loadDefaultDeck(key) {
@@ -2418,12 +2423,14 @@ function resetRun() {
   updateResult();
   updatePriorityPanel();
   renderPickerList();
+  autoSave();
 }
 
 function setAct(n) {
   currentAct = n;
   updateActUI();
   updateResult();
+  autoSave();
 }
 
 function updateActUI() {
@@ -2448,6 +2455,7 @@ function addCard(name, count = 1) {
   updateResult();
   updatePriorityPanel();
   if (document.getElementById('inlinePicker').style.display !== 'none') renderPickerList();
+  autoSave();
 }
 
 function adjustQty(name, delta) {
@@ -2457,6 +2465,7 @@ function adjustQty(name, delta) {
   updateResult();
   updatePriorityPanel();
   if (document.getElementById('inlinePicker').style.display !== 'none') renderPickerList();
+  autoSave();
 }
 
 function deckCards() {
@@ -3115,6 +3124,7 @@ function confirmLoad(i) {
   updatePriorityPanel();
   renderPickerList();
   closeLoadModal();
+  autoSave();
 }
 
 function deleteSave(i) {
@@ -3126,6 +3136,85 @@ function deleteSave(i) {
 
 document.getElementById('saveOverlay').addEventListener('click', function(e) { if(e.target===this) closeSaveModal(); });
 document.getElementById('loadOverlay').addEventListener('click', function(e) { if(e.target===this) closeLoadModal(); });
+
+// ============================================================
+// AUTO-SAVE (session recovery)
+// ============================================================
+const AUTO_SAVE_KEY = 'sts2_session';
+let _autoSaveTimer = null;
+
+function autoSave() {
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(function() {
+    if (!currentChar) return;
+    try {
+      localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify({
+        char: currentChar,
+        act: currentAct,
+        asc: currentAsc,
+        deck: Object.assign({}, deck),
+        hp: document.getElementById('hpCur').value,
+        hpMax: document.getElementById('hpMax').value,
+        gold: document.getElementById('goldInput').value,
+        boss: selectedBoss,
+        ts: Date.now()
+      }));
+    } catch(e) {}
+  }, 600);
+}
+
+function autoRestore() {
+  try {
+    var raw = localStorage.getItem(AUTO_SAVE_KEY);
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    if (!s || !s.char || !s.deck) return;
+    if (s.ts && Date.now() - s.ts > 86400000) { localStorage.removeItem(AUTO_SAVE_KEY); return; }
+    currentChar = s.char;
+    currentAct = s.act || 1;
+    currentAsc = s.asc || 0;
+    deck = Object.assign({}, s.deck);
+    selectedBoss = s.boss || null;
+    document.querySelectorAll('.char-btn').forEach(function(b){ b.classList.remove('active'); });
+    var charBtn = document.getElementById('char-' + currentChar);
+    if (charBtn) charBtn.classList.add('active');
+    if (s.hp) document.getElementById('hpCur').value = s.hp;
+    if (s.hpMax) document.getElementById('hpMax').value = s.hpMax;
+    if (s.gold !== undefined) document.getElementById('goldInput').value = s.gold;
+    document.getElementById('mainUI').style.display = 'block';
+    document.getElementById('inlinePicker').style.display = 'block';
+    updateActUI();
+    updateAscUI();
+    renderDeck();
+    updateResult();
+    updatePriorityPanel();
+    renderPickerList();
+    updateGoldAdvice();
+    renderBossAlert();
+    _showRestoreToast(s);
+  } catch(e) {}
+}
+
+function _showRestoreToast(s) {
+  var charLabel = {ironclad:'Ironclad',silent:'Silent',defect:'Defect',necrobinder:'Necrobinder',regent:'Regent'};
+  var total = Object.values(s.deck||{}).reduce(function(a,b){return a+b;},0);
+  var when = s.ts ? new Date(s.ts).toLocaleTimeString() : '';
+  var toast = document.createElement('div');
+  toast.id = 'restoreToast';
+  toast.innerHTML = '<strong style="color:var(--amber-bright)">Session restored</strong> &mdash; ' +
+    (charLabel[s.char]||s.char) + ' &bull; Act ' + (s.act||1) + ' &bull; ' + total + ' cards' +
+    (when ? ' &bull; saved ' + when : '') +
+    ' <button onclick="clearAutoSave()" style="background:none;border:1px solid rgba(200,146,42,.4);border-radius:2px;color:var(--text-muted);font-family:\'Share Tech Mono\',monospace;font-size:9px;cursor:pointer;padding:2px 7px;margin-left:10px;letter-spacing:.05em">DISMISS</button>';
+  toast.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;background:#1f1c15;border:1px solid var(--amber);border-radius:5px;padding:.75rem 1.1rem;font-size:12px;color:var(--text);z-index:200;max-width:420px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity .4s;';
+  document.body.appendChild(toast);
+  setTimeout(function(){ toast.style.opacity='0'; setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 420); }, 6000);
+}
+
+function clearAutoSave() {
+  localStorage.removeItem(AUTO_SAVE_KEY);
+  var toast = document.getElementById('restoreToast');
+  if (toast) { toast.style.opacity='0'; setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 420); }
+}
 
 // ============================================================
 // CARD POOL HELPER — own char + colorless first, other chars last
@@ -4859,6 +4948,7 @@ function setBoss(name) {
     }
   }
   renderBossAlert();
+  autoSave();
 }
 
 // ============================================================
