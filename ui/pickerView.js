@@ -23,6 +23,14 @@ function switchPickerTab(tab) {
     renderPickerAdd();
   }
   document.getElementById('pickerSearch').focus();
+  
+  // Session 3 UI improvement: highlight reward tab if pool is active
+  const rTab = document.getElementById('ptab-reward');
+  if (rewardOffered.length > 0 && pickerTab !== 'reward') {
+    rTab.style.borderBottom = '2px solid var(--amber)';
+  } else {
+    rTab.style.borderBottom = '';
+  }
 }
 
 // --- REWARD TAB ---

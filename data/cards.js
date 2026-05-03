@@ -3,8 +3,8 @@
 
 const ALL_CARDS = {
 ironclad: [
-  {name:"Strike",type:"atk",cost:1,rarity:"basic",note:"Starter. Remove when possible in Act 3."},
-  {name:"Bash",type:"atk",cost:2,rarity:"basic",note:"Starter. 10 dmg + 2 Vulnerable. Remove once you have better attacks."},
+  {name:"Strike",type:"atk",cost:1,rarity:"basic",note:"Starter. Core card until you find better alternatives."},
+  {name:"Bash",type:"atk",cost:2,rarity:"basic",note:"Starter. 12 dmg + 2 Vulnerable. Buffed in v0.103.3."},
   {name:"Defend",type:"def",cost:1,rarity:"basic",note:"Starter. Remove when possible in Act 3."},
   // Common attacks
   {name:"Anger",type:"atk",cost:0,rarity:"common",note:"0-cost. Adds a copy to discard. Good with Exhaust."},

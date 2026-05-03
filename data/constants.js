@@ -1,6 +1,27 @@
 // Shared constants and lookup tables for STS2 Build Advisor.
 // Keep this file data-only.
 
+const DECK_THRESHOLDS = {
+  lean: 10,
+  healthyMin: 15,
+  bloated: 25,
+  tooLarge: 30,
+  heavyAtkPct: 45,
+  heavyAtkDiff: 15,
+  heavyAtkSclDiff: 10,
+  heavyDefPct: 40,
+  heavyDefDiff: 15,
+  heavySclPct: 45,
+  heavySclDiff: 15,
+  lowVelScore: 25,
+  lowVelMinDeck: 8,
+  lowBlkScore: 25,
+  lowDmgScore: 25,
+  heavyAtkBlkReq: 40,
+  heavyDefDmgReq: 40,
+  heavySclDmgReq: 35
+};
+
 const ACT_ADVICE = [
   "Sprint to 100 damage in 3 turns. Fight 3+ Elites. Take almost every card reward.",
   "Find your scaling engine now. Start skipping cards that don't fit your archetype.",

@@ -492,6 +492,20 @@ function init() {
   updateActUI();
   updateAscUI();
   autoRestore();
+
+  subscribe(() => {
+    updateActUI();
+    updateAscUI();
+    updateGoldAdvice();
+    renderBossAlert();
+    renderDeckList();
+    updateResult();
+    updatePriorityPanel();
+    if (document.getElementById('inlinePicker').style.display !== 'none') {
+      renderPickerList();
+    }
+    autoSave();
+  });
 }
 
 document.getElementById('saveOverlay').addEventListener('click', function(e) { if(e.target===this) closeSaveModal(); });

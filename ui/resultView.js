@@ -317,24 +317,14 @@ function updateResult() {
   const deckNames = Object.keys(deck);
   const deckNameSet = new Set(deckNames);
 
-  const scores = {};
-  Object.entries(builds).forEach(([key, build]) => {
-    const hits = deckNames.filter(n => build.cards.includes(n)).length;
-    const pct = Math.round(hits / build.cards.length * 100);
-    const engData = (BUILD_ENGINES[currentChar] || {})[key];
-    const engHave = engData ? engData.cards.filter(n => deckNameSet.has(n)).length : 0;
-    const engTotal = engData ? engData.cards.length : 0;
-    const engPct = engTotal > 0 ? engHave / engTotal : 0;
-    scores[key] = { hits, total: build.cards.length, pct, engPct };
-  });
-
-  const RANK_ORDER_R = {S:4, A:3, B:2, C:1};
-  const ranked = Object.entries(scores).sort((a, b) => {
-    if (Math.abs(b[1].engPct - a[1].engPct) > 0.001) return b[1].engPct - a[1].engPct;
-    const rankDiff = (RANK_ORDER_R[builds[b[0]].rank] || 0) - (RANK_ORDER_R[builds[a[0]].rank] || 0);
-    if (rankDiff !== 0) return rankDiff;
-    return b[1].pct - a[1].pct;
-  });
+  const { scores, ranked } = getBuildScores();
+  if (!ranked || ranked.length === 0) {
+    box.innerHTML = '<div class="placeholder"><div class="placeholder-icon">⚔</div><p>Add cards to your deck to see your build path.</p></div>';
+    renderDeckHealth();
+    renderEngineTracker();
+    renderBossAlert();
+    return;
+  }
   const [topKey] = ranked[0];
 
   box.innerHTML = renderBuildResults(ranked, builds, deckNameSet, topKey);

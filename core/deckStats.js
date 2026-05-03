@@ -42,46 +42,46 @@ function getDeckSizeProfile() {
 
   // Determine what the deck is over-represented in
   // "Heavy" = that category is notably above the others and above a threshold
-  const heavyAtk = pAtk > 45 && pAtk > pDef + 15 && pAtk > pScl + 10;
-  const heavyDef = pDef > 40 && pDef > pAtk + 15;
-  const heavyScl = pScl > 45 && pScl > pAtk + 15;
-  const lowVel   = velScore < 25 && total > 8;
+  const heavyAtk = pAtk > DECK_THRESHOLDS.heavyAtkPct && pAtk > pDef + DECK_THRESHOLDS.heavyAtkDiff && pAtk > pScl + DECK_THRESHOLDS.heavyAtkSclDiff;
+  const heavyDef = pDef > DECK_THRESHOLDS.heavyDefPct && pDef > pAtk + DECK_THRESHOLDS.heavyDefDiff;
+  const heavyScl = pScl > DECK_THRESHOLDS.heavySclPct && pScl > pAtk + DECK_THRESHOLDS.heavySclDiff;
+  const lowVel   = velScore < DECK_THRESHOLDS.lowVelScore && total > DECK_THRESHOLDS.lowVelMinDeck;
 
   // Build a focused "what to add next" recommendation
   function getNextFocusTip() {
-    if (total < 10) return 'Add more playable cards first. Statuses like Dazed can wreck draws in a tiny deck.';
-    if (total < 15) return 'Deck is thin — statuses can clog a high share of your hand. Keep adding until 15.';
+    if (total < DECK_THRESHOLDS.lean) return 'Add more playable cards first. Statuses like Dazed can wreck draws in a tiny deck.';
+    if (total < DECK_THRESHOLDS.healthyMin) return 'Deck is thin — statuses can clog a high share of your hand. Keep adding until ' + DECK_THRESHOLDS.healthyMin + '.';
 
     // Composition-specific guidance for when deck is large
-    if (total > 25) {
+    if (total > DECK_THRESHOLDS.bloated) {
       const gaps = [];
       if (heavyAtk)      gaps.push('stop adding attacks');
       if (heavyDef)      gaps.push('stop adding block cards');
       if (heavyScl)      gaps.push('stop adding scaling');
       if (lowVel)        gaps.push('add draw or energy cards');
-      if (!lowVel && axes && axes.blk < 25) gaps.push('add block cards');
-      if (!lowVel && axes && axes.dmg < 25) gaps.push('add attack cards');
+      if (!lowVel && axes && axes.blk < DECK_THRESHOLDS.lowBlkScore) gaps.push('add block cards');
+      if (!lowVel && axes && axes.dmg < DECK_THRESHOLDS.lowDmgScore) gaps.push('add attack cards');
 
       if (gaps.length > 0) return `Deck is large: ${gaps.join(', ')}.`;
       return `Deck is large. Only add cards that directly fix a weakness — every new card dilutes your best draws.`;
     }
 
     // In healthy range — give a directional tip based on what's missing
-    if (heavyAtk && axes && axes.blk < 40) return `Attack-heavy (${pAtk}%). Next reward: prioritise block or scaling cards over more attacks.`;
-    if (heavyDef && axes && axes.dmg < 40) return `Defense-heavy (${pDef}%). Next reward: you can afford to add damage or scaling instead of more block.`;
-    if (heavyScl && axes && axes.dmg < 35) return `Scaling-heavy (${pScl}%). Make sure you have enough attacks to apply the scaling before Act 2.`;
+    if (heavyAtk && axes && axes.blk < DECK_THRESHOLDS.heavyAtkBlkReq) return `Attack-heavy (${pAtk}%). Next reward: prioritise block or scaling cards over more attacks.`;
+    if (heavyDef && axes && axes.dmg < DECK_THRESHOLDS.heavyDefDmgReq) return `Defense-heavy (${pDef}%). Next reward: you can afford to add damage or scaling instead of more block.`;
+    if (heavyScl && axes && axes.dmg < DECK_THRESHOLDS.heavySclDmgReq) return `Scaling-heavy (${pScl}%). Make sure you have enough attacks to apply the scaling before Act 2.`;
     if (lowVel) return `Velocity is low (${velScore}/100). Draw and energy cards will make every other card more consistent.`;
     return 'Good composition. Keep adding cards that fit your build path.';
   }
 
   let zone, color, label;
-  if (total < 10) {
+  if (total < DECK_THRESHOLDS.lean) {
     zone = 'lean'; color = 'var(--amber-bright)'; label = 'Very Lean';
-  } else if (total < 15) {
+  } else if (total < DECK_THRESHOLDS.healthyMin) {
     zone = 'lean'; color = 'var(--amber)'; label = 'Lean';
-  } else if (total <= 25) {
+  } else if (total <= DECK_THRESHOLDS.bloated) {
     zone = 'sweet'; color = 'var(--green-bright)'; label = 'Healthy';
-  } else if (total <= 30) {
+  } else if (total <= DECK_THRESHOLDS.tooLarge) {
     zone = 'bloated'; color = 'var(--amber)'; label = 'Bloated';
   } else {
     zone = 'danger'; color = '#c06060'; label = 'Too Large';

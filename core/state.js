@@ -14,12 +14,19 @@ let hpCur = 0;
 
 let hpMax = 0;
 
+const stateListeners = [];
+
+function subscribe(callback) {
+  stateListeners.push(callback);
+}
+
+function notifyListeners() {
+  stateListeners.forEach(cb => cb());
+}
+
 function setAsc(n) {
   currentAsc = n;
-  updateAscUI();
-  updateResult();
-  renderBossAlert();
-  autoSave();
+  notifyListeners();
 }
 
 function selectChar(key) {
@@ -34,12 +41,7 @@ function selectChar(key) {
   document.getElementById('hpMax').value = hp;
   document.getElementById('mainUI').style.display = 'block';
   document.getElementById('inlinePicker').style.display = 'block';
-  updateActUI();
-  renderDeckList();
-  updateResult();
-  updatePriorityPanel();
-  renderPickerList();
-  autoSave();
+  notifyListeners();
 }
 
 function loadDefaultDeck(key) {
@@ -57,38 +59,23 @@ function resetRun() {
   document.getElementById('hpCur').value = hp;
   document.getElementById('hpMax').value = hp;
   document.getElementById('inlinePicker').style.display = 'block';
-  updateActUI();
-  renderDeckList();
-  updateResult();
-  updatePriorityPanel();
-  renderPickerList();
-  autoSave();
+  notifyListeners();
 }
 
 function setAct(n) {
   currentAct = n;
-  updateActUI();
-  updateResult();
-  autoSave();
+  notifyListeners();
 }
 
 function addCard(name, count = 1) {
   deck[name] = (deck[name] || 0) + count;
-  renderDeckList();
-  updateResult();
-  updatePriorityPanel();
-  if (document.getElementById('inlinePicker').style.display !== 'none') renderPickerList();
-  autoSave();
+  notifyListeners();
 }
 
 function adjustQty(name, delta) {
   deck[name] = Math.max(0, (deck[name] || 0) + delta);
   if (deck[name] === 0) delete deck[name];
-  renderDeckList();
-  updateResult();
-  updatePriorityPanel();
-  if (document.getElementById('inlinePicker').style.display !== 'none') renderPickerList();
-  autoSave();
+  notifyListeners();
 }
 
 function deckCards() {
@@ -102,7 +89,7 @@ function getDeckSize() { return Object.values(deck).reduce((a,b)=>a+b,0); }
 function setGold(v) {
   gold = v;
   document.getElementById('goldInput').value = v;
-  updateGoldAdvice();
+  notifyListeners();
 }
 
 function setHP(cur, max) {
@@ -110,6 +97,7 @@ function setHP(cur, max) {
   if (max !== undefined) hpMax = max;
   document.getElementById('hpCur').value = hpCur;
   if (max !== undefined) document.getElementById('hpMax').value = hpMax;
+  notifyListeners();
 }
 
 function removeCard(cardName) {
