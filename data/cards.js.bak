@@ -16,7 +16,18 @@ const ALL_CARDS = {
       "type": "atk",
       "cost": 2,
       "rarity": "basic",
-      "note": "Starter. 12 dmg + 2 Vulnerable. Buffed in v0.103.3."
+      "note": "Starter. 8 dmg + 2 Vulnerable.",
+      "description": "Deal 8 damage. Apply 2 Vulnerable."
+    },
+    {
+      "name": "Bash+",
+      "type": "atk",
+      "cost": 2,
+      "rarity": "basic",
+      "note": "Upgraded Bash. 10 dmg + 3 Vulnerable.",
+      "description": "Deal 10 damage. Apply 3 Vulnerable.",
+      "isUpgraded": true,
+      "baseCard": "Bash"
     },
     {
       "name": "Defend",
@@ -703,21 +714,54 @@ const ALL_CARDS = {
       "type": "atk",
       "cost": 0,
       "rarity": "event",
-      "note": "14 dmg. Only if all hand cards are Attacks. 0-cost high damage."
+      "note": "14 dmg. Only if all hand cards are Attacks. 0-cost high damage.",
+      "description": "Can only be played if every card in your Hand is an Attack. Deal 14 damage."
+    },
+    {
+      "name": "Clash+",
+      "type": "atk",
+      "cost": 0,
+      "rarity": "event",
+      "note": "Upgraded Clash. 18 dmg. Only if all hand cards are Attacks.",
+      "description": "Can only be played if every card in your Hand is an Attack. Deal 18 damage.",
+      "isUpgraded": true,
+      "baseCard": "Clash"
     },
     {
       "name": "Dual Wield",
       "type": "skl",
       "cost": 1,
       "rarity": "event",
-      "note": "Add a copy of an Attack or Power from hand to hand. Duplication."
+      "note": "Add a copy of an Attack or Power from hand to hand. Duplication.",
+      "description": "Choose an Attack or Power card. Add a copy of that card into your Hand."
+    },
+    {
+      "name": "Dual Wield+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "event",
+      "note": "Upgraded Dual Wield. Add 2 copies of an Attack or Power from hand.",
+      "description": "Choose an Attack or Power card. Add 2 copies of that card into your Hand.",
+      "isUpgraded": true,
+      "baseCard": "Dual Wield"
     },
     {
       "name": "Entrench",
       "type": "def_skl",
       "cost": 2,
       "rarity": "event",
-      "note": "Double your current Block. Huge with Barricade."
+      "note": "Double your current Block. Huge with Barricade.",
+      "description": "Double your StS2 Intent Defend.png Block."
+    },
+    {
+      "name": "Entrench+",
+      "type": "def_skl",
+      "cost": 1,
+      "rarity": "event",
+      "note": "Upgraded Entrench. 1 cost. Double your current Block.",
+      "description": "Double your StS2 Intent Defend.png Block.",
+      "isUpgraded": true,
+      "baseCard": "Entrench"
     },
     {
       "name": "Defend+",
@@ -2300,21 +2344,54 @@ const ALL_CARDS = {
       "type": "atk",
       "cost": 1,
       "rarity": "event",
-      "note": "Whenever attacked, deal 3 damage back. Passive thorns."
+      "note": "Whenever attacked, deal 3 damage back. Passive thorns.",
+      "description": "Whenever you are attacked, deal 3 damage back."
+    },
+    {
+      "name": "Caltrops+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "event",
+      "note": "Upgraded Caltrops. Whenever attacked, deal 5 damage back.",
+      "description": "Whenever you are attacked, deal 5 damage back.",
+      "isUpgraded": true,
+      "baseCard": "Caltrops"
     },
     {
       "name": "Distraction",
       "type": "vel",
+      "cost": 1,
+      "rarity": "event",
+      "note": "Add a random free Skill to hand. Exhaust.",
+      "description": "Add a random Skill into your Hand. It's free to play this turn. Exhaust."
+    },
+    {
+      "name": "Distraction+",
+      "type": "vel",
       "cost": 0,
       "rarity": "event",
-      "note": "Add a random free Skill to hand. Exhaust."
+      "note": "Upgraded Distraction. 0 cost. Add a random free Skill to hand. Exhaust.",
+      "description": "Add a random Skill into your Hand. It's free to play this turn. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Distraction"
     },
     {
       "name": "Outmaneuver",
       "type": "skl",
       "cost": 0,
       "rarity": "event",
-      "note": "Gain 2 Energy next turn. Energy banking."
+      "note": "Gain 2 Energy next turn. Energy banking.",
+      "description": "Next turn, gain StS2 EnergySilent.pngStS2 EnergySilent.png."
+    },
+    {
+      "name": "Outmaneuver+",
+      "type": "skl",
+      "cost": 0,
+      "rarity": "event",
+      "note": "Upgraded Outmaneuver. Gain 3 Energy next turn.",
+      "description": "Next turn, gain StS2 EnergySilent.pngStS2 EnergySilent.pngStS2 EnergySilent.png.",
+      "isUpgraded": true,
+      "baseCard": "Outmaneuver"
     },
     {
       "name": "Defend+",
@@ -3583,7 +3660,18 @@ const ALL_CARDS = {
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "7 dmg to random enemy twice. Multi-hit."
+      "note": "7 dmg to random enemy twice. Multi-hit.",
+      "description": "Deal 7 damage to a random enemy twice."
+    },
+    {
+      "name": "Rip and Tear+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "uncommon",
+      "note": "Upgraded Rip and Tear. 9 dmg to random enemy twice.",
+      "description": "Deal 9 damage to a random enemy twice.",
+      "isUpgraded": true,
+      "baseCard": "Rip and Tear"
     },
     {
       "name": "Rocket Punch",
@@ -3718,7 +3806,18 @@ const ALL_CARDS = {
       "type": "atk",
       "cost": 2,
       "rarity": "rare",
-      "note": "10 dmg + return all 0-cost cards from discard to hand. Core Claw engine."
+      "note": "10 dmg + return all 0-cost cards from discard to hand. Core Claw engine.",
+      "description": "Deal 10 damage. Put ALL 0StS2 EnergyDefect.png cards from your Discard Pile into your Hand."
+    },
+    {
+      "name": "All for One+",
+      "type": "atk",
+      "cost": 2,
+      "rarity": "rare",
+      "note": "Upgraded All for One. 14 dmg + return all 0-cost cards from discard to hand.",
+      "description": "Deal 14 damage. Put ALL 0StS2 EnergyDefect.png cards from your Discard Pile into your Hand.",
+      "isUpgraded": true,
+      "baseCard": "All for One"
     },
     {
       "name": "Buffer",
@@ -3933,35 +4032,90 @@ const ALL_CARDS = {
       "type": "skl",
       "cost": 0,
       "rarity": "event",
-      "note": "At turn start, add random Common card to hand. Event."
+      "note": "At turn start, add random Common card to hand. Event.",
+      "description": "At the start of your turn, add a random Common card into your Hand."
+    },
+    {
+      "name": "Hello World+",
+      "type": "skl",
+      "cost": 0,
+      "rarity": "event",
+      "note": "Upgraded Hello World. Innate. At turn start, add random Common card to hand.",
+      "description": "Innate. At the start of your turn, add a random Common card into your Hand.",
+      "isUpgraded": true,
+      "baseCard": "Hello World"
     },
     {
       "name": "Rebound",
       "type": "atk_vel",
       "cost": 1,
       "rarity": "event",
-      "note": "9 dmg. Next card played goes on top of draw pile. Event."
+      "note": "9 dmg. Next card played goes on top of draw pile. Event.",
+      "description": "Deal 9 damage. Put the next card you play this turn on top of your Draw Pile."
+    },
+    {
+      "name": "Rebound+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "event",
+      "note": "Upgraded Rebound. 12 dmg. Next card played goes on top of draw pile.",
+      "description": "Deal 12 damage. Put the next card you play this turn on top of your Draw Pile.",
+      "isUpgraded": true,
+      "baseCard": "Rebound"
     },
     {
       "name": "Stack",
       "type": "def",
       "cost": 1,
       "rarity": "common",
-      "note": "Block equal to discard pile size. Event. Scales with cycling."
+      "note": "Block equal to discard pile size. Event. Scales with cycling.",
+      "description": "Gain StS2 Intent Defend.png Block equal to the number of cards in your Discard Pile."
+    },
+    {
+      "name": "Stack+",
+      "type": "def",
+      "cost": 1,
+      "rarity": "common",
+      "note": "Upgraded Stack. Block equal to discard pile size +3.",
+      "description": "Gain StS2 Intent Defend.png Block equal to the number of cards in your Discard Pile +3.",
+      "isUpgraded": true,
+      "baseCard": "Stack"
     },
     {
       "name": "Panache",
       "type": "skl",
       "cost": 0,
       "rarity": "uncommon",
-      "note": "Every 5 cards played per turn, deal 10 AoE. Claw/spam synergy."
+      "note": "Every 5 cards played per turn, deal 10 AoE. Claw/spam synergy.",
+      "description": "Every time you play 5 cards in a single turn, deal 10 damage to ALL enemies."
+    },
+    {
+      "name": "Panache+",
+      "type": "skl",
+      "cost": 0,
+      "rarity": "uncommon",
+      "note": "Upgraded Panache. Every 5 cards played per turn, deal 14 AoE.",
+      "description": "Every time you play 5 cards in a single turn, deal 14 damage to ALL enemies.",
+      "isUpgraded": true,
+      "baseCard": "Panache"
     },
     {
       "name": "Flash of Steel",
       "type": "atk_vel",
       "cost": 0,
       "rarity": "uncommon",
-      "note": "0-cost. 5 dmg + draw 1. Pure Claw cycling."
+      "note": "0-cost. 5 dmg + draw 1. Pure Claw cycling.",
+      "description": "Deal 5 damage. Draw 1 card."
+    },
+    {
+      "name": "Flash of Steel+",
+      "type": "atk_vel",
+      "cost": 0,
+      "rarity": "uncommon",
+      "note": "Upgraded Flash of Steel. 8 dmg + draw 1.",
+      "description": "Deal 8 damage. Draw 1 card.",
+      "isUpgraded": true,
+      "baseCard": "Flash of Steel"
     },
     {
       "name": "Defend+",
@@ -6998,7 +7152,7 @@ const ALL_CARDS = {
       "description": "Deal 21 damage to ALL enemies. Fill your Hand with StS2 CardIcon Status.png Debris."
     },
     {
-      "name": "Decisions Decisions",
+      "name": "Decisions, Decisions",
       "type": "vel",
       "cost": 2,
       "rarity": "rare",
@@ -7021,11 +7175,12 @@ const ALL_CARDS = {
       "description": "Next turn, put 2 cards from your Draw Pile into your Hand."
     },
     {
-      "name": "Guards",
+      "name": "GUARDS!!!",
       "type": "vel",
       "cost": 2,
       "rarity": "rare",
-      "note": "Transform hand cards into Minion Sacrifice. Exhaust. Mass sacrifice."
+      "note": "Transform hand cards into Minion Sacrifice. Exhaust. Mass sacrifice.",
+      "description": "Transform any number of cards in your Hand into StS2 CardIcon Colorless Skill Token.png Minion Sacrifice. Exhaust."
     },
     {
       "name": "Genesis",
@@ -8758,7 +8913,18 @@ const ALL_CARDS = {
       "type": "skl",
       "cost": 1,
       "rarity": "common",
-      "note": "Event. Customizable card from Tinker Time event."
+      "note": "Event. Customizable card from Tinker Time event.",
+      "description": "This card can be created and customized at the event Tinker Time."
+    },
+    {
+      "name": "Mad Science+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "common",
+      "note": "Upgraded Mad Science. Innate. Customizable card from Tinker Time event.",
+      "description": "Innate. This card can be created and customized at the event Tinker Time.",
+      "isUpgraded": true,
+      "baseCard": "Mad Science"
     },
     {
       "name": "Metamorphosis",

@@ -97,28 +97,6 @@ const BUILD_ENGINES = {
   }
 };
 
-const SAFE_PICKS = {
-  ironclad: {
-    early: ['Pommel Strike','Headbutt','Feel No Pain','True Grit','Shrug It Off','Second Wind'],
-    generic: ['Offering','Brand','True Grit','Spite','Battle Trance','Shrug It Off','Second Wind']
-  },
-  silent: {
-    early: ['Acrobatics','Leg Sweep','Footwork','Well-Laid Plans','Prepared','Dagger Throw','Backflip'],
-    generic: ['Acrobatics','Well-Laid Plans','Leg Sweep','Footwork','Afterimage','Prepared','Dagger Throw','Backflip','Adrenaline','Serpent Form']
-  },
-  defect: {
-    early: ['Boot Sequence','Defragment','Skim','Hologram','Coolheaded','FTL'],
-    generic: ['Hologram','Skim','Defragment','Loop','Capacitor','Modded','Coolheaded','Double Energy']
-  },
-  necrobinder: {
-    early: ['Reap','Defy','Snap','Fetch','Grave Warden','Friendship'],
-    generic: ['Borrowed Time','Defy','Snap','Neurosurge','Fetch','Grave Warden','Friendship','Wisp']
-  },
-  regent: {
-    early: ['Decisions Decisions','Cloak of Stars','Convergence','Solar Strike','Prophesize','Glimmer'],
-    generic: ['Cloak of Stars','Convergence','Alignment','Glow','Decisions Decisions','Prophesize','Glimmer','Photon Cut']
-  }
-};
 
 const SYNERGY_PAIRS = [
   // ── IRONCLAD ──────────────────────────────────────────────

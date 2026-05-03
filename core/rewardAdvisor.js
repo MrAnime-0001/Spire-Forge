@@ -2,7 +2,7 @@
 // Card scoring for reward picks, skip decisions, and shop advice.
 // Returns plain data objects — no DOM, no HTML.
 // Depends on: state.js, buildAnalyzer.js, deckStats.js, builds.js, constants.js
-// Also reads globals from HTML scope: selectedBoss, getCardTier(), getAllCardsForPicker(), getRarity()
+// Also reads globals from HTML scope: selectedBoss, getAllCardsForPicker(), getRarity()
 
 // ── scoreCard ────────────────────────────────────────────────
 // Score a single card against the current run state.
@@ -12,10 +12,8 @@ function scoreCard(cardName) {
 
   var builds   = (BUILD_DATA[currentChar] || {}).builds || {};
   var allCards = getAllCardsForPicker();
-  var stats    = getDeckStats();
   var total    = getDeckSize();
-  var sp       = SAFE_PICKS[currentChar] || {early: [], generic: []};
-  var IDEAL = 33, WARN = 12;
+  var axes     = calcFourAxes();
 
   var name  = cardName;
   var baseName = name.endsWith('+') ? name.slice(0, -1) : name;
@@ -47,13 +45,8 @@ function scoreCard(cardName) {
     else if (inSyn)                        synergyBuilds.push({key: key, b: b, rankMult: rankMult});
   });
 
-  var isSafePick  = sp.generic.includes(baseName);
-  var isSafeEarly = sp.early.includes(baseName);
-
-  // ── Base score from tier ─────────────────────────────────
-  var _tierInfo = getCardTier(baseName);
-  var _tierBase = _tierInfo ? ({S:10, A:7, B:5, C:3, D:1}[_tierInfo.tier] || 3) : 3;
-  var score = _tierBase;
+  // ── Base score ───────────────────────────────────────────
+  var score = 0;
   var reasons = [];
 
   // Tips mention
@@ -89,47 +82,70 @@ function scoreCard(cardName) {
     reasons.push('synergy: ' + synergyBuilds.map(function(e) { return e.b.name; }).join(', '));
   }
 
-  // Safe pick
-  if (isSafePick)  { score += 15; reasons.push('useful in any build'); }
-  if (isSafeEarly && total < 12) { score += 10; reasons.push('strong early-game card'); }
+  // ── DMG / BLOCK / SCL scoring ────────────────────────────
+  if (total > 5 && axes) {
+    var targets = DMG_BLOCK_TARGETS[currentAct] || DMG_BLOCK_TARGETS[1];
+    var t       = card.type || 'skl';
+    var isAtk   = t === 'atk' || t.includes('atk');
+    var isDef   = t === 'def' || t.includes('def');
+    var isScl   = t === 'pow' || t === 'skl' || t.includes('scl');
 
-  // ── Balance scoring (ATK / DEF / SCALE) ──────────────────
-  if (total > 5) {
-    var pAtk = Math.round(stats.atk / total * 100);
-    var pDef = Math.round(stats.def / total * 100);
-    var pScl = Math.round(stats.scl / total * 100);
-    var t     = card.type || 'skl';
-    var isAtk = t === 'atk' || t.includes('atk');
-    var isDef = t === 'def' || t.includes('def');
-    var isScl = t === 'pow' || t === 'skl' || t.includes('scl');
-    var axes  = calcFourAxes();
-    if (isAtk && pAtk < IDEAL - WARN) { score += 18; reasons.push('fixes low attack (' + pAtk + '%)'); }
-    if (isDef && pDef < IDEAL - WARN) { score += 18; reasons.push('fixes low defense (' + pDef + '%)'); }
-    if (isScl && pScl < IDEAL - WARN && total > 8) { score += 14; reasons.push('fixes low scaling (' + pScl + '%)'); }
-    if (isScl && currentAct >= 2 && axes && axes.scl < 50) { score += 8; reasons.push('scaling critical for Act ' + currentAct + ' bosses'); }
-    if (isAtk && pAtk > IDEAL + WARN) { score -= 8;  reasons.push('deck already attack-heavy'); }
-    if (isDef && pDef > IDEAL + WARN) { score -= 8;  reasons.push('deck already defense-heavy'); }
+    // Damage axis — reward atk cards that close the gap, penalise excess
+    var dmgGap = Math.max(0, targets.dmg - axes.dmg);
+    if (isAtk && dmgGap > 0) {
+      var dmgBonus = Math.min(25, Math.round(dmgGap * 0.5));
+      score += dmgBonus;
+      reasons.push('fills low damage (axis ' + Math.round(axes.dmg) + '/' + targets.dmg + ')');
+    }
+    if (isAtk && axes.dmg > targets.dmg + 20) { score -= 8; reasons.push('deck already attack-heavy'); }
+
+    // Block axis — same pattern
+    var blkGap = Math.max(0, targets.blk - axes.blk);
+    if (isDef && blkGap > 0) {
+      var blkBonus = Math.min(25, Math.round(blkGap * 0.5));
+      score += blkBonus;
+      reasons.push('fills low block (axis ' + Math.round(axes.blk) + '/' + targets.blk + ')');
+    }
+    if (isDef && axes.blk > targets.blk + 20) { score -= 8; reasons.push('deck already defense-heavy'); }
+
+    // Scaling axis — act multiplier × boss multiplier
+    var sclActMult  = ({1: 0.5, 2: 1.0, 3: 1.5})[currentAct] || 0.5;
+    var sclBossMult = (typeof selectedBoss !== 'undefined' && selectedBoss && SCL_PRIORITY_BOSSES.has(selectedBoss)) ? 1.5 : 1.0;
+    var sclGap = Math.max(0, 50 - axes.scl);
+    if (isScl && sclGap > 0) {
+      var sclBonus = Math.min(20, Math.round(sclGap * 0.3 * sclActMult * sclBossMult));
+      if (sclBonus > 0) {
+        score += sclBonus;
+        var sclReason = 'scaling needed (axis ' + Math.round(axes.scl) + '/50)';
+        if (sclBossMult > 1) sclReason += ' — critical vs ' + selectedBoss;
+        else if (currentAct >= 2) sclReason += ' — Act ' + currentAct;
+        reasons.push(sclReason);
+      }
+    }
   }
 
   // ── Velocity scoring ─────────────────────────────────────
-  var axes = calcFourAxes();
-  var velLow       = axes && axes.vel < 20 && total > 6;
   var isDrawCard   = DRAW_CARDS[currentChar]   && DRAW_CARDS[currentChar].includes(baseName);
   var isEnergyCard = ENERGY_CARDS[currentChar] && ENERGY_CARDS[currentChar].includes(baseName);
   var isVelCard    = (VELOCITY_CARDS[currentChar] || []).includes(baseName);
-  if (velLow) {
-    if (isDrawCard)        { score += 20; reasons.push('deck lacks draw — this helps cycle'); }
-    else if (isEnergyCard) { score += 20; reasons.push('deck lacks energy — this fuels bigger turns'); }
-    else if (isVelCard)    { score += 16; reasons.push('fixes low velocity'); }
-  } else if (isVelCard && axes && axes.vel < 40 && total > 6) {
-    score += 8; reasons.push('adds draw/energy');
+  if (axes && total > 6) {
+    var velTarget = (DMG_BLOCK_TARGETS[currentAct] || DMG_BLOCK_TARGETS[1]).vel;
+    var velGap    = Math.max(0, velTarget - axes.vel);
+    if (velGap > 0) {
+      var velBonus = Math.min(20, Math.round(velGap * 0.8));
+      if (isDrawCard)        { score += velBonus + 4; reasons.push('deck lacks draw — this helps cycle'); }
+      else if (isEnergyCard) { score += velBonus + 4; reasons.push('deck lacks energy — this fuels bigger turns'); }
+      else if (isVelCard)    { score += velBonus;     reasons.push('fixes low velocity'); }
+    } else if (isVelCard && axes.vel < 40) {
+      score += 8; reasons.push('adds draw/energy');
+    }
   }
 
   // ── Act context ───────────────────────────────────────────
   if (currentAct === 1 && total < 10 && (card.type === 'atk' || card.type === 'def' || (card.type || '').includes('atk') || (card.type || '').includes('def'))) {
     score += 6;
   }
-  if (currentAct === 3 && tipsBuilds.length === 0 && priorityBuilds.length === 0 && fitsBuilds.length === 0 && synergyBuilds.length === 0 && !isSafePick && !isVelCard) {
+  if (currentAct === 3 && tipsBuilds.length === 0 && priorityBuilds.length === 0 && fitsBuilds.length === 0 && synergyBuilds.length === 0 && !isVelCard) {
     score -= 20; reasons.push('Act 3: only take core cards');
   }
   if (baseName === 'Strike' || baseName === 'Defend') { score -= 35; reasons.push('starter card — never add more'); }
@@ -226,7 +242,7 @@ function scoreCard(cardName) {
 
   // ── Rarity modifier ───────────────────────────────────────
   var cardRarity = card.rarity || 'common';
-  var buildFit   = tipsBuilds.length > 0 || priorityBuilds.length > 0 || fitsBuilds.length > 0 || synergyBuilds.length > 0 || isSafePick;
+  var buildFit   = tipsBuilds.length > 0 || priorityBuilds.length > 0 || fitsBuilds.length > 0 || synergyBuilds.length > 0;
   if (buildFit) {
     if (cardRarity === 'rare')    { score += 12; reasons.push('Rare — appears infrequently, strong take when it fits'); }
     if (cardRarity === 'ancient') { score += 16; reasons.push('Ancient — extremely rare, take it'); }
@@ -302,9 +318,6 @@ function scoreCard(cardName) {
   } else if (pairResult.bonus >= 10 && score >= 20) {
     verdict = 'consider'; vLabel = 'SYNERGY PICK';
     vBorder = 'rgba(200,146,42,.45)'; vBg = 'rgba(200,146,42,.15)'; vColor = 'var(--amber-bright)';
-  } else if ((isSafePick || isSafeEarly) && score >= 20) {
-    verdict = 'consider'; vLabel = 'SAFE PICK';
-    vBorder = 'rgba(200,146,42,.35)'; vBg = 'rgba(200,146,42,.12)'; vColor = 'var(--amber-bright)';
   } else if (score >= 40) {
     verdict = 'pick';    vLabel = 'PICK THIS';
     vBorder = 'rgba(106,172,95,.4)'; vBg = 'rgba(74,124,63,.2)'; vColor = 'var(--green-bright)';
@@ -357,7 +370,7 @@ function scoreCard(cardName) {
     name, card, score, verdict, vLabel, vBorder, vBg, vColor,
     reasons,
     tipsBuilds, priorityBuilds, synergyBuilds, fitsBuilds,
-    isSafePick, isSafeEarly, alreadyHave,
+    alreadyHave,
     activePairs, engineMatches, eradicateEstimate
   };
 }

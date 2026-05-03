@@ -1,44 +1,6 @@
 // Shared display helpers for STS2 Build Advisor.
 // Used by deckView, resultView, pickerView, and modals.
 
-function getCardTier(cardName) {
-  if (!currentChar) return null;
-  const charTiers = CARD_TIERS[currentChar] || {};
-  const colorlessTiers = CARD_TIERS.colorless || {};
-  const crossChars = ['ironclad','silent','defect','necrobinder','regent'].filter(c => c !== currentChar);
-  let tierData = charTiers[cardName] || colorlessTiers[cardName];
-  if (!tierData) {
-    for (const c of crossChars) {
-      if ((CARD_TIERS[c] || {})[cardName]) {
-        tierData = CARD_TIERS[c][cardName];
-        break;
-      }
-    }
-  }
-  return tierData || null;
-}
-
-function tierBadgeHtml(cardName, size) {
-  const t = getCardTier(cardName);
-  if (!t || !t.tier) return '';
-  const colors = {
-    S: {bg:'rgba(232,184,75,.18)', border:'rgba(232,184,75,.55)', fg:'#e8b84b'},
-    A: {bg:'rgba(106,172,95,.18)', border:'rgba(106,172,95,.55)', fg:'#6aac5f'},
-    B: {bg:'rgba(74,140,186,.18)', border:'rgba(74,140,186,.55)', fg:'#6aacda'},
-    C: {bg:'rgba(122,106,138,.18)', border:'rgba(122,106,138,.55)', fg:'#a090b0'},
-    D: {bg:'rgba(192,64,64,.18)', border:'rgba(192,64,64,.55)', fg:'#c06060'}
-  };
-  const c = colors[t.tier] || colors.C;
-  const fs = size === 'sm' ? '8px' : '9px';
-  const pad = size === 'sm' ? '1px 4px' : '1px 5px';
-  const title = t.note ? ` title="${t.note.replace(/"/g,'&quot;')}"` : '';
-  return `<span class="tier-badge" style="font-family:'Share Tech Mono',monospace;font-size:${fs};font-weight:700;padding:${pad};border-radius:2px;background:${c.bg};border:1px solid ${c.border};color:${c.fg};letter-spacing:.04em;white-space:nowrap;flex-shrink:0"${title}>${t.tier}</span>`;
-}
-
-function getCardTierNote(cardName) {
-  const t = getCardTier(cardName);
-  return (t && t.note) ? t.note : '';
-}
 
 function getAllCardsForPicker() {
   var own = (ALL_CARDS[currentChar] || []).map(function(c){ return Object.assign({}, c, {crossChar: false}); });

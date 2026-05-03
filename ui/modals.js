@@ -69,13 +69,12 @@ function renderModalCards() {
     groups[g].forEach(c => {
       const inDeck = deck[c.name] ? ` <span style="font-size:10px;color:var(--amber);font-family:'Share Tech Mono',monospace">(×${deck[c.name]} in deck)</span>` : '';
       const recommended = (g==='take'||g==='synergy') ? ' recommended' : (g==='skip'?' skip-flag':'');
-      const tierB = tierBadgeHtml(c.name, 'sm');
       const isUpgraded = c.name.endsWith('+');
       const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : '';
       
       html += `<div class="card-option${recommended}" onclick="addCard('${c.name.replace(/'/g,"\\'")}')">
         <div>
-          <div class="card-opt-name" style="${nameStyle}">${c.name}${inDeck} ${tierB}</div>
+          <div class="card-opt-name" style="${nameStyle}">${c.name}${inDeck}</div>
           <div class="card-opt-reason">${c.cat.reason}. ${c.note||''}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">

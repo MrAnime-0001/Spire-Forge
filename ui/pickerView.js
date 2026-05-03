@@ -60,8 +60,8 @@ function renderRewardUnified(el) {
     rewardOffered.forEach(function(n) {
       const c = allCards.find(function(x){return x.name===n;});
       const t = c ? c.type : 'skl';
-      const safeNR = n.replace(/'/g,"&#39;");
-      html += '<span onclick="rewardRemoveOffered(&#39;'+safeNR+'&#39;)" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--border-bright);border-radius:3px;background:var(--surface2);font-size:12px;cursor:pointer;color:var(--text)">';
+      const safeNR = n.replace(/'/g,"\\'");
+      html += '<span onclick="rewardRemoveOffered(\''+safeNR+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--border-bright);border-radius:3px;background:var(--surface2);font-size:12px;cursor:pointer;color:var(--text)">';
       html += '<span class="deck-item-tag '+typeCls(t)+'" style="font-size:8px;padding:1px 4px">'+t.replace(/_/g,'·').toUpperCase()+'</span>';
       html += ' '+n+' <span style="color:var(--text-muted);font-size:10px">\u2715</span></span>';
     });
@@ -79,8 +79,8 @@ function renderRewardUnified(el) {
     } else {
       matches.forEach(function(c) {
         const already = rewardOffered.includes(c.name);
-        const safeN = c.name.replace(/'/g,"&#39;");
-        const clickFn = already ? 'rewardRemoveOffered(&#39;'+safeN+'&#39;)' : 'rewardAddOffered(&#39;'+safeN+'&#39;)';
+        const safeN = c.name.replace(/'/g,"\\'");
+        const clickFn = already ? 'rewardRemoveOffered(\''+safeN+'\')' : 'rewardAddOffered(\''+safeN+'\')';
         const borderCol = already ? 'var(--amber)' : (c.crossChar ? 'rgba(100,90,70,.3)' : 'var(--border)');
         const bgCol = already ? 'var(--amber-dim)' : 'var(--bg2)';
         const nameCol = already ? 'var(--amber-bright)' : (c.crossChar ? 'var(--text-dim)' : 'var(--text)');
@@ -179,24 +179,14 @@ function renderRewardVerdictHtml() {
     var sRarity = getRarity(s.card);
     html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap">';
     html += '<span style="font-size:14px;'+nameStyle+'">'+s.name+'</span>';
-    html += tierBadgeHtml(s.name);
     html += '<span class="deck-item-tag '+typeCls(s.card.type)+'" style="font-size:9px;padding:1px 5px">'+typeTag+'</span>';
     html += rarityBadgeHtml(sRarity);
-    if (s.isSafePick) html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid var(--amber-dim);color:var(--amber);background:rgba(200,146,42,.1)">safe pick</span>';
-    if (s.isSafeEarly && total < 12) html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid rgba(200,120,40,.4);color:#c88040;background:rgba(200,120,40,.1)">early value</span>';
     if (deck[s.name]) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×'+deck[s.name]+'</span>';
     html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;margin-left:auto;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+'">'+s.vLabel+'</span>';
     html += '</div>';
 
     var rCtx = rarityContext(sRarity, s.verdict);
     if (rCtx) html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;opacity:.8">'+rCtx+'</div>';
-
-    var tierNote = getCardTierNote(s.name);
-    if (tierNote) {
-      var tierInfo = getCardTier(s.name);
-      var tierColor = {S:'#e8b84b',A:'#6aac5f',B:'#6aacda',C:'#a090b0',D:'#c06060'}[tierInfo.tier] || 'var(--text-muted)';
-      html += '<div style="font-size:11px;color:'+tierColor+';margin-bottom:5px;font-style:italic;opacity:.9">'+tierInfo.tier+'-tier: '+tierNote+'</div>';
-    }
 
     var hasIndicators = s.tipsBuilds.length>0 || s.priorityBuilds.length>0 || s.synergyBuilds.length>0 || s.fitsBuilds.length>0;
     if (hasIndicators) {
@@ -281,8 +271,8 @@ function renderRewardVerdictHtml() {
   html += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)">';
   html += '<button onclick="rewardReset()" style="padding:6px 10px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-size:9px;text-transform:uppercase;cursor:pointer">&#8635; reset</button>';
   scored.filter(function(s){return s.verdict!=='skip';}).forEach(function(s) {
-    var safeN = s.name.replace(/'/g,"&#39;");
-    html += '<button onclick="rewardConfirm(&#39;'+safeN+'&#39;)" style="padding:6px 10px;border:1px solid '+s.vBorder+';border-radius:3px;background:'+s.vBg+';color:'+s.vColor+';font-size:9px;text-transform:uppercase;cursor:pointer">took '+s.name+'</button>';
+    var safeN = s.name.replace(/'/g,"\\'");
+    html += '<button onclick="rewardConfirm(\''+safeN+'\')" style="padding:6px 10px;border:1px solid '+s.vBorder+';border-radius:3px;background:'+s.vBg+';color:'+s.vColor+';font-size:9px;text-transform:uppercase;cursor:pointer">took '+s.name+'</button>';
   });
   html += '<button onclick="rewardReset()" style="padding:6px 10px;border:1px solid var(--border);border-radius:3px;background:none;color:var(--text-muted);font-size:9px;text-transform:uppercase;cursor:pointer">took nothing</button>';
   html += '</div>';
@@ -329,7 +319,6 @@ function renderPickerAdd() {
   const allCards = getAllCardsForPicker();
   const builds = (BUILD_DATA[currentChar] || {}).builds || {};
   const engines = BUILD_ENGINES[currentChar] || {};
-  const spData = SAFE_PICKS[currentChar] || { early: [], generic: [] };
   const topBuildKey = getTopBuild();
   const topBuild = topBuildKey ? builds[topBuildKey] : null;
   const stats = getDeckStats();
@@ -369,10 +358,6 @@ function renderPickerAdd() {
         }
       });
 
-      const isSafeEarly = spData.early.includes(name);
-      const isSafeGeneric = spData.generic.includes(name);
-      const isSafe = isSafeEarly || isSafeGeneric;
-
       let borderColor, bgColor, verdictLabel, verdictStyle;
       if (engineMatches.length > 0) {
         borderColor = 'rgba(74,154,138,.5)'; bgColor = 'rgba(74,154,138,.08)';
@@ -382,10 +367,6 @@ function renderPickerAdd() {
         borderColor = 'rgba(106,172,95,.45)'; bgColor = 'rgba(74,124,63,.08)';
         verdictLabel = 'PRIORITY';
         verdictStyle = 'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)';
-      } else if (isSafe) {
-        borderColor = 'rgba(200,146,42,.35)'; bgColor = 'rgba(200,146,42,.06)';
-        verdictLabel = isSafeEarly ? 'SAFE — TAKE EARLY' : 'SAFE PICK';
-        verdictStyle = 'background:rgba(200,146,42,.15);color:var(--amber-bright);border:1px solid rgba(200,146,42,.3)';
       } else {
         borderColor = 'var(--border)'; bgColor = 'var(--bg2)';
         verdictLabel = 'NOT A PRIORITY';
@@ -403,18 +384,10 @@ function renderPickerAdd() {
       html += `<div style="padding:7px 9px;border:1px solid ${borderColor};border-radius:3px;background:${bgColor};margin-bottom:4px">`;
       html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">`;
       html += `<span style="font-size:13px;${nameStyle}">${name}</span>`;
-      html += tierBadgeHtml(name);
       html += typeTag + deckTag + crossTag;
       html += card.rarity ? rarityBadgeHtml(card.rarity) : '';
       html += `<span class="card-check-verdict" style="${verdictStyle}">${verdictLabel}</span>`;
       html += `</div>`;
-
-      const tierNote = getCardTierNote(name);
-      if (tierNote) {
-        const tierInfo = getCardTier(name);
-        const tierColor = {S:'#e8b84b',A:'#6aac5f',B:'#6aacda',C:'#a090b0',D:'#c06060'}[tierInfo.tier] || 'var(--text-muted)';
-        html += `<div style="font-size:11px;color:${tierColor};margin-bottom:4px;font-style:italic;opacity:.9">${tierInfo.tier}-tier: ${tierNote}</div>`;
-      }
 
       if (engineMatches.length > 0) {
         engineMatches.forEach(e => {
@@ -430,10 +403,7 @@ function renderPickerAdd() {
         });
       }
 
-      if (isSafe && engineMatches.length === 0 && priorityMatches.length === 0) {
-        html += `<div style="font-size:11px;color:var(--text-muted)">Useful across most builds — safe to take regardless of path.</div>`;
-      }
-      if (!isSafe && engineMatches.length === 0 && priorityMatches.length === 0) {
+      if (engineMatches.length === 0 && priorityMatches.length === 0) {
         html += `<div style="font-size:11px;color:var(--text-muted)">Not a priority for any ${currentChar.charAt(0).toUpperCase()+currentChar.slice(1)} build. Skip unless you have a specific reason.</div>`;
       }
 
@@ -509,7 +479,6 @@ function pickerRowHtmlAdd(c, typeCls, vs) {
       <div class="picker-card-name" style="${nameStyle}">${c.name}${inDeck}${crossTag}</div>
       ${noteText ? `<div class="picker-card-note">${noteText}</div>` : ''}
     </div>
-    ${tierB}
     <span class="deck-item-tag ${typeCls(c.type)}" style="font-size:9px;padding:1px 5px;white-space:nowrap">${(c.type||'skl').replace(/_/g,'·').toUpperCase()}</span>
     ${c.cat.label ? `<span class="picker-verdict" style="${vs[c.cat.v]||''}">${c.cat.label}</span>` : '<span style="width:20px"></span>'}
   </div>`;

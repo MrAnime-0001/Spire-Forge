@@ -1,12 +1,5 @@
 // Result panel, priority panel, deck health, and engine tracker rendering for STS2 Build Advisor.
 
-let safePicksOpen = false;
-
-function toggleSafePicks() {
-  safePicksOpen = !safePicksOpen;
-  updatePriorityPanel();
-}
-
 function updatePriorityPanel() {
   const panel = document.getElementById('priorityPanel');
   if (!currentChar) { panel.innerHTML = ''; return; }
@@ -17,8 +10,6 @@ function updatePriorityPanel() {
   const allCards = getAllCardsForPicker();
   const stats = getDeckStats();
 
-  const issues = [];
-
   const typeTagHtml = (card) => {
     if (!card) return '';
     const t = card.type || 'skl';
@@ -27,51 +18,6 @@ function updatePriorityPanel() {
   };
 
   let html = '';
-
-  // ---- Safe picks ----
-  const spData = SAFE_PICKS[currentChar];
-  if (spData && getDeckSize() > 0) {
-    const earlyMissing   = spData.early.filter(n => !deckNames.has(n));
-    const genericMissing = spData.generic.filter(n => !deckNames.has(n) && !spData.early.includes(n));
-    if (earlyMissing.length > 0 || genericMissing.length > 0) {
-      const totalSafe = earlyMissing.length + genericMissing.length;
-      const chevron = safePicksOpen ? '▴' : '▾';
-      html += `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;margin-bottom:.75rem;overflow:hidden">`;
-      html += `<div onclick="toggleSafePicks()" style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .85rem;cursor:pointer;user-select:none" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">`;
-      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)">safe picks</span>`;
-      html += `<span style="display:flex;align-items:center;gap:7px">`;
-      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">${totalSafe} card${totalSafe !== 1 ? 's' : ''}</span>`;
-      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);opacity:.7">${chevron}</span>`;
-      html += `</span></div>`;
-      if (safePicksOpen) {
-        html += `<div style="padding:.1rem .85rem .65rem;border-top:1px solid var(--border)">`;
-        html += `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin:.4rem 0 .5rem">Useful across most builds — safe to take any time.</div>`;
-        if (earlyMissing.length > 0) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c8922a;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">take early</div>`;
-          earlyMissing.forEach(name => {
-            const card = allCards.find(c => c.name === name);
-            const safeN = name.replace(/'/g,"\'");
-            const tag = typeTagHtml(card);
-            html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid rgba(200,146,42,.3);border-radius:3px;background:rgba(200,146,42,.06);cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='#c8922a';this.style.background='rgba(200,146,42,.14)'" onmouseout="this.style.borderColor='rgba(200,146,42,.3)';this.style.background='rgba(200,146,42,.06)'"><div style="flex:1;font-size:13px;color:var(--text)">${name}</div>${tag}${card ? rarityBadgeHtml(getRarity(card)) : ''}<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c8922a;opacity:.8;flex-shrink:0">+ add</span></div>`;
-          });
-        }
-        if (genericMissing.length > 0) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-top:${earlyMissing.length > 0 ? '.4rem' : '0'};margin-bottom:4px">build-agnostic value</div>`;
-          genericMissing.forEach(name => {
-            const card = allCards.find(c => c.name === name);
-            const safeN = name.replace(/'/g,"\'");
-            const tag = typeTagHtml(card);
-            html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--border);border-radius:3px;background:var(--bg2);cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='var(--border-bright)';this.style.background='var(--surface)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg2)'"><div style="flex:1;font-size:13px;color:var(--text-dim)">${name}</div>${tag}${card ? rarityBadgeHtml(getRarity(card)) : ''}<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green-bright);opacity:.7;flex-shrink:0">+ add</span></div>`;
-          });
-        }
-        html += `</div>`;
-      }
-      html += `</div>`;
-      if (issues.length > 0) {
-        html += `<div class="divider" style="margin:.5rem 0"></div>`;
-      }
-    }
-  }
 
   // ---- Engine-grouped priority section ----
   const RANK_ORDER = {S:4, A:3, B:2, C:1};
