@@ -25,9 +25,9 @@ function renderModalCards() {
     const inTop = topBuild && topBuild.cards.includes(card.name);
     const inTopSyn = topBuild && topBuild.synergy && topBuild.synergy.includes(card.name);
     const inAnyBuild = Object.values(builds).some(b => b.cards.includes(card.name) || (b.synergy && b.synergy.includes(card.name)));
-    const needsDef = stats.def < 3 && (card.type === 'def' || card.type === 'atk_def' || card.type === 'def_scl' || card.type === 'atk_def_scl');
-    const needsAtk = stats.atk < 3 && (card.type === 'atk' || card.type === 'atk_def' || card.type === 'atk_scl' || card.type === 'atk_def_scl');
-    const tooMany = deck[card.name] && deck[card.name] >= 2 && (card.type === 'atk' || card.type === 'atk_def' || card.type === 'atk_scl');
+    const needsDef = stats.def < 3 && (card.type.includes('def'));
+    const needsAtk = stats.atk < 3 && (card.type.includes('atk'));
+    const tooMany = deck[card.name] && deck[card.name] >= 2 && (card.type.includes('atk'));
     if (inTop) return {verdict:'take', label:'TAKE', cls:'verdict-take', reason: needsDef?'Priority + fixes low defense': needsAtk?'Priority + fixes low attacks':'Core card for your leading build'};
     if (inTopSyn) return {verdict:'synergy', label:'SYNERGY', cls:'verdict-synergy', reason:'Good synergy with your leading build'};
     if (needsDef && card.type==='def') return {verdict:'take', label:'TAKE', cls:'verdict-take', reason:'Fixes low defense in your deck'};
@@ -70,13 +70,16 @@ function renderModalCards() {
       const inDeck = deck[c.name] ? ` <span style="font-size:10px;color:var(--amber);font-family:'Share Tech Mono',monospace">(×${deck[c.name]} in deck)</span>` : '';
       const recommended = (g==='take'||g==='synergy') ? ' recommended' : (g==='skip'?' skip-flag':'');
       const tierB = tierBadgeHtml(c.name, 'sm');
+      const isUpgraded = c.name.endsWith('+');
+      const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : '';
+      
       html += `<div class="card-option${recommended}" onclick="addCard('${c.name.replace(/'/g,"\\'")}')">
         <div>
-          <div class="card-opt-name">${c.name}${inDeck} ${tierB}</div>
+          <div class="card-opt-name" style="${nameStyle}">${c.name}${inDeck} ${tierB}</div>
           <div class="card-opt-reason">${c.cat.reason}. ${c.note||''}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
-          <span class="deck-item-tag ${c.type&&c.type.startsWith('atk')?'tag-atk':c.type&&c.type.startsWith('def')?'tag-def':c.type==='pow'?'tag-pow':c.type==='vel'?'tag-vel':'tag-skl'}">${(c.type||'skl').replace(/_/g,'·').toUpperCase()}</span>
+          <span class="deck-item-tag ${c.type.includes('atk')?'tag-atk':c.type.includes('def')?'tag-def':c.type.includes('vel')?'tag-vel':'tag-skl'}">${(c.type||'skl').replace(/_/g,'\u00B7').toUpperCase()}</span>
           ${rarityBadgeHtml(getRarity(c))}
         </div>
         <span class="card-opt-verdict ${c.cat.cls}">${c.cat.label}</span>

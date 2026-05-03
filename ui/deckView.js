@@ -33,8 +33,14 @@ function renderDeckList() {
     return;
   }
 
-  const typeLabel = {atk:'ATK',def:'DEF',pow:'POW',skl:'SKL',vel:'VEL',atk_def:'ATK·DEF',atk_scl:'ATK·SCL',def_scl:'DEF·SCL',atk_def_scl:'ALL'};
-  const typeCls = t => t.startsWith('atk_def_scl') ? 'tag-skl' : t.startsWith('atk_def') ? 'tag-atk' : t.startsWith('atk_scl') ? 'tag-atk' : t.startsWith('def_scl') ? 'tag-def' : t==='atk' ? 'tag-atk' : t==='def' ? 'tag-def' : t==='pow' ? 'tag-pow' : t==='vel' ? 'tag-vel' : t==='other' ? 'tag-other' : 'tag-skl';
+  const typeLabel = t => (t||'skl').replace(/_/g,'\u00B7').toUpperCase();
+  const typeCls = t => {
+    if (t.includes('atk')) return 'tag-atk';
+    if (t.includes('def')) return 'tag-def';
+    if (t.includes('vel')) return 'tag-vel';
+    if (t.includes('pow')) return 'tag-pow';
+    return 'tag-skl';
+  };
   const charCards = ALL_CARDS[currentChar] || [];
   const colorlessCards = ALL_CARDS['colorless'] || [];
   const allOtherDeckCards = ['ironclad','silent','defect','necrobinder','regent'].filter(k=>k!==currentChar).flatMap(k=>ALL_CARDS[k]||[]);
@@ -43,12 +49,21 @@ function renderDeckList() {
   list.innerHTML = sorted.map(([name,count]) => {
     const c = charCards.find(x=>x.name===name) || colorlessCards.find(x=>x.name===name) || allOtherDeckCards.find(x=>x.name===name);
     const type = c ? c.type : 'skl';
-    const tl = typeLabel[type] || type.toUpperCase();
+    const tl = typeLabel(type);
     const tierB = tierBadgeHtml(name, 'sm');
+    
+    const isUpgraded = name.endsWith('+');
+    const hasUpgrade = !isUpgraded && (charCards.find(x=>x.name===name+'+') || colorlessCards.find(x=>x.name===name+'+') || allOtherDeckCards.find(x=>x.name===name+'+'));
+    const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600; text-shadow: 0 0 5px rgba(200,146,42,0.3);' : '';
+    const upgradeBtn = hasUpgrade ? `<button class="qty-btn" onclick="upgradeCard('${name}')" title="Upgrade this card" style="border-color:var(--amber); color:var(--amber-bright); font-size:11px; margin-right:4px;">\u2692</button>` : '';
+
     return `<div class="deck-item" style="grid-template-columns:1fr auto auto auto;gap:6px">
-      <span class="deck-item-name">${name}</span>
+      <span class="deck-item-name" style="${nameStyle}">${name}</span>
       ${tierB}
-      <span class="deck-item-tag ${typeCls(type)}">${tl}</span>
+      <div style="display:flex; align-items:center; gap:4px">
+        ${upgradeBtn}
+        <span class="deck-item-tag ${typeCls(type)}">${tl}</span>
+      </div>
       <div class="qty-ctrl">
         <button class="qty-btn" onclick="adjustQty('${name}',-1)">−</button>
         <span class="qty-num">${count}</span>

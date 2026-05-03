@@ -42,7 +42,14 @@ function renderPickerReward() {
 function renderRewardUnified(el) {
   const q = (document.getElementById('pickerSearch').value || '').toLowerCase();
   const allCards = getAllCardsForPicker();
-  const typeCls = t => t&&t.startsWith('atk')?'tag-atk':t&&t.startsWith('def')?'tag-def':t==='pow'?'tag-pow':t==='vel'?'tag-vel':t==='other'?'tag-other':'tag-skl';
+  const typeCls = t => {
+    if (!t) return 'tag-skl';
+    if (t.includes('atk')) return 'tag-atk';
+    if (t.includes('def')) return 'tag-def';
+    if (t.includes('vel')) return 'tag-vel';
+    if (t.includes('pow')) return 'tag-pow';
+    return 'tag-skl';
+  };
   let html = '';
 
   // Pool chips (always visible at top)
@@ -81,8 +88,10 @@ function renderRewardUnified(el) {
         const addLbl = already ? '&#10003; added' : '+ add';
         const crossLabel = c.crossChar ? ' <span style="font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">'+c.crossCharName+'</span>' : '';
         const noteHtml = c.note ? '<div style="font-size:10px;color:var(--text-muted);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.note+'</div>' : '';
+        const isUpgraded = c.name.endsWith('+');
+        const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:'+nameCol;
         html += '<div onclick="'+clickFn+'" style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:7px;padding:6px 8px;border:1px solid '+borderCol+';border-radius:3px;margin-bottom:3px;background:'+bgCol+';cursor:pointer">';
-        html += '<div><div style="font-size:13px;color:'+nameCol+'">'+c.name+crossLabel+'</div>'+noteHtml+'</div>';
+        html += '<div><div style="font-size:13px;'+nameStyle+'">'+c.name+crossLabel+'</div>'+noteHtml+'</div>';
         html += '<span class="deck-item-tag '+typeCls(c.type)+'" style="font-size:9px;padding:1px 5px">'+(c.type||'skl').replace(/_/g,'·').toUpperCase()+'</span>';
         html += rarityBadgeHtml(getRarity(c));
         html += '<span style="font-size:9px;color:'+addCol+';min-width:40px;text-align:right">'+addLbl+'</span>';
@@ -109,7 +118,14 @@ function renderRewardVerdictHtml() {
   if (!currentChar || !BUILD_DATA[currentChar]) return '';
   var builds = (BUILD_DATA[currentChar] || {}).builds || {};
   var total = getDeckSize();
-  var typeCls = function(t){return t&&t.startsWith('atk')?'tag-atk':t&&t.startsWith('def')?'tag-def':t==='pow'?'tag-pow':t==='vel'?'tag-vel':t==='other'?'tag-other':'tag-skl';};
+  var typeCls = function(t){
+    if (!t) return 'tag-skl';
+    if (t.includes('atk')) return 'tag-atk';
+    if (t.includes('def')) return 'tag-def';
+    if (t.includes('vel')) return 'tag-vel';
+    if (t.includes('pow')) return 'tag-pow';
+    return 'tag-skl';
+  };
 
   var scored = scoreRewardPool(rewardOffered);
 
@@ -156,11 +172,13 @@ function renderRewardVerdictHtml() {
     var borderW = isBest ? '1.5px' : '1px';
     var typeTag = (s.card.type||'skl').replace(/_/g,'·').toUpperCase();
 
+    var isUpgraded = s.name.endsWith('+');
+    var nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:'+(isBest?'var(--text)':'var(--text-dim)');
     html += '<div style="padding:9px 10px;border:'+borderW+' solid '+outerBorder+';border-radius:4px;background:'+outerBg+';margin-bottom:6px">';
 
     var sRarity = getRarity(s.card);
     html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap">';
-    html += '<span style="font-size:14px;color:'+(isBest?'var(--text)':'var(--text-dim)')+'">'+s.name+'</span>';
+    html += '<span style="font-size:14px;'+nameStyle+'">'+s.name+'</span>';
     html += tierBadgeHtml(s.name);
     html += '<span class="deck-item-tag '+typeCls(s.card.type)+'" style="font-size:9px;padding:1px 5px">'+typeTag+'</span>';
     html += rarityBadgeHtml(sRarity);
@@ -315,7 +333,14 @@ function renderPickerAdd() {
   const topBuildKey = getTopBuild();
   const topBuild = topBuildKey ? builds[topBuildKey] : null;
   const stats = getDeckStats();
-  const typeCls = t => t&&t.startsWith('atk')?'tag-atk':t&&t.startsWith('def')?'tag-def':t==='pow'?'tag-pow':t==='vel'?'tag-vel':t==='other'?'tag-other':'tag-skl';
+  const typeCls = t => {
+    if (!t) return 'tag-skl';
+    if (t.includes('atk')) return 'tag-atk';
+    if (t.includes('def')) return 'tag-def';
+    if (t.includes('vel')) return 'tag-vel';
+    if (t.includes('pow')) return 'tag-pow';
+    return 'tag-skl';
+  };
 
   if (q) {
     const matches = allCards.filter(c => c.name.toLowerCase().includes(q)).slice(0, 8);
@@ -372,10 +397,12 @@ function renderPickerAdd() {
       const typeTag = `<span class="deck-item-tag ${tCls}" style="font-size:9px;padding:1px 5px">${t.replace(/_/g,'·').toUpperCase()}</span>`;
       const crossTag = card.crossChar ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">${card.crossCharName}</span>` : '';
       const deckTag = alreadyInDeck > 0 ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×${alreadyInDeck}</span>` : '';
+      const isUpgraded = name.endsWith('+');
+      const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:var(--text)';
 
       html += `<div style="padding:7px 9px;border:1px solid ${borderColor};border-radius:3px;background:${bgColor};margin-bottom:4px">`;
       html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">`;
-      html += `<span style="font-size:13px;color:var(--text)">${name}</span>`;
+      html += `<span style="font-size:13px;${nameStyle}">${name}</span>`;
       html += tierBadgeHtml(name);
       html += typeTag + deckTag + crossTag;
       html += card.rarity ? rarityBadgeHtml(card.rarity) : '';
@@ -475,10 +502,11 @@ function pickerRowHtmlAdd(c, typeCls, vs) {
   const rowCls = c.cat.v==='rec'?' rec':c.cat.v==='syn'?' syn':'';
   const safeN = c.name.replace(/'/g,"&#39;");
   const noteText = [c.cat.reason, c.note].filter(Boolean).join('. ');
-  const tierB = tierBadgeHtml(c.name, 'sm');
+  const isUpgraded = c.name.endsWith('+');
+  const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : '';
   return `<div class="picker-card-row${rowCls}" onclick="pickerAddCard('${safeN}')" style="grid-template-columns:1fr auto auto auto;gap:5px">
     <div style="min-width:0">
-      <div class="picker-card-name">${c.name}${inDeck}${crossTag}</div>
+      <div class="picker-card-name" style="${nameStyle}">${c.name}${inDeck}${crossTag}</div>
       ${noteText ? `<div class="picker-card-note">${noteText}</div>` : ''}
     </div>
     ${tierB}

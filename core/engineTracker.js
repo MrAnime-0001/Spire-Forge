@@ -14,7 +14,7 @@ function getEngineTrackerItems() {
     const eng = buildEngines[key];
     const build = builds[key];
     if (!eng || !build) return null;
-    const have = eng.cards.filter(n => deck[n]).length;
+    const have = eng.cards.filter(n => deck[n] || deck[n + '+']).length;
     return { key, eng, build, have, pct: have / eng.cards.length, commitment, commitColor };
   }
 
@@ -33,7 +33,7 @@ function getEngineTrackerItems() {
 
   const fallback = [];
   engines.forEach(eng => {
-    const have = eng.cards.filter(n => deck[n]).length;
+    const have = eng.cards.filter(n => deck[n] || deck[n + '+']).length;
     if (have > 0) {
       fallback.push({
         eng,

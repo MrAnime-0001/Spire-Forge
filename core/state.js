@@ -103,3 +103,11 @@ function setHP(cur, max) {
 function removeCard(cardName) {
   adjustQty(cardName, -1);
 }
+
+function upgradeCard(baseName) {
+  if (deck[baseName] && deck[baseName] > 0) {
+    const upgradedName = baseName + '+';
+    adjustQty(baseName, -1);
+    addCard(upgradedName, 1);
+  }
+}

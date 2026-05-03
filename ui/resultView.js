@@ -22,8 +22,8 @@ function updatePriorityPanel() {
   const typeTagHtml = (card) => {
     if (!card) return '';
     const t = card.type || 'skl';
-    const cls = t.startsWith('atk') ? 'tag-atk' : t.startsWith('def') ? 'tag-def' : t==='pow' ? 'tag-pow' : t==='vel' ? 'tag-vel' : 'tag-skl';
-    return `<span class="deck-item-tag ${cls}" style="font-size:9px;padding:1px 5px">${t.replace(/_/g,'·').toUpperCase()}</span>`;
+    const cls = t.includes('atk') ? 'tag-atk' : t.includes('def') ? 'tag-def' : t.includes('vel') ? 'tag-vel' : 'tag-skl';
+    return `<span class="deck-item-tag ${cls}" style="font-size:9px;padding:1px 5px">${t.replace(/_/g,'\u00B7').toUpperCase()}</span>`;
   };
 
   let html = '';

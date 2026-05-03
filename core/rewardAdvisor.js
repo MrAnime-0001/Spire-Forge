@@ -18,8 +18,13 @@ function scoreCard(cardName) {
   var IDEAL = 33, WARN = 12;
 
   var name  = cardName;
+  var baseName = name.endsWith('+') ? name.slice(0, -1) : name;
   var card  = allCards.find(function(c) { return c.name === name; }) || {name: name, type: 'skl', note: ''};
-  var alreadyHave = deck[name] || 0;
+  var alreadyHave = (deck[name] || 0) + (deck[baseName] || 0);
+  if (name === baseName) {
+      // If we are scoring a base card, alreadyHave should only count other copies if we want to be precise, 
+      // but usually we want to know if we have ANY version of this card.
+  }
 
   // ── Build membership ─────────────────────────────────────
   var RANK_SCORE = {S:4, A:3, B:2, C:1};
@@ -31,10 +36,10 @@ function scoreCard(cardName) {
 
   Object.entries(builds).forEach(function(entry) {
     var key = entry[0], b = entry[1];
-    var inCore = b.cards.includes(name);
-    var inSyn  = (b.synergy || []).includes(name);
-    var inRec  = (b.recs || []).includes(name);
-    var inTips = (charTips[key] || []).includes(name);
+    var inCore = b.cards.includes(baseName);
+    var inSyn  = (b.synergy || []).includes(baseName);
+    var inRec  = (b.recs || []).includes(baseName);
+    var inTips = (charTips[key] || []).includes(baseName);
     var rankMult = RANK_SCORE[b.rank] || 1;
     if (inTips) tipsBuilds.push({key: key, b: b, rankMult: rankMult});
     if (inRec && alreadyHave === 0)        priorityBuilds.push({key: key, b: b, rankMult: rankMult});
@@ -42,11 +47,11 @@ function scoreCard(cardName) {
     else if (inSyn)                        synergyBuilds.push({key: key, b: b, rankMult: rankMult});
   });
 
-  var isSafePick  = sp.generic.includes(name);
-  var isSafeEarly = sp.early.includes(name);
+  var isSafePick  = sp.generic.includes(baseName);
+  var isSafeEarly = sp.early.includes(baseName);
 
   // ── Base score from tier ─────────────────────────────────
-  var _tierInfo = getCardTier(name);
+  var _tierInfo = getCardTier(baseName);
   var _tierBase = _tierInfo ? ({S:10, A:7, B:5, C:3, D:1}[_tierInfo.tier] || 3) : 3;
   var score = _tierBase;
   var reasons = [];
@@ -109,9 +114,9 @@ function scoreCard(cardName) {
   // ── Velocity scoring ─────────────────────────────────────
   var axes = calcFourAxes();
   var velLow       = axes && axes.vel < 20 && total > 6;
-  var isDrawCard   = DRAW_CARDS[currentChar]   && DRAW_CARDS[currentChar].includes(name);
-  var isEnergyCard = ENERGY_CARDS[currentChar] && ENERGY_CARDS[currentChar].includes(name);
-  var isVelCard    = (VELOCITY_CARDS[currentChar] || []).includes(name);
+  var isDrawCard   = DRAW_CARDS[currentChar]   && DRAW_CARDS[currentChar].includes(baseName);
+  var isEnergyCard = ENERGY_CARDS[currentChar] && ENERGY_CARDS[currentChar].includes(baseName);
+  var isVelCard    = (VELOCITY_CARDS[currentChar] || []).includes(baseName);
   if (velLow) {
     if (isDrawCard)        { score += 20; reasons.push('deck lacks draw — this helps cycle'); }
     else if (isEnergyCard) { score += 20; reasons.push('deck lacks energy — this fuels bigger turns'); }
@@ -127,30 +132,30 @@ function scoreCard(cardName) {
   if (currentAct === 3 && tipsBuilds.length === 0 && priorityBuilds.length === 0 && fitsBuilds.length === 0 && synergyBuilds.length === 0 && !isSafePick && !isVelCard) {
     score -= 20; reasons.push('Act 3: only take core cards');
   }
-  if (name === 'Strike' || name === 'Defend') { score -= 35; reasons.push('starter card — never add more'); }
+  if (baseName === 'Strike' || baseName === 'Defend') { score -= 35; reasons.push('starter card — never add more'); }
 
   // Redundancy penalty
-  var _isEngineCard = Object.values(BUILD_ENGINES[currentChar] || {}).some(function(e) { return e.cards.includes(name); });
+  var _isEngineCard = Object.values(BUILD_ENGINES[currentChar] || {}).some(function(e) { return e.cards.includes(baseName); });
   if (alreadyHave === 1 && !_isEngineCard) { score -= 5;  reasons.push('already have 1 copy'); }
   if (alreadyHave >= 2)                    { score -= 12; reasons.push('already have ' + alreadyHave + ' copies'); }
 
   // ── Act scaling bonus / penalty ───────────────────────────
-  if (currentAct >= 2 && ACT_SCALES_INTO.has(name)) {
+  if (currentAct >= 2 && ACT_SCALES_INTO.has(baseName)) {
     score += 4; reasons.push('scales into Act 3');
   }
-  if (currentAct === 3 && ACT_CARRY_FALLOFF.has(name)) {
+  if (currentAct === 3 && ACT_CARRY_FALLOFF.has(baseName)) {
     score -= 4; reasons.push('Act 1 carry — loses value here');
   }
 
   // ── Synergy pair bonus ────────────────────────────────────
-  var pairResult = getSynergyPairBonus(name);
+  var pairResult = getSynergyPairBonus(baseName);
   if (pairResult.bonus > 0) {
     score += pairResult.bonus;
     pairResult.reasons.forEach(function(r) { reasons.push(r); });
   }
 
   // ── Scaling damage note ───────────────────────────────────
-  var scalingNote = getScalingDmgNote(name);
+  var scalingNote = getScalingDmgNote(baseName);
   if (scalingNote) { reasons.push(scalingNote); }
 
   // ── Archetype commitment bonus ────────────────────────────
@@ -183,7 +188,7 @@ function scoreCard(cardName) {
   }
 
   // ── Engine commitment bonus ───────────────────────────────
-  var engCommit = getEngineCommitment(name);
+  var engCommit = getEngineCommitment(baseName);
   if (engCommit > 0) {
     var engBonus = Math.round(engCommit * 8);
     score += engBonus;
@@ -195,7 +200,7 @@ function scoreCard(cardName) {
   var antiSynPenalty = 0;
   deckTags.forEach(function(tag) {
     var badCards = ARCHETYPE_ANTI_SYNERGY[tag] || [];
-    if (badCards.includes(name)) { antiSynPenalty = Math.max(antiSynPenalty, 5); }
+    if (badCards.includes(baseName)) { antiSynPenalty = Math.max(antiSynPenalty, 5); }
   });
   if (antiSynPenalty > 0) {
     var wPenalty = Math.round(antiSynPenalty * phaseW);
@@ -206,7 +211,7 @@ function scoreCard(cardName) {
   // ── Boss adaptation bonus / penalty ──────────────────────
   if (typeof selectedBoss !== 'undefined' && selectedBoss && BOSS_MATRIX[selectedBoss]) {
     var bMatrix  = BOSS_MATRIX[selectedBoss];
-    var cardTags = CARD_BOSS_TAGS[name] || [];
+    var cardTags = CARD_BOSS_TAGS[baseName] || [];
     if (cardTags.length > 0) {
       var rewardHit = bMatrix.rewards.some(function(r) {
         return cardTags.some(function(t) { return r.toLowerCase().includes(t.toLowerCase()); });
@@ -264,18 +269,18 @@ function scoreCard(cardName) {
   // ── Verdict label assignment ──────────────────────────────
   var verdict, vLabel, vBorder, vBg, vColor;
 
-  var _inEngine   = Object.values(BUILD_ENGINES[currentChar] || {}).some(function(e) { return e.cards.includes(name); });
-  var _bossReward = (typeof selectedBoss !== 'undefined') && selectedBoss && BOSS_MATRIX[selectedBoss] && (CARD_BOSS_TAGS[name] || []).length > 0 &&
+  var _inEngine   = Object.values(BUILD_ENGINES[currentChar] || {}).some(function(e) { return e.cards.includes(baseName); });
+  var _bossReward = (typeof selectedBoss !== 'undefined') && selectedBoss && BOSS_MATRIX[selectedBoss] && (CARD_BOSS_TAGS[baseName] || []).length > 0 &&
                     BOSS_MATRIX[selectedBoss].rewards.some(function(r) {
-                      return (CARD_BOSS_TAGS[name] || []).some(function(t) { return r.toLowerCase().includes(t.toLowerCase()); });
+                      return (CARD_BOSS_TAGS[baseName] || []).some(function(t) { return r.toLowerCase().includes(t.toLowerCase()); });
                     });
   var _buildCore  = tipsBuilds.length > 0 || priorityBuilds.length > 0;
-  var _actScale   = currentAct >= 2 && ACT_SCALES_INTO.has(name);
+  var _actScale   = currentAct >= 2 && ACT_SCALES_INTO.has(baseName);
   var _archClassV = classifyArchetypes();
   var _isCommittedCard = (function() {
     if (!_archClassV.committed) return false;
     var cb = ((BUILD_DATA[currentChar] || {}).builds || {})[_archClassV.committed];
-    return cb && ((cb.recs || []).includes(name) || (cb.cards || []).includes(name));
+    return cb && ((cb.recs || []).includes(baseName) || (cb.cards || []).includes(baseName));
   })();
   var _hasPairBonus = pairResult.bonus >= 14;
 
@@ -314,8 +319,8 @@ function scoreCard(cardName) {
   // ── Active synergy pairs ──────────────────────────────────
   var activePairs = [];
   SYNERGY_PAIRS.forEach(function(p) {
-    var isA = p.a === name && deck[p.b] > 0;
-    var isB = p.b === name && deck[p.a] > 0;
+    var isA = p.a === baseName && deck[p.b] > 0;
+    var isB = p.b === baseName && deck[p.a] > 0;
     if (isA || isB) {
       activePairs.push({partner: isA ? p.b : p.a, bond: p.bond, note: p.note, bonus: p.bonus});
     }
@@ -326,9 +331,9 @@ function scoreCard(cardName) {
   var engineMatches  = [];
   Object.entries(enginesData).forEach(function(pair) {
     var buildKey = pair[0], engData = pair[1];
-    if (engData.cards.includes(name)) {
+    if (engData.cards.includes(baseName)) {
       var build     = builds[buildKey];
-      var haveCount = engData.cards.filter(function(n) { return deck[n]; }).length;
+      var haveCount = engData.cards.filter(function(n) { return deck[n] || deck[n + '+']; }).length;
       engineMatches.push({
         buildName:  build ? build.name  : buildKey,
         buildColor: build ? build.color : 'var(--teal-bright)',
