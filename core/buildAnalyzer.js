@@ -96,22 +96,12 @@ function getEradicateNukeEstimate() {
 function getArchetypeCommitment() {
   if (!currentChar) return {};
   var builds = (BUILD_DATA[currentChar] || {}).builds || {};
-  var engines = BUILD_ENGINES[currentChar] || {};
   var result = {};
-  var deckNames = Object.keys(deck);
 
   Object.keys(builds).forEach(function (key) {
-    var build = builds[key];
-    var eng = engines[key];
-    var engCards = eng ? eng.cards : [];
-    var recCards = build.recs || [];
-
-    var engOwned = engCards.filter(function (n) { return deck[n]; }).length;
-    var recOwned = recCards.filter(function (n) { return deck[n]; }).length;
-
-    var rawScore = (engOwned * 3) + (recOwned * 1.5);
-    var maxScore = (engCards.length * 3) + (recCards.length * 1.5) * 1.5;
-    result[key] = maxScore > 0 ? Math.min(1, rawScore / maxScore) : 0;
+    var essential = builds[key].essential || [];
+    var owned = essential.filter(function (n) { return deck[n]; }).length;
+    result[key] = essential.length > 0 ? Math.min(1, owned / essential.length) : 0;
   });
   return result;
 }
@@ -135,18 +125,6 @@ function getPhaseWeight() {
   if (currentAct === 1) return total < 14 ? 0.5 : (total < 20 ? 0.7 : 0.8);
   if (currentAct === 2) return total < 14 ? 0.8 : (total < 20 ? 1.0 : 1.2);
   return total < 14 ? 1.0 : (total < 20 ? 1.4 : 1.6);
-}
-
-function getEngineCommitment(cardName) {
-  const engines = BUILD_ENGINES[currentChar] || {};
-  var best = 0;
-  Object.values(engines).forEach(function (eng) {
-    if (eng.cards.includes(cardName)) {
-      var have = eng.cards.filter(function (n) { return deck[n]; }).length;
-      best = Math.max(best, have / eng.cards.length);
-    }
-  });
-  return best;
 }
 
 function detectDeckArchetypes(deck) {
@@ -197,33 +175,21 @@ function getTopBuild() {
 function getBuildScores() {
   if (!currentChar) return { scores: {}, ranked: [] };
   const builds = (BUILD_DATA[currentChar] || {}).builds || {};
-  const deckNames = Object.keys(deck);
-  const deckNameSet = new Set(deckNames);
+  const deckNameSet = new Set(Object.keys(deck));
 
   const scores = {};
   Object.entries(builds).forEach(([key, build]) => {
-    const hits = deckNames.filter(n => build.cards.includes(n)).length;
-    const pct = Math.round(hits / build.cards.length * 100);
-    const engData = (BUILD_ENGINES[currentChar] || {})[key];
-    const engHave = engData ? engData.cards.filter(n => deckNameSet.has(n)).length : 0;
-    const engTotal = engData ? engData.cards.length : 0;
-    const engPct = engTotal > 0 ? engHave / engTotal : 0;
-
-    // Improved scoring: Penalize builds in bloated decks if the engine isn't forming
-    let adjustedEngPct = engPct;
-    if (deckNames.length > DECK_THRESHOLDS.bloated && engPct < 0.2) {
-      adjustedEngPct *= 0.8;
-    }
-
-    scores[key] = { hits, total: build.cards.length, pct, engPct: adjustedEngPct };
+    const essential = build.essential || [];
+    const hits = essential.filter(n => deckNameSet.has(n)).length;
+    const pct = essential.length > 0 ? Math.round(hits / essential.length * 100) : 0;
+    scores[key] = { hits, total: essential.length, pct };
   });
 
   const RANK_ORDER_R = { S: 4, A: 3, B: 2, C: 1 };
   const ranked = Object.entries(scores).sort((a, b) => {
-    if (Math.abs(b[1].engPct - a[1].engPct) > 0.001) return b[1].engPct - a[1].engPct;
-    const rankDiff = (RANK_ORDER_R[builds[b[0]].rank] || 0) - (RANK_ORDER_R[builds[a[0]].rank] || 0);
-    if (rankDiff !== 0) return rankDiff;
-    return b[1].pct - a[1].pct;
+    const pctDiff = b[1].pct - a[1].pct;
+    if (Math.abs(pctDiff) > 1) return pctDiff;
+    return (RANK_ORDER_R[builds[b[0]].rank] || 0) - (RANK_ORDER_R[builds[a[0]].rank] || 0);
   });
 
   return { scores, ranked };

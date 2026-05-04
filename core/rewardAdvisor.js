@@ -29,50 +29,28 @@ function scoreCard(cardName) {
   var priorityBuilds = [];
   var synergyBuilds  = [];
   var fitsBuilds     = [];
-  var tipsBuilds     = [];
-  var charTips = (TIPS_CARDS[currentChar] || {});
 
   Object.entries(builds).forEach(function(entry) {
     var key = entry[0], b = entry[1];
-    var inCore = b.cards.includes(baseName);
+    var inEssential = (b.essential || []).includes(baseName);
     var inSyn  = (b.synergy || []).includes(baseName);
-    var inRec  = (b.recs || []).includes(baseName);
-    var inTips = (charTips[key] || []).includes(baseName);
     var rankMult = RANK_SCORE[b.rank] || 1;
-    if (inTips) tipsBuilds.push({key: key, b: b, rankMult: rankMult});
-    if (inRec && alreadyHave === 0)        priorityBuilds.push({key: key, b: b, rankMult: rankMult});
-    else if (inCore && alreadyHave === 0)  fitsBuilds.push({key: key, b: b, rankMult: rankMult});
-    else if (inSyn)                        synergyBuilds.push({key: key, b: b, rankMult: rankMult});
+    if (inEssential && alreadyHave === 0)  priorityBuilds.push({key: key, b: b, rankMult: rankMult});
+    else if (inEssential)                   fitsBuilds.push({key: key, b: b, rankMult: rankMult});
+    else if (inSyn)                         synergyBuilds.push({key: key, b: b, rankMult: rankMult});
   });
 
   // ── Base score ───────────────────────────────────────────
   var score = 0;
   var reasons = [];
 
-  // Tips mention
-  if (tipsBuilds.length > 0) {
-    var tipsBest = tipsBuilds.reduce(function(best, e) { return e.rankMult > best.rankMult ? e : best; }, tipsBuilds[0]);
-    score += tipsBest.rankMult * 18;
-    var tierLabel = {4:'S-tier', 3:'A-tier', 2:'B-tier', 1:'C-tier'}[tipsBest.rankMult] || '';
-    reasons.push('key card in ' + tierLabel + ' ' + tipsBest.b.name + ' how-to-play');
-    if (tipsBuilds.length > 1) { score += 10; reasons.push('named in ' + tipsBuilds.length + ' build guides'); }
-  }
-
   // Priority rec
   if (priorityBuilds.length > 0) {
     var priBest = priorityBuilds.reduce(function(best, e) { return e.rankMult > best.rankMult ? e : best; }, priorityBuilds[0]);
-    var priBonus = alreadyHave === 0 ? (15 + priBest.rankMult * 8) : 8;
+    var priBonus = alreadyHave === 0 ? (20 + priBest.rankMult * 10) : 8;
     score += priBonus;
-    if (!reasons.some(function(r) { return r.includes('how-to-play'); })) {
-      reasons.push('priority for ' + priBest.b.name + (priBest.b.rank ? ' (' + priBest.b.rank + '-tier)' : ''));
-    }
-    if (priorityBuilds.length > 1) { score += 8; reasons.push('priority across ' + priorityBuilds.length + ' builds'); }
-  } else if (fitsBuilds.length > 0) {
-    var fitsBest = fitsBuilds.reduce(function(best, e) { return e.rankMult > best.rankMult ? e : best; }, fitsBuilds[0]);
-    score += 10 + fitsBest.rankMult * 4;
-    if (!reasons.some(function(r) { return r.includes('how-to-play') || r.includes('priority'); })) {
-      reasons.push('fits ' + fitsBest.b.name);
-    }
+    reasons.push('essential for ' + priBest.b.name + (priBest.b.rank ? ' (' + priBest.b.rank + '-tier)' : ''));
+    if (priorityBuilds.length > 1) { score += 8; reasons.push('essential across ' + priorityBuilds.length + ' builds'); }
   }
 
   // Synergy
@@ -145,14 +123,14 @@ function scoreCard(cardName) {
   if (currentAct === 1 && total < 10 && (card.type === 'atk' || card.type === 'def' || (card.type || '').includes('atk') || (card.type || '').includes('def'))) {
     score += 6;
   }
-  if (currentAct === 3 && tipsBuilds.length === 0 && priorityBuilds.length === 0 && fitsBuilds.length === 0 && synergyBuilds.length === 0 && !isVelCard) {
+  if (currentAct === 3 && priorityBuilds.length === 0 && fitsBuilds.length === 0 && synergyBuilds.length === 0 && !isVelCard) {
     score -= 20; reasons.push('Act 3: only take core cards');
   }
   if (baseName === 'Strike' || baseName === 'Defend') { score -= 35; reasons.push('starter card — never add more'); }
 
   // Redundancy penalty
-  var _isEngineCard = Object.values(BUILD_ENGINES[currentChar] || {}).some(function(e) { return e.cards.includes(baseName); });
-  if (alreadyHave === 1 && !_isEngineCard) { score -= 5;  reasons.push('already have 1 copy'); }
+  var _isEssential = Object.values(builds).some(function(b) { return (b.essential || []).includes(baseName); });
+  if (alreadyHave === 1 && !_isEssential) { score -= 5;  reasons.push('already have 1 copy'); }
   if (alreadyHave >= 2)                    { score -= 12; reasons.push('already have ' + alreadyHave + ' copies'); }
 
   // ── Act scaling bonus / penalty ───────────────────────────
@@ -182,7 +160,7 @@ function scoreCard(cardName) {
 
   if (archClass.committed) {
     var cBuild = builds_local[archClass.committed];
-    if (cBuild && ((cBuild.recs || []).includes(name) || (cBuild.cards || []).includes(name))) {
+    if (cBuild && (cBuild.essential || []).includes(name)) {
       archBonus  = Math.round(30 + (archClass.confidence[archClass.committed] || 0) * 20);
       archReason = 'committed to ' + cBuild.name + ' — core card';
     }
@@ -191,7 +169,7 @@ function scoreCard(cardName) {
     archClass.building.forEach(function(bKey) {
       var bBuild = builds_local[bKey];
       if (!bBuild) return;
-      if ((bBuild.recs || []).includes(name) || (bBuild.cards || []).includes(name)) {
+      if ((bBuild.essential || []).includes(name)) {
         var candidate = Math.round(15 + (archClass.confidence[bKey] || 0) * 10);
         if (candidate > archBonus) { archBonus = candidate; archReason = 'building toward ' + bBuild.name; }
       }
@@ -201,14 +179,6 @@ function scoreCard(cardName) {
     var wArchBonus = Math.round(archBonus * phaseW);
     score += wArchBonus;
     if (wArchBonus >= 20) reasons.push(archReason);
-  }
-
-  // ── Engine commitment bonus ───────────────────────────────
-  var engCommit = getEngineCommitment(baseName);
-  if (engCommit > 0) {
-    var engBonus = Math.round(engCommit * 8);
-    score += engBonus;
-    if (engCommit >= 0.6) reasons.push('deepens engine you\'re ' + Math.round(engCommit * 100) + '% into');
   }
 
   // ── Archetype anti-synergy penalty ────────────────────────
@@ -242,7 +212,7 @@ function scoreCard(cardName) {
 
   // ── Rarity modifier ───────────────────────────────────────
   var cardRarity = card.rarity || 'common';
-  var buildFit   = tipsBuilds.length > 0 || priorityBuilds.length > 0 || fitsBuilds.length > 0 || synergyBuilds.length > 0;
+  var buildFit   = priorityBuilds.length > 0 || fitsBuilds.length > 0 || synergyBuilds.length > 0;
   if (buildFit) {
     if (cardRarity === 'rare')    { score += 12; reasons.push('Rare — appears infrequently, strong take when it fits'); }
     if (cardRarity === 'ancient') { score += 16; reasons.push('Ancient — extremely rare, take it'); }
@@ -262,22 +232,22 @@ function scoreCard(cardName) {
 
   if (szp.zone === 'bloated' || szp.zone === 'danger') {
     var sizeBase = szp.zone === 'danger' ? -22 : -12;
-    if (isAtkCard && szp.heavyAtk && tipsBuilds.length === 0 && priorityBuilds.length === 0) {
+    if (isAtkCard && szp.heavyAtk && priorityBuilds.length === 0 && fitsBuilds.length === 0) {
       score += sizeBase - 10; reasons.push('deck is attack-heavy (' + szp.pAtk + '%) and already large — skip');
-    } else if (isDefCard && szp.heavyDef && tipsBuilds.length === 0 && priorityBuilds.length === 0) {
+    } else if (isDefCard && szp.heavyDef && priorityBuilds.length === 0 && fitsBuilds.length === 0) {
       score += sizeBase - 10; reasons.push('deck is defense-heavy (' + szp.pDef + '%) and already large — skip');
-    } else if (isSclCard && szp.heavyScl && !isVelCardSz && tipsBuilds.length === 0 && priorityBuilds.length === 0) {
+    } else if (isSclCard && szp.heavyScl && !isVelCardSz && priorityBuilds.length === 0 && fitsBuilds.length === 0) {
       score += sizeBase - 8; reasons.push('deck is scaling-heavy (' + szp.pScl + '%) and already large — skip');
-    } else if (!isVelCardSz && tipsBuilds.length === 0 && priorityBuilds.length === 0) {
+    } else if (!isVelCardSz && priorityBuilds.length === 0 && fitsBuilds.length === 0) {
       score += sizeBase; reasons.push('deck already large (' + szp.total + ' cards) — only take essentials or draw/energy');
     }
     if (isVelCardSz && szp.zone !== 'danger') { score += 8; reasons.push('draw/energy helps compensate for large deck'); }
   } else if (szp.zone === 'sweet' || szp.zone === 'lean') {
-    if (isAtkCard && szp.heavyAtk && !priorityBuilds.length && !tipsBuilds.length) {
+    if (isAtkCard && szp.heavyAtk && !priorityBuilds.length && !fitsBuilds.length) {
       score -= 6; reasons.push('already attack-heavy (' + szp.pAtk + '%) — consider block or scaling instead');
-    } else if (isDefCard && szp.heavyDef && !priorityBuilds.length && !tipsBuilds.length) {
+    } else if (isDefCard && szp.heavyDef && !priorityBuilds.length && !fitsBuilds.length) {
       score -= 6; reasons.push('already defense-heavy (' + szp.pDef + '%) — consider attacks or scaling instead');
-    } else if (isSclCard && szp.heavyScl && !isVelCardSz && !priorityBuilds.length && !tipsBuilds.length) {
+    } else if (isSclCard && szp.heavyScl && !isVelCardSz && !priorityBuilds.length && !fitsBuilds.length) {
       score -= 4; reasons.push('already scaling-heavy (' + szp.pScl + '%) — make sure you have enough attacks');
     }
   }
@@ -285,26 +255,25 @@ function scoreCard(cardName) {
   // ── Verdict label assignment ──────────────────────────────
   var verdict, vLabel, vBorder, vBg, vColor;
 
-  var _inEngine   = Object.values(BUILD_ENGINES[currentChar] || {}).some(function(e) { return e.cards.includes(baseName); });
   var _bossReward = (typeof selectedBoss !== 'undefined') && selectedBoss && BOSS_MATRIX[selectedBoss] && (CARD_BOSS_TAGS[baseName] || []).length > 0 &&
                     BOSS_MATRIX[selectedBoss].rewards.some(function(r) {
                       return (CARD_BOSS_TAGS[baseName] || []).some(function(t) { return r.toLowerCase().includes(t.toLowerCase()); });
                     });
-  var _buildCore  = tipsBuilds.length > 0 || priorityBuilds.length > 0;
+  var _buildCore  = priorityBuilds.length > 0 || fitsBuilds.length > 0;
   var _actScale   = currentAct >= 2 && ACT_SCALES_INTO.has(baseName);
   var _archClassV = classifyArchetypes();
   var _isCommittedCard = (function() {
     if (!_archClassV.committed) return false;
     var cb = ((BUILD_DATA[currentChar] || {}).builds || {})[_archClassV.committed];
-    return cb && ((cb.recs || []).includes(baseName) || (cb.cards || []).includes(baseName));
+    return cb && (cb.essential || []).includes(baseName);
   })();
   var _hasPairBonus = pairResult.bonus >= 14;
 
   if (score < 15 || antiSynPenalty > 0) {
     verdict = 'skip';    vLabel = 'SKIP';
     vBorder = 'var(--border)'; vBg = 'rgba(100,90,70,.12)'; vColor = 'var(--text-muted)';
-  } else if ((_inEngine && engCommit >= 0.33) || (_isCommittedCard && score >= 35) || (_hasPairBonus && _inEngine)) {
-    verdict = 'pick';    vLabel = 'ENGINE PIECE';
+  } else if (_isCommittedCard && score >= 30) {
+    verdict = 'pick';    vLabel = 'ESSENTIAL';
     vBorder = 'rgba(74,154,138,.5)'; vBg = 'rgba(74,154,138,.15)'; vColor = 'var(--teal-bright)';
   } else if (_bossReward && score >= 30) {
     verdict = 'pick';    vLabel = 'BOSS COUNTER';
@@ -339,24 +308,6 @@ function scoreCard(cardName) {
     }
   });
 
-  // ── Engine progress rows ──────────────────────────────────
-  var enginesData    = BUILD_ENGINES[currentChar] || {};
-  var engineMatches  = [];
-  Object.entries(enginesData).forEach(function(pair) {
-    var buildKey = pair[0], engData = pair[1];
-    if (engData.cards.includes(baseName)) {
-      var build     = builds[buildKey];
-      var haveCount = engData.cards.filter(function(n) { return deck[n] || deck[n + '+']; }).length;
-      engineMatches.push({
-        buildName:  build ? build.name  : buildKey,
-        buildColor: build ? build.color : 'var(--teal-bright)',
-        label:      engData.label,
-        have:       haveCount,
-        total:      engData.cards.length
-      });
-    }
-  });
-
   // ── Eradicate nuke estimate (Necrobinder specific) ────────
   var eradicateEstimate = null;
   if (currentChar === 'necrobinder') {
@@ -369,9 +320,9 @@ function scoreCard(cardName) {
   return {
     name, card, score, verdict, vLabel, vBorder, vBg, vColor,
     reasons,
-    tipsBuilds, priorityBuilds, synergyBuilds, fitsBuilds,
+    tipsBuilds: [], priorityBuilds, synergyBuilds, fitsBuilds,
     alreadyHave,
-    activePairs, engineMatches, eradicateEstimate
+    activePairs, engineMatches: [], eradicateEstimate
   };
 }
 
@@ -441,12 +392,12 @@ function getRemoveCandidates() {
     });
   }
 
-  // Duplicate non-engine cards with 2+ copies
-  var enginesData = BUILD_ENGINES[currentChar] || {};
+  // Duplicate non-essential cards with 2+ copies
+  var builds_rc = (BUILD_DATA[currentChar] || {}).builds || {};
   Object.keys(deck).forEach(function(name) {
     if ((deck[name] || 0) >= 2) {
-      var isEngine = Object.values(enginesData).some(function(e) { return e.cards.includes(name); });
-      if (!isEngine) {
+      var isEssential = Object.values(builds_rc).some(function(b) { return (b.essential || []).includes(name); });
+      if (!isEssential) {
         candidates.push({name, reason: deck[name] + ' copies — consider removing one', priority: 'low'});
       }
     }

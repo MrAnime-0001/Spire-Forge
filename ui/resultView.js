@@ -25,18 +25,15 @@ function updatePriorityPanel() {
 
   const _archCmt = classifyArchetypes();
   const buildGroups = Object.entries(builds).map(([key, build]) => {
-    const hits    = deckNames_arr.filter(n => build.cards.includes(n)).length;
-    const pct     = hits / build.cards.length;
-    const engData = (BUILD_ENGINES[currentChar] || {})[key];
-    const missingEngCards = engData ? engData.cards.filter(n => !deckNames.has(n)) : [];
-    const missingRecCards = (build.recs || []).filter(n => !deckNames.has(n));
-    const engHave = engData ? engData.cards.filter(n => deckNames.has(n)).length : 0;
-    const engTotal = engData ? engData.cards.length : 0;
-    const engPct = engTotal > 0 ? engHave / engTotal : 0;
-    const commitmentConf = (_archCmt.confidence || {})[key] || 0;
+    const essential        = build.essential || [];
+    const hits             = deckNames_arr.filter(n => essential.includes(n)).length;
+    const pct              = essential.length > 0 ? hits / essential.length : 0;
+    const missingEssential = essential.filter(n => !deckNames.has(n));
+    const missingSynergy   = (build.synergy || []).filter(n => !deckNames.has(n));
+    const commitmentConf   = (_archCmt.confidence || {})[key] || 0;
     const isCommitted = _archCmt.committed === key;
-    const isBuilding = (_archCmt.building || []).includes(key);
-    return { key, build, hits, pct, engData, missingEngCards, missingRecCards, engHave, engTotal, engPct, commitmentConf, isCommitted, isBuilding };
+    const isBuilding  = (_archCmt.building || []).includes(key);
+    return { key, build, hits, pct, missingEssential, missingSynergy, commitmentConf, isCommitted, isBuilding };
   }).sort((a, b) => {
     if (a.isCommitted && !b.isCommitted) return -1;
     if (!a.isCommitted && b.isCommitted) return 1;
@@ -48,7 +45,7 @@ function updatePriorityPanel() {
     return b.pct - a.pct;
   });
 
-  const activeGroups = buildGroups.filter(g => g.missingEngCards.length > 0 || g.missingRecCards.length > 0);
+  const activeGroups = buildGroups.filter(g => g.missingEssential.length > 0 || g.missingSynergy.length > 0);
 
   const rankColors = {S:'#e8b84b', A:'#6aac5f', B:'#4a8cba', C:'#7a6a8a'};
 
@@ -56,7 +53,7 @@ function updatePriorityPanel() {
     html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);opacity:.8;margin-bottom:.6rem">priority</div>`;
 
     activeGroups.forEach((g, i) => {
-      const { key, build, pct, engData, missingEngCards, missingRecCards } = g;
+      const { key, build, pct, missingEssential, missingSynergy } = g;
       const isTop  = key === topBuildKey;
       const rankC  = rankColors[build.rank] || 'var(--text-muted)';
       const pctStr = Math.round(pct * 100) + '%';
@@ -72,15 +69,15 @@ function updatePriorityPanel() {
       html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:auto">${pctStr} match</span>`;
       html += `</div>`;
 
-      if (missingEngCards.length > 0 && engData) {
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;opacity:.8">engine pieces</div>`;
-        missingEngCards.forEach(name => {
+      if (missingEssential.length > 0) {
+        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;opacity:.8">essential</div>`;
+        missingEssential.slice(0, 5).forEach(name => {
           const card  = allCards.find(c => c.name === name);
           const safeN = name.replace(/'/g,"\\'");
           html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--teal-bright)40;border-radius:3px;background:rgba(74,154,138,.07);cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='var(--teal-bright)';this.style.background='rgba(74,154,138,.14)'" onmouseout="this.style.borderColor='var(--teal-bright)40';this.style.background='rgba(74,154,138,.07)'">
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;color:var(--text)">${name}</div>
-              ${card ? `<div style="font-size:10px;color:var(--text-muted);font-style:italic">${engData.label}</div>` : ''}
+              ${card?.note ? `<div style="font-size:10px;color:var(--text-muted);font-style:italic">${card.note}</div>` : ''}
             </div>
             ${typeTagHtml(card)}
             ${card ? rarityBadgeHtml(getRarity(card)) : ''}
@@ -89,11 +86,11 @@ function updatePriorityPanel() {
         });
       }
 
-      if (missingRecCards.length > 0) {
-        if (missingEngCards.length > 0) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--green-bright);letter-spacing:.08em;text-transform:uppercase;margin:5px 0 3px;opacity:.8">other priority</div>`;
+      if (missingSynergy.length > 0) {
+        if (missingEssential.length > 0) {
+          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--amber-bright);letter-spacing:.08em;text-transform:uppercase;margin:5px 0 3px;opacity:.8">synergy</div>`;
         }
-        missingRecCards.slice(0, 5).forEach(name => {
+        missingSynergy.slice(0, 4).forEach(name => {
           const card  = allCards.find(c => c.name === name);
           const safeN = name.replace(/'/g,"\\'");
           html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid ${isTop ? build.color+'55' : 'var(--border)'};border-radius:3px;background:${isTop ? build.color+'0e' : 'var(--bg2)'};cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='${build.color}';this.style.background='${build.color}1a'" onmouseout="this.style.borderColor='${isTop ? build.color+'55' : 'var(--border)'}';this.style.background='${isTop ? build.color+'0e' : 'var(--bg2)'}'">
@@ -103,7 +100,7 @@ function updatePriorityPanel() {
             </div>
             ${typeTagHtml(card)}
             ${card ? rarityBadgeHtml(getRarity(card)) : ''}
-            <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green-bright);opacity:.7;flex-shrink:0">+ add</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber-bright);opacity:.7;flex-shrink:0">+ add</span>
           </div>`;
         });
       }
@@ -152,10 +149,10 @@ function renderBuildResults(ranked, builds, deckNameSet, topKey) {
   ranked.forEach(([key, sc], i) => {
     const build = builds[key];
     const isTop = key === topKey;
-    const tips = (BUILD_DATA[currentChar].tips||{})[key] || [];
+    const tips = build.tips || [];
 
-    const haveCards = build.cards.filter(n => deckNameSet.has(n));
-    const missingPri = (build.recs||[]).filter(n => !deckNameSet.has(n)).slice(0, 6);
+    const haveCards  = (build.essential||[]).concat(build.synergy||[]).filter(n => deckNameSet.has(n));
+    const missingPri = (build.essential||[]).filter(n => !deckNameSet.has(n)).slice(0, 6);
     const missingSyn = (build.synergy||[]).filter(n => !deckNameSet.has(n)).slice(0, 5);
 
     html += `<div class="build-block">`;
@@ -164,10 +161,10 @@ function renderBuildResults(ranked, builds, deckNameSet, topKey) {
     const rankColor = rankColors[build.rank] || 'var(--text-muted)';
     html += `<div class="build-block-header">`;
     html += `<span class="build-block-name" style="color:${build.color}">${build.fullName}</span>`;
-    if (build.rank) html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;border:1px solid ${rankColor}50;background:${rankColor}18;color:${rankColor};letter-spacing:.06em" title="${build.rankNote||''}">${build.rank}-tier</span>`;
+    if (build.rank) html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;border:1px solid ${rankColor}50;background:${rankColor}18;color:${rankColor};letter-spacing:.06em" title="${build.winCondition||''}">${build.rank}-tier</span>`;
     if (isTop) html += `<span class="build-block-badge" style="background:${build.color}18;color:${build.color};border:1px solid ${build.color}40">best match</span>`;
     html += `</div>`;
-    if (build.rankNote) html += `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-bottom:4px">${build.rankNote}</div>`;
+    if (build.winCondition) html += `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-bottom:4px">${build.winCondition}</div>`;
 
     html += `<div class="build-block-sub">${getDeckSize()} cards \xb7 ${sc.hits}/${sc.total} match</div>`;
 
@@ -180,29 +177,6 @@ function renderBuildResults(ranked, builds, deckNameSet, topKey) {
     if (haveCards.length > 0) {
       html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">in your deck</div>`;
       html += `<div class="mini-chips">${haveCards.map(n=>`<span class="mini-chip have">${n}</span>`).join('')}</div>`;
-    }
-
-    const buildEngine = (BUILD_ENGINES[currentChar] || {})[key];
-    if (buildEngine) {
-      const engHave    = buildEngine.cards.filter(n => deckNameSet.has(n));
-      const engMissing = buildEngine.cards.filter(n => !deckNameSet.has(n));
-      const engPct = engHave.length / buildEngine.cards.length;
-      const engLive = engPct >= 1;
-      const engColor = engLive ? 'var(--green-bright)' : engPct > 0 ? 'var(--amber)' : 'var(--text-muted)';
-      const engStatus = engLive ? '✔ engine online' : engPct > 0 ? '⚙ engine forming' : '⚙ engine needed';
-      html += `<div style="margin-top:.6rem;padding:.5rem .7rem;border:1px solid ${engColor}35;border-radius:3px;background:${engColor}0a">`;
-      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${engColor};letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem">${engStatus}</div>`;
-      html += `<div style="font-size:11px;color:var(--text-dim);margin-bottom:.35rem">${buildEngine.label}</div>`;
-      html += `<div style="display:flex;flex-wrap:wrap;gap:4px">`;
-      buildEngine.cards.forEach(n => {
-        const have = deckNameSet.has(n);
-        html += `<span style="font-size:10px;padding:1px 7px;border-radius:2px;border:1px solid ${have ? engColor+'80' : 'var(--border)'};background:${have ? engColor+'18' : 'transparent'};color:${have ? engColor : 'var(--text-muted)'}${have ? '' : ';opacity:.6'}">${n}${have ? ' ✓' : ''}</span>`;
-      });
-      html += `</div>`;
-      if (engMissing.length > 0 && !engLive) {
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:.3rem">need: <span style="color:${engColor}">${engMissing.join(', ')}</span></div>`;
-      }
-      html += `</div>`;
     }
 
     if (missingPri.length > 0) {
@@ -449,30 +423,42 @@ function renderDeckHealth() {
 function renderEngineTracker() {
   const el = document.getElementById('engineTracker');
   if (!el || !currentChar) { if(el) el.innerHTML=''; return; }
-  const toShow = getEngineTrackerItems();
+
+  const builds    = (BUILD_DATA[currentChar] || {}).builds || {};
+  const archClass = classifyArchetypes();
+  const toShow    = [];
+
+  const addBuild = (key, commitment, commitColor) => {
+    const build = builds[key];
+    if (!build) return;
+    const essential = build.essential || [];
+    const have = essential.filter(n => deck[n]).length;
+    const pct  = essential.length > 0 ? have / essential.length : 0;
+    toShow.push({ build, essential, have, pct, commitment, commitColor });
+  };
+
+  if (archClass.committed) addBuild(archClass.committed, 'COMMITTED', 'var(--teal-bright)');
+  (archClass.building || []).forEach(k => addBuild(k, 'BUILDING', 'var(--amber-bright)'));
+
   if (toShow.length === 0) { el.innerHTML=''; return; }
 
   let html = '<div class="engine-wrap">';
   html += '<div style="font-family:&quot;Share Tech Mono&quot;,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">build status</div>';
 
   toShow.forEach(item => {
-    const isLive = item.pct >= 0.6;
-    const color = isLive ? 'var(--green-bright)' : item.commitColor;
-    const status = isLive ? '✔ live' : item.pct > 0 ? '⚙ forming' : '○ needed';
-    const buildName = item.build ? item.build.name : (item.eng ? item.eng.name : '');
-    const buildColor = item.build ? item.build.color : color;
-    const label = item.eng ? item.eng.label : '';
-    const missing = item.eng ? item.eng.cards.filter(n => !deck[n]) : [];
+    const isLive  = item.pct >= 1;
+    const color   = isLive ? 'var(--green-bright)' : item.pct >= 0.5 ? item.commitColor : 'var(--text-muted)';
+    const status  = isLive ? '✔ complete' : item.pct > 0 ? '⚙ building' : '○ start';
+    const missing = item.essential.filter(n => !deck[n]);
 
     html += '<div style="margin-bottom:.5rem;padding:.4rem .5rem;border:1px solid '+color+'30;border-radius:3px;background:'+color+'08">';
     html += '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">';
-    html += '<span style="font-size:11px;font-family:Cinzel,serif;color:'+buildColor+'">'+buildName+'</span>';
-    if (item.commitment) html += '<span style="font-family:Share Tech Mono,monospace;font-size:8px;padding:1px 5px;border-radius:2px;border:1px solid '+item.commitColor+'50;background:'+item.commitColor+'18;color:'+item.commitColor+'">'+item.commitment+'</span>';
+    html += '<span style="font-size:11px;font-family:Cinzel,serif;color:'+item.build.color+'">'+item.build.name+'</span>';
+    html += '<span style="font-family:Share Tech Mono,monospace;font-size:8px;padding:1px 5px;border-radius:2px;border:1px solid '+item.commitColor+'50;background:'+item.commitColor+'18;color:'+item.commitColor+'">'+item.commitment+'</span>';
     html += '<span style="font-family:Share Tech Mono,monospace;font-size:8px;color:'+color+';margin-left:auto">'+status+'</span>';
     html += '</div>';
-    html += '<div class="axis-row" style="margin-bottom:4px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:'+Math.round(item.pct*100)+'%;background:'+color+'"></div></div><span class="axis-val">'+item.have+'/'+(item.eng?item.eng.cards.length:0)+'</span></div>';
-    if (label) html += '<div style="font-size:10px;color:var(--text-dim);margin-bottom:3px">'+label+'</div>';
-    if (missing.length > 0) html += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted)">need: <span style="color:'+color+'">'+missing.join(', ')+'</span></div>';
+    html += '<div class="axis-row" style="margin-bottom:4px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:'+Math.round(item.pct*100)+'%;background:'+color+'"></div></div><span class="axis-val">'+item.have+'/'+item.essential.length+'</span></div>';
+    if (missing.length > 0 && !isLive) html += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted)">need: <span style="color:'+color+'">'+missing.slice(0,5).join(', ')+'</span></div>';
     html += '</div>';
   });
 
@@ -486,7 +472,7 @@ function renderEngineTracker() {
   }
 
   if (currentAct === 2 && toShow.length > 0 && toShow[0].pct < 0.5) {
-    html += '<div style="margin-top:6px;padding:5px 8px;border:1px solid rgba(192,64,64,.35);border-radius:3px;background:rgba(192,64,64,.08);font-size:11px;color:#c06060">⏰ Act 2 and your engine is not live. Prioritise engine cards above all else.</div>';
+    html += '<div style="margin-top:6px;padding:5px 8px;border:1px solid rgba(192,64,64,.35);border-radius:3px;background:rgba(192,64,64,.08);font-size:11px;color:#c06060">⏰ Act 2 and essential cards not found. Prioritise essential picks above all else.</div>';
   }
 
   html += '</div>';

@@ -318,7 +318,6 @@ function renderPickerAdd() {
   const q = (document.getElementById('pickerSearch').value || '').toLowerCase();
   const allCards = getAllCardsForPicker();
   const builds = (BUILD_DATA[currentChar] || {}).builds || {};
-  const engines = BUILD_ENGINES[currentChar] || {};
   const topBuildKey = getTopBuild();
   const topBuild = topBuildKey ? builds[topBuildKey] : null;
   const stats = getDeckStats();
@@ -340,32 +339,24 @@ function renderPickerAdd() {
       const name = card.name;
       const alreadyInDeck = deck[name] || 0;
 
-      const engineMatches = [];
-      Object.entries(engines).forEach(([buildKey, engData]) => {
-        if (engData.cards.includes(name)) {
-          const build = builds[buildKey];
-          const haveCount = engData.cards.filter(n => deck[n]).length;
-          engineMatches.push({ buildName: build ? build.name : buildKey, buildColor: build ? build.color : 'var(--teal-bright)', label: engData.label, have: haveCount, total: engData.cards.length });
-        }
-      });
-
-      const priorityMatches = [];
-      Object.entries(builds).forEach(([buildKey, build]) => {
-        if ((build.recs || []).includes(name) || (build.cards || []).includes(name)) {
-          if (!engineMatches.find(e => e.buildName === (builds[buildKey] ? builds[buildKey].name : buildKey))) {
-            priorityMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
-          }
+      const essentialMatches = [];
+      const synergyMatches   = [];
+      Object.values(builds).forEach(build => {
+        if ((build.essential || []).includes(name)) {
+          essentialMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
+        } else if ((build.synergy || []).includes(name)) {
+          synergyMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
         }
       });
 
       let borderColor, bgColor, verdictLabel, verdictStyle;
-      if (engineMatches.length > 0) {
+      if (essentialMatches.length > 0) {
         borderColor = 'rgba(74,154,138,.5)'; bgColor = 'rgba(74,154,138,.08)';
-        verdictLabel = 'ENGINE PIECE';
+        verdictLabel = 'ESSENTIAL';
         verdictStyle = 'background:rgba(74,154,138,.2);color:var(--teal-bright);border:1px solid rgba(74,154,138,.4)';
-      } else if (priorityMatches.length > 0) {
+      } else if (synergyMatches.length > 0) {
         borderColor = 'rgba(106,172,95,.45)'; bgColor = 'rgba(74,124,63,.08)';
-        verdictLabel = 'PRIORITY';
+        verdictLabel = 'SYNERGY';
         verdictStyle = 'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)';
       } else {
         borderColor = 'var(--border)'; bgColor = 'var(--bg2)';
@@ -389,21 +380,23 @@ function renderPickerAdd() {
       html += `<span class="card-check-verdict" style="${verdictStyle}">${verdictLabel}</span>`;
       html += `</div>`;
 
-      if (engineMatches.length > 0) {
-        engineMatches.forEach(e => {
-          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${e.buildColor};font-family:'Cinzel',serif;font-size:11px">${e.buildName}</span> <span style="color:var(--text-muted)">engine — ${e.label}</span> <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--teal-bright)">(${e.have}/${e.total} in deck)</span></div>`;
-        });
-      }
-
-      if (priorityMatches.length > 0) {
-        priorityMatches.forEach(p => {
-          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${p.buildColor};font-family:'Cinzel',serif;font-size:11px">${p.buildName}</span>`;
-          if (p.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">[${p.rank}]</span>`;
+      if (essentialMatches.length > 0) {
+        essentialMatches.forEach(e => {
+          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${e.buildColor};font-family:'Cinzel',serif;font-size:11px">${e.buildName}</span>`;
+          if (e.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">[${e.rank}]</span>`;
           html += `</div>`;
         });
       }
 
-      if (engineMatches.length === 0 && priorityMatches.length === 0) {
+      if (synergyMatches.length > 0) {
+        synergyMatches.forEach(s => {
+          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${s.buildColor};font-family:'Cinzel',serif;font-size:11px">${s.buildName}</span>`;
+          if (s.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">[${s.rank}]</span>`;
+          html += `</div>`;
+        });
+      }
+
+      if (essentialMatches.length === 0 && synergyMatches.length === 0) {
         html += `<div style="font-size:11px;color:var(--text-muted)">Not a priority for any ${currentChar.charAt(0).toUpperCase()+currentChar.slice(1)} build. Skip unless you have a specific reason.</div>`;
       }
 
@@ -421,14 +414,14 @@ function renderPickerAdd() {
 
   // No query: grouped priority list for quick browsing
   function categorise(card) {
-    const inTop = topBuild && topBuild.cards.includes(card.name);
-    const inTopSyn = topBuild && topBuild.synergy && topBuild.synergy.includes(card.name);
-    const inAnyBuild = Object.values(builds).some(b=>b.cards.includes(card.name)||(b.synergy||[]).includes(card.name));
+    const inTopEssential = topBuild && (topBuild.essential || []).includes(card.name);
+    const inTopSyn = topBuild && (topBuild.synergy || []).includes(card.name);
+    const inAnyBuild = Object.values(builds).some(b=>(b.essential||[]).includes(card.name)||(b.synergy||[]).includes(card.name));
     const needsDef = stats.def < 3 && (card.type==='def'||card.type.includes('def'));
     const needsAtk = stats.atk < 3 && (card.type==='atk'||card.type.includes('atk'));
-    if (inTop) return {v:'rec', label:'TAKE', reason:needsDef?'priority + fixes low def':needsAtk?'priority + fixes low atk':'core build card'};
+    if (inTopEssential) return {v:'rec', label:'ESSENTIAL', reason:needsDef?'essential + fixes low def':needsAtk?'essential + fixes low atk':'essential build card'};
     if (inTopSyn) return {v:'syn', label:'SYNERGY', reason:'synergy with your build'};
-    if (needsDef) return {v:'rec', label:'TAKE', reason:'fixes low defense'};
+    if (needsDef) return {v:'rec', label:'ESSENTIAL', reason:'fixes low defense'};
     if (needsAtk && inAnyBuild) return {v:'syn', label:'CONSIDER', reason:'fixes low attacks'};
     if (inAnyBuild) return {v:'other', label:'', reason:'fits a build'};
     return {v:'skip', label:'', reason:''};
