@@ -31,14 +31,14 @@ function getDeckStats() {
 function getDeckSizeProfile() {
   const total = getDeckSize();
   const stats = getDeckStats();
-  const axes = calcFourAxes();
+  const axes = calcSixAxes();
   const playable = Math.max(1, total - (stats.other || 0));
 
   // Percentages of playable deck
   const pAtk = playable > 0 ? Math.round(stats.atk / playable * 100) : 0;
   const pDef = playable > 0 ? Math.round(stats.def / playable * 100) : 0;
   const pScl = playable > 0 ? Math.round(stats.scl / playable * 100) : 0;
-  const velScore = axes ? axes.vel : 0;
+  const velScore = axes ? axes.Efficiency : 0;
 
   // Determine what the deck is over-represented in
   // "Heavy" = that category is notably above the others and above a threshold
@@ -59,17 +59,17 @@ function getDeckSizeProfile() {
       if (heavyDef)      gaps.push('stop adding block cards');
       if (heavyScl)      gaps.push('stop adding scaling');
       if (lowVel)        gaps.push('add draw or energy cards');
-      if (!lowVel && axes && axes.blk < DECK_THRESHOLDS.lowBlkScore) gaps.push('add block cards');
-      if (!lowVel && axes && axes.dmg < DECK_THRESHOLDS.lowDmgScore) gaps.push('add attack cards');
+      if (!lowVel && axes && axes.Defense < DECK_THRESHOLDS.lowBlkScore) gaps.push('add block cards');
+      if (!lowVel && axes && axes.Attack < DECK_THRESHOLDS.lowDmgScore) gaps.push('add attack cards');
 
       if (gaps.length > 0) return `Deck is large: ${gaps.join(', ')}.`;
       return `Deck is large. Only add cards that directly fix a weakness — every new card dilutes your best draws.`;
     }
 
     // In healthy range — give a directional tip based on what's missing
-    if (heavyAtk && axes && axes.blk < DECK_THRESHOLDS.heavyAtkBlkReq) return `Attack-heavy (${pAtk}%). Next reward: prioritise block or scaling cards over more attacks.`;
-    if (heavyDef && axes && axes.dmg < DECK_THRESHOLDS.heavyDefDmgReq) return `Defense-heavy (${pDef}%). Next reward: you can afford to add damage or scaling instead of more block.`;
-    if (heavyScl && axes && axes.dmg < DECK_THRESHOLDS.heavySclDmgReq) return `Scaling-heavy (${pScl}%). Make sure you have enough attacks to apply the scaling before Act 2.`;
+    if (heavyAtk && axes && axes.Defense < DECK_THRESHOLDS.heavyAtkBlkReq) return `Attack-heavy (${pAtk}%). Next reward: prioritise block or scaling cards over more attacks.`;
+    if (heavyDef && axes && axes.Attack < DECK_THRESHOLDS.heavyDefDmgReq) return `Defense-heavy (${pDef}%). Next reward: you can afford to add damage or scaling instead of more block.`;
+    if (heavyScl && axes && axes.Attack < DECK_THRESHOLDS.heavySclDmgReq) return `Scaling-heavy (${pScl}%). Make sure you have enough attacks to apply the scaling before Act 2.`;
     if (lowVel) return `Velocity is low (${velScore}/100). Draw and energy cards will make every other card more consistent.`;
     return 'Good composition. Keep adding cards that fit your build path.';
   }
@@ -90,31 +90,52 @@ function getDeckSizeProfile() {
   return { total, zone, color, label, advice: getNextFocusTip(), pAtk, pDef, pScl, velScore, heavyAtk, heavyDef, heavyScl, lowVel };
 }
 
-function calcFourAxes() {
+function calcSixAxes() {
   if (!currentChar || getDeckSize() === 0) return null;
   const stats = getDeckStats();
   const total = getDeckSize();
   const playable = Math.max(1, total - (stats.other||0));
 
-  // Damage score: atk% of playable, scaled 0-100
-  const dmgScore = Math.min(100, Math.round((stats.atk / playable) * 200));
-  // Block score: def% of playable, scaled 0-100, with bonus for barricade/juggernaut
-  let blkScore = Math.min(100, Math.round((stats.def / playable) * 200));
-  // Check for block-generating powers
+  // 1. Attack (old dmg)
+  const attackScore = Math.min(100, Math.round((stats.atk / playable) * 200));
+
+  // 2. Defense (old blk)
+  let defenseScore = Math.min(100, Math.round((stats.def / playable) * 200));
   const blockPowers = ['Barricade','Juggernaut','Afterimage','Stone Armor','Crimson Mantle','Feel No Pain','Shroud'];
-  blockPowers.forEach(n => { if (deck[n]) blkScore = Math.min(100, blkScore + 15); });
-  // Velocity score: count velocity/cycling cards
+  blockPowers.forEach(n => { if (deck[n]) defenseScore = Math.min(100, defenseScore + 15); });
+
+  // 3. Scaling (old scl)
+  const scalingScore = Math.min(100, Math.round((stats.scl / playable) * 300));
+
+  // 4. Efficiency (old vel)
   const velCards = VELOCITY_CARDS[currentChar] || [];
   let velCount = 0;
   Object.keys(deck).forEach(n => { if (velCards.includes(n)) velCount += deck[n]; });
-  // Also count powers/scaling as partial velocity
   velCount += stats.scl * 0.4;
-  const velScore = Math.min(100, Math.round(velCount * 18));
-  // Scaling score: scl cards as fraction of playable, scaled 0-100
-  // ~2-3 scaling cards in a 15-card deck hits ~50-75
-  const sclScore = Math.min(100, Math.round((stats.scl / playable) * 300));
+  const efficiencyScore = Math.min(100, Math.round(velCount * 18));
 
-  return { dmg: dmgScore, blk: blkScore, vel: velScore, scl: sclScore };
+  // 5. Consistency
+  // approach: deck size ÷ draw power ratio
+  let drawPower = 5; // base draw
+  Object.entries(deck).forEach(([name, count]) => {
+    drawPower += (VEL_DRAW_BONUS[name] || 0) * count;
+  });
+  const consistencyScore = Math.min(100, Math.round((drawPower / total) * 100));
+
+  // 6. Synergy
+  // approach: use highest commitment score as Synergy axis value
+  const commitment = getArchetypeCommitment();
+  const maxCommitment = Math.max(0, ...Object.values(commitment));
+  const synergyScore = Math.round(maxCommitment * 100);
+
+  return { 
+    Attack: attackScore, 
+    Defense: defenseScore, 
+    Scaling: scalingScore, 
+    Consistency: consistencyScore, 
+    Efficiency: efficiencyScore, 
+    Synergy: synergyScore 
+  };
 }
 
 function calcDeckCycleTime() {

@@ -131,14 +131,17 @@ function renderRewardVerdictHtml() {
 
   var allSkip = currentAct===3 && scored.every(function(s){return s.verdict==='skip';});
 
-  var axes = calcFourAxes();
+  var axes = calcSixAxes();
+  var targets = AXIS_TARGETS[currentAct] || AXIS_TARGETS[1];
   var db = getDrawBalance();
   var deckStateChips = [];
   if (axes) {
-    if (axes.blk < 25 && total > 6) deckStateChips.push({t:'low block', c:'#6aacda'});
-    if (axes.dmg < 25 && total > 6) deckStateChips.push({t:'low damage', c:'#c06060'});
-    if (axes.vel < 20 && total > 6) deckStateChips.push({t:'low velocity', c:'var(--amber)'});
-    if (axes.scl < 20 && total > 8) deckStateChips.push({t:'low scaling', c:'#9a6aba'});
+    if (axes.Defense < targets.Defense && total > 6) deckStateChips.push({t:'low defense', c:'#6aacda'});
+    if (axes.Attack < targets.Attack && total > 6) deckStateChips.push({t:'low attack', c:'#c06060'});
+    if (axes.Efficiency < targets.Efficiency && total > 6) deckStateChips.push({t:'low efficiency', c:'var(--amber)'});
+    if (axes.Scaling < targets.Scaling && total > 8) deckStateChips.push({t:'low scaling', c:'#9a6aba'});
+    if (axes.Consistency < targets.Consistency && total > 10) deckStateChips.push({t:'low consistency', c:'var(--teal-bright)'});
+    if (axes.Synergy < targets.Synergy && total > 15) deckStateChips.push({t:'low synergy', c:'var(--amber-bright)'});
   }
   var atkDefPool = Math.max(1, db.atkDraw + db.defDraw);
   var rAtk = Math.round(db.atkDraw / atkDefPool * 100);

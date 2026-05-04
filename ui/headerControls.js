@@ -1,4 +1,4 @@
-// Act, ascension, gold, and boss/region controls for STS2 Build Advisor.
+// Act, ascension, and boss/region controls for STS2 Build Advisor.
 
 let selectedBoss = null;
 
@@ -25,13 +25,6 @@ function updateAscUI() {
     const color = currentAsc === 0 ? 'var(--text-dim)' : currentAsc >= 8 ? '#c06060' : 'var(--amber)';
     advEl.innerHTML = `<span style="color:${color}"><strong>${asc.name}</strong> \u2014 ${asc.modifier}</span>`;
   }
-}
-
-function updateGoldAdvice() {
-  const g = parseInt(document.getElementById('goldInput').value) || 0;
-  const el = document.getElementById('goldAdvice');
-  const advice = getShopAdvice(g);
-  el.innerHTML = '<span style="color:' + advice.color + '">"' + advice.text + '</span>';
 }
 
 function renderBossAlert() {

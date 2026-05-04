@@ -1,98 +1,5 @@
 // Build detection, archetype scoring, and synergy analysis for STS2 Build Advisor.
 
-function getSynergyPairBonus(cardName) {
-  if (!currentChar) return { bonus: 0, reasons: [] };
-  var bonus = 0;
-  var reasons = [];
-  var hasEradicate = !!(deck['Eradicate']);
-
-  SYNERGY_PAIRS.forEach(function (pair) {
-    var partnerName = null;
-    if (pair.a === cardName && deck[pair.b]) partnerName = pair.b;
-    else if (pair.b === cardName && deck[pair.a]) partnerName = pair.a;
-    if (!partnerName) return;
-    bonus += pair.bonus;
-    reasons.push(partnerName + ' in deck: ' + pair.note);
-  });
-
-  // Energy cluster detection: if Eradicate in deck AND 2+ energy cards,
-  // add cluster bonus to additional energy cards
-  if (hasEradicate && currentChar === 'necrobinder') {
-    var energyCluster = ['Neurosurge', 'Wisp', 'Borrowed Time', 'Friendship', 'Demesne'];
-    var clusterInDeck = energyCluster.filter(function (n) { return deck[n]; }).length;
-    if (clusterInDeck >= 2 && energyCluster.includes(cardName)) {
-      bonus += 12;
-      reasons.push('Energy cluster: each energy card adds ~11 dmg to Eradicate ceiling');
-    }
-    // Lethality + attack cluster
-    if (deck['Lethality'] && (cardName === 'Debilitate' || cardName === 'Putrefy')) {
-      bonus += 6;
-      reasons.push('Lethality active: Vulnerable multiplier compounds Lethality bonus');
-    }
-  }
-
-  return { bonus: Math.min(bonus, 30), reasons: reasons };
-}
-
-function getScalingDmgNote(cardName) {
-  if (!currentChar) return null;
-  // Eradicate / Whirlwind — energy multipliers
-  if (cardName === 'Eradicate' && currentChar === 'necrobinder') {
-    var e = getEradicateNukeEstimate();
-    if (e && e.energy > 3) return 'with current energy sources: ~' + e.base + ' dmg nuke turn' + (e.withMultipliers !== e.base ? ', ' + e.withMultipliers + ' with multipliers' : '');
-  }
-  if (cardName === 'Whirlwind' && currentChar === 'ironclad') {
-    var energyCards = ['Pyre', 'Bloodletting', 'Offering', 'Battle Trance'].filter(n => deck[n]);
-    var baseE = 3 + energyCards.length;
-    var strCards = ['Demon Form', 'Inflame', 'Fight Me!', 'Rupture'].filter(n => deck[n]).length;
-    if (strCards >= 1 || baseE > 3) return 'with ' + baseE + 'E avg and ' + strCards + ' Strength sources: ~' + (baseE * (4 + strCards * 3)) + ' total AoE';
-  }
-  if (cardName === 'Skewer' && currentChar === 'silent') {
-    var energySilent = ['Tactician', 'Adrenaline', 'Calculated Gamble'].filter(n => deck[n]).length;
-    if (energySilent >= 1) return 'Sly energy sources in deck — burst ceiling ~' + ((3 + energySilent) * 7) + ' dmg';
-  }
-  if (cardName === 'No Escape' && currentChar === 'necrobinder') {
-    var doomCards = ['Countdown', 'Scourge', 'Deathbringer', 'Blight Strike', 'Reaper Form'].filter(n => deck[n]).length;
-    if (doomCards >= 1) return doomCards + ' other Doom source(s) in deck — threshold reachable in 2-3 turns with No Escape stacking';
-  }
-  if (cardName === 'Seven Stars' && currentChar === 'regent') {
-    var starSources = ['Genesis', 'Glow', 'Hidden Cache', 'Royal Gamble', 'Shining Strike', 'Venerate', 'Alignment'].filter(n => deck[n]).length;
-    if (starSources >= 2) return starSources + ' Star generators in deck — 7★ cost reachable in ~' + Math.max(1, Math.ceil(7 / (starSources * 1.5))) + ' turns';
-  }
-  if (cardName === 'Radiate' && currentChar === 'regent') {
-    var rStarSrc = ['Genesis', 'Glow', 'Royal Gamble', 'Hidden Cache', 'Shining Strike'].filter(n => deck[n]).length;
-    if (rStarSrc >= 1) return rStarSrc + ' Star generator(s) in deck — Radiate fires ~' + (rStarSrc * 4) + ' AoE passively per turn cycle';
-  }
-  if (cardName === 'Haunt' && currentChar === 'necrobinder') {
-    var soulSrc = ['Dirge', 'Grave Warden', 'Capture Spirit', 'Severance', 'Reave'].filter(n => deck[n]).length;
-    if (soulSrc >= 1) return soulSrc + ' Soul generator(s) in deck — Haunt deals ~' + (soulSrc * 6) + ' unblockable per turn cycle';
-  }
-  return null;
-}
-
-function getEradicateNukeEstimate() {
-  if (!currentChar || currentChar !== 'necrobinder' || !deck['Eradicate']) return null;
-  var baseEnergy = 3;
-  var sustained = (deck['Friendship'] || 0) * 1;
-  var burst = 0;
-  if (deck['Neurosurge']) burst += 3;
-  if (deck['Borrowed Time']) burst += 4;
-  var wispCount = deck['Wisp'] || 0;
-  burst += wispCount;
-  if (deck['Demesne']) burst += 1;
-  var totalEnergy = baseEnergy + sustained + burst;
-  var baseDmg = totalEnergy * 11;
-  var lethMult = deck['Lethality'] ? 1.5 : 1.0;
-  var debMult = deck['Debilitate'] ? 1.5 : 1.0;
-  return {
-    energy: totalEnergy,
-    base: Math.round(baseDmg),
-    withMultipliers: Math.round(baseDmg * lethMult * debMult),
-    hasLethality: !!(deck['Lethality']),
-    hasDebilitate: !!(deck['Debilitate'])
-  };
-}
-
 function getArchetypeCommitment() {
   if (!currentChar) return {};
   var builds = (BUILD_DATA[currentChar] || {}).builds || {};
@@ -118,13 +25,6 @@ function classifyArchetypes() {
     else if (c >= 0.15) exploring.push(key);
   });
   return { committed: committed, building: building, exploring: exploring, confidence: conf };
-}
-
-function getPhaseWeight() {
-  var total = getDeckSize();
-  if (currentAct === 1) return total < 14 ? 0.5 : (total < 20 ? 0.7 : 0.8);
-  if (currentAct === 2) return total < 14 ? 0.8 : (total < 20 ? 1.0 : 1.2);
-  return total < 14 ? 1.0 : (total < 20 ? 1.4 : 1.6);
 }
 
 function detectDeckArchetypes(deck) {

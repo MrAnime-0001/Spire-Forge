@@ -8,8 +8,6 @@ let currentAsc = 0; // ascension level 0-10
 
 let deck = {}; // card name -> count
 
-let gold = 0;
-
 let hpCur = 0;
 
 let hpMax = 0;
@@ -85,12 +83,6 @@ function deckCards() {
 }
 
 function getDeckSize() { return Object.values(deck).reduce((a,b)=>a+b,0); }
-
-function setGold(v) {
-  gold = v;
-  document.getElementById('goldInput').value = v;
-  notifyListeners();
-}
 
 function setHP(cur, max) {
   hpCur = cur;

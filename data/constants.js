@@ -1,12 +1,11 @@
 // Shared constants and lookup tables for STS2 Build Advisor.
 // Keep this file data-only.
 
-// Phase 3: act-scaling targets for the DMG / BLOCK / VEL axes (0–100 scale, see calcFourAxes)
-// dmg=40 ≈ 20% atk cards; blk=40 ≈ 20% def cards; vel=20 ≈ 1 velocity card
-const DMG_BLOCK_TARGETS = {
-  1: {dmg: 40, blk: 40, vel: 20},
-  2: {dmg: 50, blk: 40, vel: 20},
-  3: {dmg: 60, blk: 30, vel: 20}
+// Phase 8: act-scaling targets for the 6 axes (0–100 scale)
+const AXIS_TARGETS = {
+  1: { Attack: 30, Defense: 35, Scaling: 15, Consistency: 20, Efficiency: 25, Synergy: 10 },
+  2: { Attack: 45, Defense: 40, Scaling: 30, Consistency: 40, Efficiency: 35, Synergy: 35 },
+  3: { Attack: 55, Defense: 30, Scaling: 55, Consistency: 55, Efficiency: 45, Synergy: 60 }
 };
 
 // Bosses with long kill windows where scaling matters most (1.5× scl bonus)
@@ -19,6 +18,7 @@ const DECK_THRESHOLDS = {
   healthyMin: 15,
   bloated: 25,
   tooLarge: 30,
+  velocityThreshold: 20,
   heavyAtkPct: 45,
   heavyAtkDiff: 15,
   heavyAtkSclDiff: 10,

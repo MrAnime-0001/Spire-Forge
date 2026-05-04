@@ -22,9 +22,9 @@ function renderModalCards() {
   const stats = getDeckStats();
 
   function categorise(card) {
-    const inTop = topBuild && topBuild.cards.includes(card.name);
+    const inTop = topBuild && topBuild.essential && topBuild.essential.includes(card.name);
     const inTopSyn = topBuild && topBuild.synergy && topBuild.synergy.includes(card.name);
-    const inAnyBuild = Object.values(builds).some(b => b.cards.includes(card.name) || (b.synergy && b.synergy.includes(card.name)));
+    const inAnyBuild = Object.values(builds).some(b => (b.essential && b.essential.includes(card.name)) || (b.synergy && b.synergy.includes(card.name)));
     const needsDef = stats.def < 3 && (card.type.includes('def'));
     const needsAtk = stats.atk < 3 && (card.type.includes('atk'));
     const tooMany = deck[card.name] && deck[card.name] >= 2 && (card.type.includes('atk'));

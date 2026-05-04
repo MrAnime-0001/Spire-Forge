@@ -117,7 +117,6 @@ function autoSave() {
         deck: Object.assign({}, deck),
         hp: document.getElementById('hpCur').value,
         hpMax: document.getElementById('hpMax').value,
-        gold: document.getElementById('goldInput').value,
         boss: selectedBoss,
         ts: Date.now()
       }));
@@ -142,7 +141,6 @@ function autoRestore() {
     if (charBtn) charBtn.classList.add('active');
     if (s.hp) document.getElementById('hpCur').value = s.hp;
     if (s.hpMax) document.getElementById('hpMax').value = s.hpMax;
-    if (s.gold !== undefined) document.getElementById('goldInput').value = s.gold;
     document.getElementById('mainUI').style.display = 'block';
     document.getElementById('inlinePicker').style.display = 'block';
     updateActUI();
@@ -151,7 +149,6 @@ function autoRestore() {
     updateResult();
     updatePriorityPanel();
     renderPickerList();
-    updateGoldAdvice();
     renderBossAlert();
     _showRestoreToast(s);
   } catch(e) {}
@@ -189,7 +186,6 @@ function exportDeck() {
     act: currentAct,
     hp: document.getElementById('hpCur').value,
     hpMax: document.getElementById('hpMax').value,
-    gold: document.getElementById('goldInput').value,
     deck: deck,
     exported: new Date().toISOString()
   };
@@ -228,11 +224,9 @@ function importDeckFile(event) {
       if (charBtn) charBtn.classList.add('active');
       if (data.hp) document.getElementById('hpCur').value = data.hp;
       if (data.hpMax) document.getElementById('hpMax').value = data.hpMax;
-      if (data.gold) document.getElementById('goldInput').value = data.gold;
       document.getElementById('mainUI').style.display = 'block';
       document.getElementById('inlinePicker').style.display = 'block';
       updateActUI();
-      updateGoldAdvice();
       renderDeckList();
       updateResult();
       updatePriorityPanel();

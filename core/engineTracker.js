@@ -6,7 +6,7 @@ function getEngineTrackerItems() {
   if (!engines) return [];
 
   const archClass = classifyArchetypes();
-  const buildEngines = BUILD_ENGINES[currentChar] || {};
+  const buildEngines = (BUILD_DATA[currentChar] || {}).builds || {};
   const builds = (BUILD_DATA[currentChar] || {}).builds || {};
   const toShow = [];
 
@@ -14,8 +14,9 @@ function getEngineTrackerItems() {
     const eng = buildEngines[key];
     const build = builds[key];
     if (!eng || !build) return null;
-    const have = eng.cards.filter(n => deck[n] || deck[n + '+']).length;
-    return { key, eng, build, have, pct: have / eng.cards.length, commitment, commitColor };
+    const essentialCards = eng.essential || [];
+    const have = essentialCards.filter(n => deck[n] || deck[n + '+']).length;
+    return { key, eng, build, have, pct: essentialCards.length ? have / essentialCards.length : 0, commitment, commitColor };
   }
 
   if (archClass.committed) {

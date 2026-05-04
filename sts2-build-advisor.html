@@ -251,8 +251,6 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
 .boss-bar-text{font-size:12px;color:var(--text-dim);line-height:1.5;}
 .boss-select-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.6rem;}
 .boss-btn{padding:3px 9px;background:none;border:1px solid var(--border);border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--text-muted);transition:all .12s;}
-.gold-preset{padding:2px 6px;background:none;border:1px solid var(--border);border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);cursor:pointer;transition:all .12s;letter-spacing:.04em;}
-.gold-preset:hover{border-color:var(--border-bright);color:var(--amber);}
 .boss-btn:hover{border-color:var(--border-bright);color:var(--text-dim);}
 .boss-btn.active{border-color:var(--ember);color:var(--ember);background:rgba(192,66,26,.1);}
 /* Engine tracker */
@@ -302,20 +300,6 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
     <button class="act-btn" id="act2btn" onclick="setAct(2)">2 &mdash; City</button>
     <button class="act-btn" id="act3btn" onclick="setAct(3)">3 &mdash; Beyond</button>
     <span class="act-advice" id="actAdvice"></span>
-    <span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:auto;flex-shrink:0">
-      <span style="display:flex;align-items:center;gap:6px">
-        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.06em">gold</span>
-        <input type="number" id="goldInput" value="0" min="0" max="9999" oninput="updateGoldAdvice();autoSave()" style="width:60px;background:var(--bg2);border:1px solid var(--border-bright);border-radius:3px;padding:3px 6px;color:var(--amber-bright);font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;text-align:center">
-        <span style="display:flex;gap:3px">
-          <button onclick="setGold(0)" class="gold-preset">0</button>
-          <button onclick="setGold(100)" class="gold-preset">100</button>
-          <button onclick="setGold(200)" class="gold-preset">200</button>
-          <button onclick="setGold(300)" class="gold-preset">300</button>
-          <button onclick="setGold(500)" class="gold-preset">500</button>
-        </span>
-      </span>
-      <span id="goldAdvice" style="font-size:11px;color:var(--text-muted);font-style:italic;min-height:1em"></span>
-    </span>
   </div>
 
   <!-- Ascension row -->
@@ -428,6 +412,12 @@ h1{font-family:'Cinzel',serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700
   </div>
 </div>
 
+<script src="data/cards-ironclad.js"></script>
+<script src="data/cards-silent.js"></script>
+<script src="data/cards-defect.js"></script>
+<script src="data/cards-necrobinder.js"></script>
+<script src="data/cards-regent.js"></script>
+<script src="data/cards-colorless.js"></script>
 <script src="data/cards.js"></script>
 <script src="data/builds.js"></script>
 <script src="data/constants.js"></script>
@@ -496,7 +486,6 @@ function init() {
   subscribe(() => {
     updateActUI();
     updateAscUI();
-    updateGoldAdvice();
     renderBossAlert();
     renderDeckList();
     updateResult();

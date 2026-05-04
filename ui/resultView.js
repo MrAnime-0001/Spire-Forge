@@ -259,10 +259,11 @@ function renderDeckHealth() {
   if (!el) return;
   if (!currentChar || getDeckSize() === 0) { el.innerHTML = ''; return; }
 
-  const axes = calcFourAxes();
+  const axes = calcSixAxes();
   const stats = getDeckStats();
   if (!axes) { el.innerHTML = ''; return; }
 
+  const targets = AXIS_TARGETS[currentAct] || AXIS_TARGETS[1];
   const total = getDeckSize();
   const oth = stats.other || 0;
   const playable = Math.max(1, total - oth);
@@ -280,48 +281,45 @@ function renderDeckHealth() {
   const drawHeavyAtk = rAtk > 65;
   const drawHeavyDef = rDef > 65;
 
-  const volume = axes.dmg === 0 || axes.blk === 0 || axes.vel === 0
-    ? 0
-    : axes.scl === 0
-      ? Math.round(Math.pow(axes.dmg * axes.blk * axes.vel, 1/3))
-      : Math.round(Math.pow(axes.dmg * axes.blk * axes.vel * axes.scl, 1/4));
-  const volColor = volume >= 70 ? 'var(--green-bright)' : volume >= 40 ? 'var(--amber-bright)' : '#c06060';
-  const volLabel = volume >= 70 ? 'Solid' : volume >= 50 ? 'Developing' : volume >= 30 ? 'Brittle'
-    : axes.blk === 0 ? 'No Defense' : axes.dmg === 0 ? 'No Damage' : axes.vel === 0 ? 'Clunky'
-    : (total > 8 && axes.scl === 0) ? 'No Scaling' : 'Weak';
+  // Volume: geometric mean of all 6 axes
+  const volume = Math.round(Math.pow(
+    Math.max(1, axes.Attack) * 
+    Math.max(1, axes.Defense) * 
+    Math.max(1, axes.Scaling) * 
+    Math.max(1, axes.Consistency) * 
+    Math.max(1, axes.Efficiency) * 
+    Math.max(1, axes.Synergy), 1/6));
+    
+  const volColor = volume >= 60 ? 'var(--green-bright)' : volume >= 35 ? 'var(--amber-bright)' : '#c06060';
+  const volLabel = volume >= 70 ? 'Optimal' : volume >= 50 ? 'Strong' : volume >= 35 ? 'Functional' : 'Unstable';
 
-  const atkCls = stats.atk <= 2 ? 'stat-warn' : stats.atk >= 3 ? 'stat-ok' : '';
-  const defCls = stats.def <= 1 ? 'stat-warn' : stats.def >= 3 ? 'stat-ok' : '';
-  const sclCls = stats.scl <= 0 ? 'stat-warn' : stats.scl >= 3 ? 'stat-ok' : '';
-  const velCls = stats.vel <= 0 ? 'stat-warn' : stats.vel >= 3 ? 'stat-ok' : '';
+  const atkCls = axes.Attack < targets.Attack ? 'stat-warn' : 'stat-ok';
+  const defCls = axes.Defense < targets.Defense ? 'stat-warn' : 'stat-ok';
+  const sclCls = axes.Scaling < targets.Scaling ? 'stat-warn' : 'stat-ok';
+  const effCls = axes.Efficiency < targets.Efficiency ? 'stat-warn' : 'stat-ok';
+  const conCls = axes.Consistency < targets.Consistency ? 'stat-warn' : 'stat-ok';
+  const synCls = axes.Synergy < targets.Synergy ? 'stat-warn' : 'stat-ok';
 
   const tte = calcTurnsToEmpty();
   const tteCls = tte !== null && tte <= 3 ? 'stat-ok' : tte !== null && tte > 5 ? 'stat-warn' : '';
 
   const starters = (deck['Strike']||0) + (deck['Defend']||0);
   const warnings = [];
-  if (axes.blk < 25 && total > 6)  warnings.push({msg:'No block — elites will punish you.', color:'#6aacda'});
-  if (axes.dmg < 25 && total > 6)  warnings.push({msg:'Low damage output — fights will drag.', color:'#c06060'});
-  if (axes.vel < 20 && total > 6)  warnings.push({msg:'Low velocity — deck feels clunky. Add draw or energy.', color:'var(--amber)'});
-  if (axes.scl < 20 && total > 8)  warnings.push({msg:'Low scaling — Power cards are needed to maintain damage output in Act 2+ boss fights.', color:'#9a6aba'});
-  if (axes.scl < 40 && total > 8 && currentAct >= 2)  warnings.push({msg:'Act '+currentAct+': scaling is critical vs. bosses. Prioritise a Power card this reward.', color:'#9a6aba'});
-  if (total > 10 && starters >= 3) warnings.push({msg:`${starters} starter cards diluting draws — remove at the shop.`, color:'#c8922a'});
-  if (playable > 7) {
-    if (drawHeavyAtk) warnings.push({msg:`Draw skewed toward attack (${rAtk}% of ATK+DEF draws). Add ${Math.ceil(db.atkDraw - db.defDraw)} more block card${db.atkDraw-db.defDraw!==1?'s':''} to reach 50/50.`, color:'#6aacda'});
-    else if (drawHeavyDef) warnings.push({msg:`Draw skewed toward block (${rDef}% of ATK+DEF draws). Add ${Math.ceil(db.defDraw - db.atkDraw)} more attack card${db.defDraw-db.atkDraw!==1?'s':''} to reach 50/50.`, color:'#c06060'});
-  }
-  if (oth >= 3) warnings.push({msg:`${oth} dead cards (curses/statuses) diluting draws. Remove at shops.`, color:'#7a6a4a'});
-  else if (oth >= 1) warnings.push({msg:`${oth} dead card${oth>1?'s':''} in deck. Consider removing at a shop.`, color:'#7a6a4a'});
+  if (axes.Defense < targets.Defense && total > 6)  warnings.push({msg:'Low defense \u2014 elites will punish you.', color:'#6aacda'});
+  if (axes.Attack < targets.Attack && total > 6)  warnings.push({msg:'Low attack \u2014 fights will drag.', color:'#c06060'});
+  if (axes.Efficiency < targets.Efficiency && total > 6)  warnings.push({msg:'Low efficiency \u2014 deck feels clunky.', color:'var(--amber)'});
+  if (axes.Consistency < targets.Consistency && total > 10) warnings.push({msg:'Low consistency \u2014 unreliable draws.', color:'var(--teal-bright)'});
+  if (axes.Scaling < targets.Scaling && total > 12)  warnings.push({msg:'Low scaling \u2014 critical for bosses.', color:'#9a6aba'});
+  if (axes.Synergy < targets.Synergy && total > 15) warnings.push({msg:'Low synergy \u2014 deck lacks a clear plan.', color:'var(--amber-bright)'});
 
-  const velSuggest = axes.vel < 20 && total > 6
-    ? `<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:3px">velocity cards to consider: ${(VELOCITY_CARDS[currentChar]||[]).filter(n=>!deck[n]).slice(0,4).join(', ')}</div>`
-    : '';
+  if (total > 10 && starters >= 3) warnings.push({msg:`${starters} starter cards diluting draws \u2014 remove at the shop.`, color:'#c8922a'});
+  if (playable > 7) {
+    if (drawHeavyAtk) warnings.push({msg:`Draw skewed toward attack (${rAtk}%). Add ${Math.ceil(db.atkDraw - db.defDraw)} block cards.`, color:'#6aacda'});
+    else if (drawHeavyDef) warnings.push({msg:`Draw skewed toward block (${rDef}%). Add ${Math.ceil(db.defDraw - db.atkDraw)} attack cards.`, color:'#c06060'});
+  }
+  if (oth >= 3) warnings.push({msg:`${oth} dead cards diluting draws. Remove at shops.`, color:'#7a6a4a'});
 
   const szp = getDeckSizeProfile();
-
-  const act2VelNudge = (currentAct === 2 && axes.vel < 30 && total > 6)
-    ? `<div style="margin-top:6px;padding:5px 8px;border:1px solid rgba(200,146,42,.4);border-radius:3px;background:rgba(200,146,42,.08);font-size:11px;color:var(--amber-bright)">Ɽ Act 2 note: timer bosses like The Insatiable require consistent draw and energy to extend their countdown. Low velocity decks can run out of turns before the kill.</div>`
-    : '';
 
   const barAtk = Math.round(stats.atk/total*100);
   const barDef = Math.round(stats.def/total*100);
@@ -336,87 +334,48 @@ function renderDeckHealth() {
   const barDrawDead = Math.max(0, 100 - barDrawAtk - barDrawDef - barDrawScl - barDrawVel);
 
   const drawBalanceColor = drawRatioBalanced ? 'var(--green-bright)' : (drawHeavyAtk || drawHeavyDef) ? '#c06060' : 'var(--amber-bright)';
-  const drawBalanceLabel = drawRatioBalanced ? '✔ balanced' : drawHeavyAtk ? '⚠ atk-heavy' : drawHeavyDef ? '⚠ def-heavy' : '~ close';
+  const drawBalanceLabel = drawRatioBalanced ? '\u2714 balanced' : drawHeavyAtk ? '\u26A0 atk-heavy' : drawHeavyDef ? '\u26A0 def-heavy' : '~ close';
 
   el.innerHTML = `<div class="axes-wrap" style="margin-bottom:.75rem">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">deck overview</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">deck evaluation</span>
       <span style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:${volColor}">${volume} <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase">${volLabel}</span></span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:.75rem">
-      <div class="stat-chip"><div class="stat-val ${atkCls}">${stats.atk}</div><div class="stat-lbl">Attack</div></div>
-      <div class="stat-chip"><div class="stat-val ${defCls}">${stats.def}</div><div class="stat-lbl">Defense</div></div>
-      <div class="stat-chip"><div class="stat-val ${sclCls}">${stats.scl}</div><div class="stat-lbl">Scale</div></div>
-      <div class="stat-chip"><div class="stat-val ${velCls}">${stats.vel}</div><div class="stat-lbl">Velocity</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:.75rem">
+      <div class="stat-chip"><div class="stat-val ${atkCls}">${axes.Attack}</div><div class="stat-lbl">Attack</div></div>
+      <div class="stat-chip"><div class="stat-val ${defCls}">${axes.Defense}</div><div class="stat-lbl">Defense</div></div>
+      <div class="stat-chip"><div class="stat-val ${sclCls}">${axes.Scaling}</div><div class="stat-lbl">Scaling</div></div>
+      <div class="stat-chip"><div class="stat-val ${effCls}">${axes.Efficiency}</div><div class="stat-lbl">Efficiency</div></div>
+      <div class="stat-chip"><div class="stat-val ${conCls}">${axes.Consistency}</div><div class="stat-lbl">Consistency</div></div>
+      <div class="stat-chip"><div class="stat-val ${synCls}">${axes.Synergy}</div><div class="stat-lbl">Synergy</div></div>
     </div>
+
     <div style="padding:.55rem .75rem;background:var(--bg2);border:1px solid ${szp.color}40;border-left:3px solid ${szp.color};border-radius:4px;margin-bottom:.75rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem">
         <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">${szp.total} cards \xb7 ${szp.label}</span>
-        ${tte !== null ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--text-muted)">turns to empty: <span class="${tteCls}" style="font-family:'Cinzel',serif;font-size:13px;font-weight:600">${tte}</span></span>` : ''}
+        ${tte !== null ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--text-muted)">cycle speed: <span class="${tteCls}" style="font-family:'Cinzel',serif;font-size:13px;font-weight:600">${tte}</span></span>` : ''}
       </div>
       <div style="height:5px;background:var(--surface);border-radius:99px;overflow:hidden;margin:.25rem 0">
         <div style="height:100%;border-radius:99px;width:${Math.min(100,Math.round(szp.total/35*100))}%;background:${szp.color};transition:width .4s"></div>
       </div>
       <div style="font-size:11px;color:var(--text-dim);font-style:italic;line-height:1.4">${szp.advice}</div>
-      ${(szp.zone==='bloated'||szp.zone==='danger') ? `<div style="margin-top:4px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.05em">atk ${szp.pAtk}% \xb7 def ${szp.pDef}% \xb7 scale ${szp.pScl}%</div>` : ''}
     </div>
-    <div class="axis-row">
-      <span class="axis-label" title="Attack damage output">damage</span>
-      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.dmg}%;background:#c04040"></div></div>
-      <span class="axis-val" style="color:#c06060">${pAtk}%</span>
-    </div>
-    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin:-3px 0 5px 70px">attacks — aim for 15–20 damage output per turn</div>
-    <div class="axis-row">
-      <span class="axis-label" title="Block/defense output">block</span>
-      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.blk}%;background:#378add"></div></div>
-      <span class="axis-val" style="color:#6aacda">${pDef}%</span>
-    </div>
-    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin:-3px 0 5px 70px">defense — how much damage you absorb</div>
-    <div class="axis-row">
-      <span class="axis-label" title="Draw, energy generation, deck thinning">cycle</span>
-      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.vel}%;background:#4a9a8a"></div></div>
-      <span class="axis-val" style="color:#4abaa0">${axes.vel}</span>
-    </div>
-    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin:-3px 0 5px 70px">draw &amp; energy — how fast you cycle through cards</div>
-    <div class="axis-row">
-      <span class="axis-label" title="Power cards, stat-scaling, passive engines">scaling</span>
-      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${axes.scl}%;background:#9a6aba"></div></div>
-      <span class="axis-val" style="color:#b07ad0">${pScl}%</span>
-    </div>
-    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin:-3px 0 10px 70px">powers &amp; scaling — strength over long fights</div>
+
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
       <span>draw odds</span>
-      <span style="color:${drawBalanceColor};font-size:9px">${db.atkDraw}ATK : ${db.defDraw}DEF${db.sclDraw>0?' : '+db.sclDraw+'SCL':''}${db.velDraw>0?' : '+db.velDraw+'VEL':''}${db.deadDraw>0?' : '+db.deadDraw+'DEAD':''}  ${drawBalanceLabel}</span>
+      <span style="color:${drawBalanceColor};font-size:9px">${db.atkDraw}ATK : ${db.defDraw}DEF  ${drawBalanceLabel}</span>
     </div>
-    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-bottom:4px">chance of drawing an attack vs a block card — aim for 50/50</div>
     <div class="balance-bar-track" style="margin:.2rem 0 .3rem;height:8px">
       <div class="balance-seg" style="width:${barDrawAtk}%;background:#c04040" title="Attack draws"></div>
       <div class="balance-seg" style="width:${barDrawDef}%;background:#378add" title="Block draws"></div>
       <div class="balance-seg" style="width:${barDrawScl}%;background:#9a6aba" title="Scale draws"></div>
-      <div class="balance-seg" style="width:${barDrawVel}%;background:#4a9a8a" title="Velocity draws"></div>
-      <div class="balance-seg" style="width:${barDrawDead}%;background:rgba(140,110,60,.5)" title="Unplayable draws"></div>
+      <div class="balance-seg" style="width:${barDrawVel}%;background:#4a9a8a" title="Efficiency draws"></div>
+      <div class="balance-seg" style="width:${barDrawDead}%;background:rgba(140,110,60,.5)" title="Dead draws"></div>
     </div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin:.55rem 0 2px">card mix</div>
-    <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-bottom:4px">what your deck is made of (hybrid cards split fractionally)</div>
-    <div class="balance-bar-track" style="margin:.2rem 0 .3rem">
-      <div class="balance-seg" style="width:${barAtk}%;background:#c04040"></div>
-      <div class="balance-seg" style="width:${barDef}%;background:#378add"></div>
-      <div class="balance-seg" style="width:${barScl}%;background:#9a6aba"></div>
-      <div class="balance-seg" style="width:${barVel}%;background:#4a9a8a"></div>
-      <div class="balance-seg" style="width:${barOth}%;background:${oth>0?'rgba(140,110,60,.45)':'rgba(100,90,70,.15)'}"></div>
-    </div>
-    <div class="balance-legend">
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#c04040"></span><span style="color:#c06060">${pAtk}% attack</span></span>
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#378add"></span><span style="color:#6aacda">${pDef}% defense</span></span>
-      <span class="balance-legend-item"><span class="balance-dot" style="background:#9a6aba"></span><span style="color:#b07ad0">${pScl}% scale</span></span>
-      ${stats.vel > 0 ? `<span class="balance-legend-item"><span class="balance-dot" style="background:#4a9a8a"></span><span style="color:#4abaa0">${barVel}% velocity</span></span>` : ''}
-      ${oth > 0 ? `<span class="balance-legend-item"><span class="balance-dot" style="background:rgba(140,110,60,.7)"></span><span style="color:#7a6a4a">${Math.round(oth/total*100)}% dead cards</span></span>` : ''}
-    </div>
-    ${velSuggest}
+
     ${warnings.length > 0
-      ? warnings.map(w=>`<div class="balance-warning" style="color:${w.color}">⚠ ${w.msg}</div>`).join('')
-      : total > 5 ? `<div class="balance-ok">✔ ${pAtk}% ATK / ${pDef}% DEF / ${pScl}% SCALE — draw ${db.atkDraw}ATK : ${db.defDraw}DEF</div>` : ''}
-    ${act2VelNudge}
+      ? warnings.map(w=>`<div class="balance-warning" style="color:${w.color}">\u26A0 ${w.msg}</div>`).join('')
+      : total > 5 ? `<div class="balance-ok">\u2714 Balanced composition for Act ${currentAct}</div>` : ''}
   </div>`;
 }
 
