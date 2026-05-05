@@ -68,7 +68,7 @@ function renderBossAlert() {
       if (boss.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${boss.hp}</span></div>`;
 
       if (selectedBoss === 'The Insatiable' && currentChar) {
-        const axes = calcFourAxes();
+        const axes = calcSixAxes();
         const szp = getDeckSizeProfile();
         const total = getDeckSize();
         let insatWarnings = [];
