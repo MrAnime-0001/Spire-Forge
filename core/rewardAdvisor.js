@@ -4,6 +4,17 @@
 // Depends on: state.js, buildAnalyzer.js, deckStats.js, builds.js, constants.js
 // Also reads globals from HTML scope: selectedBoss, getAllCardsForPicker(), getRarity()
 
+// ── getCrisisStates ──────────────────────────────────────────
+// Helper to identify critical gaps in deck composition.
+function getCrisisStates(axes, targets) {
+  if (!axes || !targets) return { attack: false, defense: false, scaling: false };
+  return {
+    attack:  axes.Attack  < (targets.Attack  * 0.5),
+    defense: axes.Defense < (targets.Defense * 0.5),
+    scaling: axes.Scaling < (targets.Scaling * 0.3) // Scaling crisis is more lenient
+  };
+}
+
 // ── scoreCard ────────────────────────────────────────────────
 // Score a single card against the current run state.
 // Returns a result object used by the reward and shop UI layers.
@@ -15,6 +26,7 @@ function scoreCard(cardName) {
   var total    = getDeckSize();
   var axes     = calcSixAxes();
   var targets  = AXIS_TARGETS[currentAct] || AXIS_TARGETS[1];
+  var crisis   = getCrisisStates(axes, targets);
 
   var name  = cardName;
   var baseName = name.endsWith('+') ? name.slice(0, -1) : name;
@@ -50,10 +62,16 @@ function scoreCard(cardName) {
     if (isAtk) {
       var gap = Math.max(0, targets.Attack - axes.Attack);
       var bonus = Math.round(gap * 0.5 * gapMult);
-      if (bonus > 0) {
+      
+      if (crisis.attack && gap > 0) {
+        bonus = Math.round(gap * 1.5); // Crisis multiplier
+        score += bonus;
+        reasons.push('CRITICAL DAMAGE NEED (+' + bonus + ')');
+      } else if (bonus > 0) {
         score += bonus;
         reasons.push('fills attack gap (+' + bonus + ')');
       }
+      
       if (axes.Attack > targets.Attack + 20) {
         score -= 10; reasons.push('deck already attack-heavy');
       }
@@ -63,10 +81,16 @@ function scoreCard(cardName) {
     if (isDef) {
       var gap = Math.max(0, targets.Defense - axes.Defense);
       var bonus = Math.round(gap * 0.5 * gapMult);
-      if (bonus > 0) {
+
+      if (crisis.defense && gap > 0) {
+        bonus = Math.round(gap * 1.5); // Crisis multiplier
+        score += bonus;
+        reasons.push('CRITICAL BLOCK NEED (+' + bonus + ')');
+      } else if (bonus > 0) {
         score += bonus;
         reasons.push('fills defense gap (+' + bonus + ')');
       }
+
       if (axes.Defense > targets.Defense + 20) {
         score -= 10; reasons.push('deck already defense-heavy');
       }
@@ -90,27 +114,41 @@ function scoreCard(cardName) {
   });
 
   var archClass = classifyArchetypes();
-  var commitment = (archClass.confidence || {})[archClass.committed] || 0;
   
-  var buildMult = (tier === 1) ? 0.5 : (tier === 2) ? 1.2 : 2.0;
+  // Calculate build multiplier based on commitment level
+  // Hierarchical: Committed (1.5) > Building (0.8) > Exploring (0.4)
+  var buildMult = 0.2; // Default baseline for random synergy
+  
   var buildBonus = 0;
   var buildReason = '';
 
   if (priorityBuilds.length > 0) {
     var priBest = priorityBuilds.reduce(function(best, e) { return e.rankMult > best.rankMult ? e : best; }, priorityBuilds[0]);
+    
+    // Determine multiplier for this specific build
+    var bKey = priBest.key;
+    var bConf = (archClass.confidence || {})[bKey] || 0;
+    var currentBuildMult = 0.4; // exploring
+    if (archClass.committed === bKey) currentBuildMult = 1.5;
+    else if (archClass.building.includes(bKey)) currentBuildMult = 0.8;
+
     var basePri = (20 + priBest.rankMult * 10);
     
-    // Tier 1 cap
+    // Tier 1 cap to prevent forcing builds too early
     if (tier === 1) basePri = Math.min(basePri, 15);
     
-    // Mid game: only apply mult if commitment is decent
-    var finalMult = (tier === 2 && commitment < 0.33) ? 1.0 : buildMult;
-    buildBonus = Math.round(basePri * finalMult);
-    buildReason = 'essential for ' + priBest.b.name;
+    buildBonus = Math.round(basePri * currentBuildMult);
+    buildReason = (currentBuildMult >= 1.5 ? 'core for ' : 'essential for ') + priBest.b.name;
     if (priorityBuilds.length > 1) { buildBonus += 5; buildReason += ' (+multi-build)'; }
   } else if (synergyBuilds.length > 0) {
     var synBest = synergyBuilds.reduce(function(best, e) { return e.rankMult > best.rankMult ? e : best; }, synergyBuilds[0]);
-    buildBonus = Math.round((8 + synBest.rankMult * 4) * (tier === 3 ? 1.5 : 1.0));
+    
+    var sKey = synBest.key;
+    var currentSynMult = 0.3;
+    if (archClass.committed === sKey) currentSynMult = 1.0;
+    else if (archClass.building.includes(sKey)) currentSynMult = 0.6;
+
+    buildBonus = Math.round((8 + synBest.rankMult * 4) * currentSynMult);
     buildReason = 'synergy: ' + synergyBuilds.map(function(e) { return e.b.name; }).join(', ');
   }
 
@@ -144,20 +182,21 @@ function scoreCard(cardName) {
   // ── Efficiency / Velocity ────────────────────────────────
   if (isUtility) {
     var effGap = Math.max(0, targets.Efficiency - axes.Efficiency);
-    var effBonus = Math.round(effGap * 0.8);
+    var effBonus = Math.round(effGap * 1.0); // Slightly higher base weight for utilities
 
-    if (tier === 1) {
-      // Natural cycle is fast enough
-      score += Math.round(effBonus * 0.3);
-      if (effBonus > 0) reasons.push('natural efficiency');
+    // Velocity is a priority only for larger decks
+    if (total < 15) {
+      // Small deck: Natural cycle is enough
+      score += Math.round(effBonus * 0.2);
+      if (effBonus > 0) reasons.push('natural efficiency enough');
+    } else if (total < 25) {
+      // Medium deck: Starting to need draw
+      score += Math.round(effBonus * 0.6);
+      if (effGap > 0) reasons.push('improves consistency');
     } else {
-      // Penalty/Requirement activates
-      if (total > DECK_THRESHOLDS.velocityThreshold || tier === 3) {
-        score += effBonus;
-        if (effGap > 0) reasons.push('improves efficiency');
-      } else {
-        score += Math.round(effBonus * 0.5);
-      }
+      // Bloated deck: Velocity is critical
+      score += Math.round(effBonus * 1.2);
+      if (effGap > 0) reasons.push('CRITICAL: deck needs velocity');
     }
   }
 
@@ -209,9 +248,16 @@ function scoreCard(cardName) {
   var _actScale   = currentAct === 3 && ACT_SCALES_INTO.has(baseName);
   var _buildCore  = (fitsBuilds.length > 0 || synergyBuilds.length > 0) && score >= 30;
 
+  // New Verdict Hierarchy: Survival > Boss Counter > Essential Build > Synergy
   if (score < 15) {
     verdict = 'skip'; vLabel = 'SKIP';
     vBorder = 'var(--border)'; vBg = 'rgba(100,90,70,.12)'; vColor = 'var(--text-muted)';
+  } else if (crisis.attack && isAtk && score >= 25) {
+    verdict = 'pick'; vLabel = 'SURVIVAL: DAMAGE';
+    vBorder = 'rgba(192,66,26,.6)'; vBg = 'rgba(192,66,26,.15)'; vColor = '#ff6040';
+  } else if (crisis.defense && isDef && score >= 25) {
+    verdict = 'pick'; vLabel = 'SURVIVAL: BLOCK';
+    vBorder = 'rgba(74,154,138,.6)'; vBg = 'rgba(74,154,138,.15)'; vColor = 'var(--teal-bright)';
   } else if (_isEssential) {
     verdict = 'pick'; vLabel = 'ESSENTIAL';
     vBorder = 'rgba(74,154,138,.5)'; vBg = 'rgba(74,154,138,.15)'; vColor = 'var(--teal-bright)';

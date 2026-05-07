@@ -189,3 +189,14 @@ function getDrawBalance() {
   });
   return { atkDraw, defDraw, sclDraw, deadDraw, velDraw };
 }
+
+// ── getCrisisStates ──────────────────────────────────────────
+// Helper to identify critical gaps in deck composition.
+function getCrisisStates(axes, targets) {
+  if (!axes || !targets) return { attack: false, defense: false, scaling: false };
+  return {
+    attack:  axes.Attack  < (targets.Attack  * 0.5),
+    defense: axes.Defense < (targets.Defense * 0.5),
+    scaling: axes.Scaling < (targets.Scaling * 0.3) // Scaling crisis is more lenient
+  };
+}

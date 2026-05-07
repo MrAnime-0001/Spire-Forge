@@ -9,6 +9,7 @@ function updatePriorityPanel() {
   const deckNames = new Set(Object.keys(deck));
   const allCards = getAllCardsForPicker();
   const stats = getDeckStats();
+  const axes = calcSixAxes();
 
   const typeTagHtml = (card) => {
     if (!card) return '';
@@ -18,6 +19,40 @@ function updatePriorityPanel() {
   };
 
   let html = '';
+
+  // ---- Survival / Crisis Section ----
+  const targets = AXIS_TARGETS[currentAct] || AXIS_TARGETS[1];
+  const crisis  = getCrisisStates(axes, targets);
+
+  if (crisis.attack || crisis.defense || crisis.scaling) {
+    html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#ff6040;margin-bottom:.6rem">critical needs</div>`;
+    
+    const suggestNeed = (label, color, typeFilter) => {
+      const bestCards = allCards
+        .filter(c => c.type && c.type.includes(typeFilter))
+        .map(c => ({ card: c, score: scoreCard(c.name).score }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 2);
+
+      bestCards.forEach(({card, score}) => {
+        const safeN = card.name.replace(/'/g,"\\'");
+        html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid ${color}60;border-radius:3px;background:${color}12;cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='${color}';this.style.background='${color}25'" onmouseout="this.style.borderColor='${color}60';this.style.background='${color}12'">
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:${color};text-transform:uppercase;margin-bottom:2px">${label}</div>
+            <div style="font-size:13px;color:var(--text)">${card.name}</div>
+          </div>
+          ${typeTagHtml(card)}
+          <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${color};opacity:.8;flex-shrink:0">+ add</span>
+        </div>`;
+      });
+    };
+
+    if (crisis.attack) suggestNeed('needs damage', '#ff6040', 'atk');
+    if (crisis.defense) suggestNeed('needs block', 'var(--teal-bright)', 'def');
+    if (crisis.scaling) suggestNeed('needs scaling', 'var(--purple-bright)', 'scl');
+    
+    html += `<div class="divider" style="margin:.6rem 0 .7rem"></div>`;
+  }
 
   // ---- Engine-grouped priority section ----
   const RANK_ORDER = {S:4, A:3, B:2, C:1};
