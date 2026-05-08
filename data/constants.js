@@ -32,7 +32,12 @@ const DECK_THRESHOLDS = {
   lowDmgScore: 25,
   heavyAtkBlkReq: 40,
   heavyDefDmgReq: 40,
-  heavySclDmgReq: 35
+  heavySclDmgReq: 35,
+  // Act 1 sub-tier boundaries for survival/scaling rebalance
+  act1PhaseAEnd: 16,
+  act1PhaseBEnd: 22,
+  act1EarlyDeckMax: 14,
+  survivalCrisisThreshold: 0.5
 };
 
 const ACT_ADVICE = [

@@ -56,23 +56,32 @@ function scoreCard(cardName) {
 
   // ── Axis Gap Filling ─────────────────────────────────────
   if (axes) {
-    var gapMult = (tier === 1) ? 2.0 : (tier === 2) ? 1.0 : 0.5;
-    
+    // Dynamic Act 1 sub-tiers: Phase A (hunt), Phase B (pivot)
+    var isPhaseA = currentAct === 1 && total >= DECK_THRESHOLDS.lean && total <= DECK_THRESHOLDS.act1PhaseAEnd;
+    var isPhaseB = currentAct === 1 && total >= DECK_THRESHOLDS.act1PhaseAEnd + 1 && total <= DECK_THRESHOLDS.act1PhaseBEnd;
+    var isEarlyGame = currentAct === 1 && total < DECK_THRESHOLDS.act1EarlyDeckMax;
+
+    var gapMult = (isPhaseA) ? 3.0 : (tier === 1) ? 2.0 : (tier === 2) ? 1.0 : 0.5;
+
     // Attack
     if (isAtk) {
       var gap = Math.max(0, targets.Attack - axes.Attack);
       var bonus = Math.round(gap * 0.5 * gapMult);
-      
+
       if (crisis.attack && gap > 0) {
-        bonus = Math.round(gap * 1.5); // Crisis multiplier
+        // SURVIVAL_CRISIS: extra multiplier when early game and critically behind
+        var crisisMult = isEarlyGame ? 2.5 : 1.5;
+        bonus = Math.round(gap * crisisMult);
         score += bonus;
         reasons.push('CRITICAL DAMAGE NEED (+' + bonus + ')');
       } else if (bonus > 0) {
         score += bonus;
         reasons.push('fills attack gap (+' + bonus + ')');
       }
-      
-      if (axes.Attack > targets.Attack + 20) {
+
+      // In Phase A, starter deck always reads as attack-heavy due to low targets. Only penalize extreme overshoot.
+      var atkHeavyThreshold = isPhaseA ? targets.Attack + 50 : targets.Attack + 20;
+      if (axes.Attack > atkHeavyThreshold) {
         score -= 10; reasons.push('deck already attack-heavy');
       }
     }
@@ -83,7 +92,8 @@ function scoreCard(cardName) {
       var bonus = Math.round(gap * 0.5 * gapMult);
 
       if (crisis.defense && gap > 0) {
-        bonus = Math.round(gap * 1.5); // Crisis multiplier
+        var crisisMult = isEarlyGame ? 2.5 : 1.5;
+        bonus = Math.round(gap * crisisMult);
         score += bonus;
         reasons.push('CRITICAL BLOCK NEED (+' + bonus + ')');
       } else if (bonus > 0) {
@@ -91,13 +101,30 @@ function scoreCard(cardName) {
         reasons.push('fills defense gap (+' + bonus + ')');
       }
 
-      if (axes.Defense > targets.Defense + 20) {
+      var defHeavyThreshold = isPhaseA ? targets.Defense + 50 : targets.Defense + 20;
+      if (axes.Defense > defHeavyThreshold) {
         score -= 10; reasons.push('deck already defense-heavy');
       }
     }
+
+    // Phase A survival dominance — 90% of score from survival, drastically suppress other categories
+    if (isPhaseA) {
+      var nonSurvivalPenalty = 0;
+      if (!isAtk && !isDef && !isUtility) {
+        nonSurvivalPenalty = 15;
+        reasons.push('phase A: prioritize survival (-' + nonSurvivalPenalty + ')');
+      } else if (isScl && !isDef) {
+        nonSurvivalPenalty = 10;
+        reasons.push('phase A: scaling penalized (-' + nonSurvivalPenalty + ')');
+      }
+      score -= nonSurvivalPenalty;
+    }
   }
 
-  // ── Build Scoring ────────────────────────────────────────
+  // Survival health check — used to suppress scaling/builds when survival gaps exist
+  var survivalOk = axes && targets
+    ? (axes.Attack || 0) >= (targets.Attack * 0.8) && (axes.Defense || 0) >= (targets.Defense * 0.8)
+    : true;
   var RANK_SCORE = {S:4, A:3, B:2, C:1};
   var priorityBuilds = [];
   var synergyBuilds  = [];
@@ -133,10 +160,13 @@ function scoreCard(cardName) {
     else if (archClass.building.includes(bKey)) currentBuildMult = 0.8;
 
     var basePri = (20 + priBest.rankMult * 10);
-    
+
     // Tier 1 cap to prevent forcing builds too early
     if (tier === 1) basePri = Math.min(basePri, 15);
-    
+
+    // Phase A (early Act 1): essential builds suppressed further — survival takes priority
+    if (isPhaseA && !survivalOk) basePri = Math.min(basePri, 8);
+
     buildBonus = Math.round(basePri * currentBuildMult);
     buildReason = (currentBuildMult >= 1.5 ? 'core for ' : 'essential for ') + priBest.b.name;
     if (priorityBuilds.length > 1) { buildBonus += 5; buildReason += ' (+multi-build)'; }
@@ -161,15 +191,24 @@ function scoreCard(cardName) {
   if (isScl) {
     var sclGap = Math.max(0, targets.Scaling - axes.Scaling);
     var sclBonus = Math.round(sclGap * 0.4);
-    
+
     // Boss priority
     if (typeof selectedBoss !== 'undefined' && selectedBoss && SCL_PRIORITY_BOSSES.has(selectedBoss)) {
       sclBonus *= 1.5;
     }
 
     if (tier === 1) {
-      sclBonus = Math.min(sclBonus, 8); // Capped Act 1
-      if (sclBonus > 0) reasons.push('early scaling (capped)');
+      // Stricter cap for very early game — survival must come first
+      if (currentAct === 1 && total < 14) {
+        sclBonus = Math.min(sclBonus, 4); // Down from 8
+        if (!survivalOk) sclBonus = 0;     // No scaling if survival gaps exist
+        if (sclBonus > 0) reasons.push('early scaling (heavily dampened)');
+        else if (!survivalOk) reasons.push('scaling suppressed: survival gap remains');
+        else reasons.push('early scaling (minimal)');
+      } else {
+        sclBonus = Math.min(sclBonus, 8); // Existing cap
+        if (sclBonus > 0) reasons.push('early scaling (capped)');
+      }
     } else if (tier === 2) {
       sclBonus *= 0.8;
       reasons.push('mid-game scaling');
