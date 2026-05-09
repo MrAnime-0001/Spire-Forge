@@ -51,7 +51,6 @@ Engine calculates real-time `card_score` using current deck state:
 data/     — Static game data (9 files): per-character cards, builds, constants, synergy pairs
 core/     — Logic engine (6 files): state, deck stats, build analysis, reward advisor, engine tracker, storage
 ui/       — View layer (6 files): deck view, picker view, result view, header controls, modals, helpers
-scripts/  — Tooling (4 files): card type classifier, Regent card generator, balance test runner + scenarios
 ```
 
 ## Browser Support
