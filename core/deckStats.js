@@ -199,8 +199,8 @@ function calcSixAxes() {
   var defenseScore = Math.min(100, Math.round(perTurnBlk * 2));
 
   // 3. Scaling (old scl)
-  var playable = Math.max(1, total - (stats.other||0));
-  const scalingScore = Math.min(100, Math.round((stats.scl / playable) * 300));
+  var playable2 = Math.max(1, total - (stats.other||0));
+  const scalingScore = Math.min(100, Math.round((stats.scl / playable2) * 300));
 
   // 4. Efficiency (old vel)
   const velCards = VELOCITY_CARDS[currentChar] || [];

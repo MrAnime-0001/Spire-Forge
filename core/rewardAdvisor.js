@@ -4,17 +4,6 @@
 // Depends on: state.js, buildAnalyzer.js, deckStats.js, builds.js, constants.js
 // Also reads globals from HTML scope: selectedBoss, getAllCardsForPicker(), getRarity()
 
-// ── getCrisisStates ──────────────────────────────────────────
-// Helper to identify critical gaps in deck composition.
-function getCrisisStates(axes, targets) {
-  if (!axes || !targets) return { attack: false, defense: false, scaling: false };
-  return {
-    attack:  axes.Attack  < (targets.Attack  * 0.5),
-    defense: axes.Defense < (targets.Defense * 0.5),
-    scaling: axes.Scaling < (targets.Scaling * 0.3) // Scaling crisis is more lenient
-  };
-}
-
 // ── scoreCard ────────────────────────────────────────────────
 // Score a single card against the current run state.
 // Returns a result object used by the reward and shop UI layers.
@@ -423,4 +412,42 @@ function getRemoveCandidates() {
 
   candidates.sort(function(a, b) { return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority]; });
   return candidates;
+}
+
+// ── getEradicateNukeEstimate ─────────────────────────────────
+// Estimate burst damage ceiling for Eradicate (Necrobinder rare).
+// Eradicate: "Deal 11 damage X times" (base) / 14 (upgraded).
+// Sums base energy + VEL_ENERGY_BONUS cards in deck to estimate X.
+// Used by renderEngineTracker() in resultView.js.
+function getEradicateNukeEstimate() {
+  if (!currentChar || currentChar !== 'necrobinder') return null;
+
+  var hasBase = deck['Eradicate'] > 0;
+  var hasUpg  = deck['Eradicate+'] > 0;
+  if (!hasBase && !hasUpg) return null;
+
+  var baseEnergy = 3 + (deck['Ascender\'s Bane'] > 0 ? 0 : 0); // start at base per turn
+  var energyBonus = 0;
+  Object.keys(VEL_ENERGY_BONUS).forEach(function(card) {
+    var count = deck[card] || 0;
+    if (count > 0) energyBonus += VEL_ENERGY_BONUS[card] * count;
+  });
+
+  // Energy cards (one-shot): add their count as burst fuel
+  var necroEnergy = ENERGY_CARDS.necrobinder || [];
+  necroEnergy.forEach(function(card) {
+    var count = deck[card] || 0;
+    if (count > 0 && !VEL_ENERGY_BONUS[card]) energyBonus += count * 1; // generic energy cards
+  });
+
+  var totalEnergy = baseEnergy + energyBonus;
+  var baseDmg = hasUpg ? 14 : 11;
+  var baseTotal = baseDmg * totalEnergy;
+  var withMultipliers = baseTotal;
+
+  // Check for Amplify synergy: Lethality (+50%), Debilitate (Vulnerable +50%)
+  if (deck['Lethality'] > 0 || deck['Lethality+'] > 0) withMultipliers = Math.round(withMultipliers * 1.5);
+  if (deck['Debilitate'] > 0 || deck['Debilitate+'] > 0) withMultipliers = Math.round(withMultipliers * 1.5);
+
+  return { energy: totalEnergy, base: baseTotal, withMultipliers: withMultipliers };
 }
