@@ -87,14 +87,18 @@ function renderRewardUnified(el) {
         const addCol = already ? 'var(--amber)' : 'var(--green-bright)';
         const addLbl = already ? '&#10003; added' : '+ add';
         const crossLabel = c.crossChar ? ' <span style="font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">'+c.crossCharName+'</span>' : '';
-        const noteHtml = c.note ? '<div style="font-size:10px;color:var(--text-muted);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.note+'</div>' : '';
+        const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
+        const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
+        const descHtml = formatCardDescription(c.description || '');
+        const detailHtml = '<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">'+typeLabel+(costStr?' · '+costStr:'')+(descHtml?' — '+descHtml:'')+'</div>';
+        const noteHtml = c.note ? '<div style="font-size:10px;color:var(--text-muted);font-style:italic;line-height:1.4;margin-top:1px">'+c.note+'</div>' : '';
         const isUpgraded = c.name.endsWith('+');
         const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:'+nameCol;
-        html += '<div onclick="'+clickFn+'" style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:7px;padding:6px 8px;border:1px solid '+borderCol+';border-radius:3px;margin-bottom:3px;background:'+bgCol+';cursor:pointer">';
-        html += '<div><div style="font-size:13px;'+nameStyle+'">'+c.name+crossLabel+'</div>'+noteHtml+'</div>';
+        html += '<div onclick="'+clickFn+'" style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:7px;padding:6px 8px;border:1px solid '+borderCol+';border-radius:3px;margin-bottom:3px;background:'+bgCol+';cursor:pointer;overflow:hidden">';
+        html += '<div style="min-width:0"><div style="font-size:13px;'+nameStyle+';overflow:hidden;text-overflow:ellipsis">'+c.name+crossLabel+'</div>'+detailHtml+noteHtml+'</div>';
         html += '<span class="deck-item-tag '+typeCls(c.type)+'" style="font-size:9px;padding:1px 5px">'+(c.type||'skl').replace(/_/g,'·').toUpperCase()+'</span>';
         html += rarityBadgeHtml(getRarity(c));
-        html += '<span style="font-size:9px;color:'+addCol+';min-width:40px;text-align:right">'+addLbl+'</span>';
+        html += '<span style="font-size:9px;color:'+addCol+';min-width:40px;text-align:right;white-space:nowrap">'+addLbl+'</span>';
         html += '</div>';
       });
     }
@@ -185,11 +189,18 @@ function renderRewardVerdictHtml() {
     html += '<span class="deck-item-tag '+typeCls(s.card.type)+'" style="font-size:9px;padding:1px 5px">'+typeTag+'</span>';
     html += rarityBadgeHtml(sRarity);
     if (deck[s.name]) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×'+deck[s.name]+'</span>';
-    html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;margin-left:auto;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+'">'+s.vLabel+'</span>';
+    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);margin-left:auto;min-width:20px;text-align:right">'+s.score+'</span>';
+    html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+'">'+s.vLabel+'</span>';
     html += '</div>';
 
     var rCtx = rarityContext(sRarity, s.verdict);
     if (rCtx) html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;opacity:.8">'+rCtx+'</div>';
+
+    // Inline card detail
+    var costStr = s.card.cost !== undefined ? (s.card.cost === 'X' ? 'X' : '⚡'.repeat(Number(s.card.cost))) : '';
+    var typeLabel = (s.card.type||'skl').replace(/_/g,'·').toUpperCase();
+    var descHtml = formatCardDescription(s.card.description || '');
+    html += '<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-bottom:6px">'+typeLabel+(costStr?' · '+costStr:'')+(descHtml?' — '+descHtml:'')+'</div>';
 
     var hasIndicators = s.tipsBuilds.length>0 || s.priorityBuilds.length>0 || s.synergyBuilds.length>0 || s.fitsBuilds.length>0;
     if (hasIndicators) {
@@ -383,6 +394,14 @@ function renderPickerAdd() {
       html += `<span class="card-check-verdict" style="${verdictStyle}">${verdictLabel}</span>`;
       html += `</div>`;
 
+      // Inline card detail
+      const costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
+      const typeLabel = (t||'skl').replace(/_/g,'·').toUpperCase();
+      const descHtml = formatCardDescription(card.description || '');
+      if (descHtml) {
+        html += `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-bottom:5px">${typeLabel}${costStr?' · '+costStr:''} — ${descHtml}</div>`;
+      }
+
       if (essentialMatches.length > 0) {
         essentialMatches.forEach(e => {
           html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${e.buildColor};font-family:'Cinzel',serif;font-size:11px">${e.buildName}</span>`;
@@ -470,9 +489,14 @@ function pickerRowHtmlAdd(c, typeCls, vs) {
   const noteText = [c.cat.reason, c.note].filter(Boolean).join('. ');
   const isUpgraded = c.name.endsWith('+');
   const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : '';
+  const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
+  const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
+  const descHtml = formatCardDescription(c.description || '');
+  const cardDetail = descHtml ? `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">${typeLabel}${costStr?' · '+costStr:''} — ${descHtml}</div>` : '';
   return `<div class="picker-card-row${rowCls}" onclick="pickerAddCard('${safeN}')" style="grid-template-columns:1fr auto auto auto;gap:5px">
     <div style="min-width:0">
       <div class="picker-card-name" style="${nameStyle}">${c.name}${inDeck}${crossTag}</div>
+      ${cardDetail}
       ${noteText ? `<div class="picker-card-note">${noteText}</div>` : ''}
     </div>
     <span class="deck-item-tag ${typeCls(c.type)}" style="font-size:9px;padding:1px 5px;white-space:nowrap">${(c.type||'skl').replace(/_/g,'·').toUpperCase()}</span>

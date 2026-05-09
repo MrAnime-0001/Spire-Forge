@@ -55,7 +55,7 @@ const IRONCLAD_CARDS = [
     {
       "name": "Blood Wall",
       "type": "def",
-      "cost": 0,
+      "cost": 2,
       "rarity": "common",
       "note": "Lose 2 HP. Gain 16 Block. Efficient panic button.",
       "description": "Lose 2 HP. Gain 16 StS2 Intent Defend.png Block."
@@ -805,7 +805,7 @@ const IRONCLAD_CARDS = [
     {
       "name": "Blood Wall+",
       "type": "def",
-      "cost": 0,
+      "cost": 2,
       "rarity": "common",
       "note": "Upgraded version of Blood Wall. Lose 2 HP. Gain 20 StS2 Intent Defend.png Block.",
       "description": "Lose 2 HP. Gain 20 StS2 Intent Defend.png Block.",

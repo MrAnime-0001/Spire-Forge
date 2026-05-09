@@ -72,10 +72,16 @@ function renderModalCards() {
       const isUpgraded = c.name.endsWith('+');
       const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : '';
       
+      const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
+      const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
+      const descHtml = formatCardDescription(c.description || '');
+      const cardDetail = `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:2px">${typeLabel}${costStr?' · '+costStr:''}${descHtml?' — '+descHtml:''}</div>`;
+
       html += `<div class="card-option${recommended}" onclick="addCard('${c.name.replace(/'/g,"\\'")}')">
-        <div>
+        <div style="min-width:0">
           <div class="card-opt-name" style="${nameStyle}">${c.name}${inDeck}</div>
           <div class="card-opt-reason">${c.cat.reason}. ${c.note||''}</div>
+          ${cardDetail}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
           <span class="deck-item-tag ${c.type.includes('atk')?'tag-atk':c.type.includes('def')?'tag-def':c.type.includes('vel')?'tag-vel':'tag-skl'}">${(c.type||'skl').replace(/_/g,'\u00B7').toUpperCase()}</span>

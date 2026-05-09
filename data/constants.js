@@ -3,9 +3,14 @@
 
 // Phase 8: act-scaling targets for the 6 axes (0–100 scale)
 const AXIS_TARGETS = {
-  1: { Attack: 30, Defense: 35, Scaling: 15, Consistency: 20, Efficiency: 25, Synergy: 10 },
-  2: { Attack: 45, Defense: 40, Scaling: 30, Consistency: 40, Efficiency: 35, Synergy: 35 },
-  3: { Attack: 55, Defense: 30, Scaling: 55, Consistency: 55, Efficiency: 45, Synergy: 60 }
+  // Per-turn output scale: axis = min(100, round(perTurnOutput * 2))
+  // Starter deck: Atk~12, Def~10. One good card each: ~30. Solved: ~50.
+  // Act 1: baseline survival — need ~2-3 strong cards to hit target
+  1: { Attack: 40, Defense: 40, Scaling: 15, Consistency: 20, Efficiency: 25, Synergy: 10 },
+  // Act 2: elite gauntlet — need real damage output and efficient block
+  2: { Attack: 60, Defense: 55, Scaling: 30, Consistency: 40, Efficiency: 35, Synergy: 35 },
+  // Act 3: boss rush — maximum output per turn wins
+  3: { Attack: 75, Defense: 50, Scaling: 55, Consistency: 55, Efficiency: 45, Synergy: 60 }
 };
 
 // Bosses with long kill windows where scaling matters most (1.5× scl bonus)
@@ -28,8 +33,10 @@ const DECK_THRESHOLDS = {
   heavySclDiff: 15,
   lowVelScore: 25,
   lowVelMinDeck: 8,
-  lowBlkScore: 25,
-  lowDmgScore: 25,
+  // Per-turn output thresholds. Atk/Def measure estimated single-turn output
+  // (3 energy, 5 draws). Starter deck gives Atk~12, Def~10.
+  lowBlkScore: 30,
+  lowDmgScore: 35,
   heavyAtkBlkReq: 40,
   heavyDefDmgReq: 40,
   heavySclDmgReq: 35,
@@ -378,6 +385,20 @@ const ENERGY_CARDS = {
   defect:      ['Turbo','Double Energy','Rip the Ether','Meteor Strike','Hologram'],
   necrobinder: ['Borrowed Time','Wisp','Friendship','Neurosurge','Demesne','Scourge','Grave Warden'],
   regent:      ['Convergence','Alignment','Glow','Void Form']
+};
+
+// Energy generated per turn by specific cards (adds to baseEnergy budget)
+const VEL_ENERGY_BONUS = {
+  // Ironclad
+  'Offering': 2, 'Bloodletting': 2, 'Pyre': 1,
+  // Silent
+  'Tactician': 1, 'Adrenaline': 1,
+  // Defect
+  'TURBO': 2, 'Double Energy': 2, 'Meteor Strike': 3,
+  // Necrobinder
+  'Borrowed Time': 4, 'Wisp': 1, 'Friendship': 1, 'Neurosurge': 3, 'Demesne': 1,
+  // Regent
+  'Convergence': 1, 'Alignment': 2, 'Void Form': 2
 };
 
 // Extra cards seen when each vel card is played (draw = direct count; energy ≈ extra plays enabled)

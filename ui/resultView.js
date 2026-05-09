@@ -28,11 +28,14 @@ function updatePriorityPanel() {
     html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#ff6040;margin-bottom:.6rem">critical needs</div>`;
     
     const suggestNeed = (label, color, typeFilter) => {
-      const bestCards = allCards
-        .filter(c => c.type && c.type.includes(typeFilter))
+      // Only recommend cards from current character's pool — cross-class/colorless
+      // cards won't appear in normal card rewards
+      const charPool = ALL_CARDS[currentChar] || [];
+      const bestCards = charPool
+        .filter(c => c.type && c.type.includes(typeFilter) && !c.name.endsWith('+'))
         .map(c => ({ card: c, score: scoreCard(c.name).score }))
         .sort((a, b) => b.score - a.score)
-        .slice(0, 2);
+        .slice(0, 3);
 
       bestCards.forEach(({card, score}) => {
         const safeN = card.name.replace(/'/g,"\\'");
@@ -42,6 +45,7 @@ function updatePriorityPanel() {
             <div style="font-size:13px;color:var(--text)">${card.name}</div>
           </div>
           ${typeTagHtml(card)}
+          <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${color};opacity:.6;flex-shrink:0;min-width:28px;text-align:right">${score}</span>
           <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${color};opacity:.8;flex-shrink:0">+ add</span>
         </div>`;
       });

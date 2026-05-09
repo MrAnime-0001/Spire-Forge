@@ -1,5 +1,23 @@
 // Deck statistics logic for STS2 Build Advisor.
 
+// ── estimateCardValue ──────────────────────────────────────────
+// Extract estimated damage/block from card description text.
+// Returns {dmg, blk} where each is numeric (0 = unknown/variable).
+function estimateCardValue(card) {
+  if (!card || !card.description) return {dmg: 0, blk: 0};
+  var desc = card.description;
+
+  var dmg = 0;
+  var dmgMatch = desc.match(/Deal (\d+) damage/);
+  if (dmgMatch) dmg = parseInt(dmgMatch[1], 10);
+
+  var blk = 0;
+  var blkMatch = desc.match(/Gain (\d+) StS2 Intent Defend\.png Block/i);
+  if (blkMatch) blk = parseInt(blkMatch[1], 10);
+
+  return {dmg: dmg, blk: blk};
+}
+
 function getDeckStats() {
   let atk=0,def=0,vel=0,scl=0,other=0;
   const charCards = ALL_CARDS[currentChar] || [];
@@ -94,17 +112,94 @@ function calcSixAxes() {
   if (!currentChar || getDeckSize() === 0) return null;
   const stats = getDeckStats();
   const total = getDeckSize();
-  const playable = Math.max(1, total - (stats.other||0));
+  const charCards = ALL_CARDS[currentChar] || [];
+  const colorlessCards = ALL_CARDS['colorless'] || [];
+  const allOtherChars = ['ironclad','silent','defect','necrobinder','regent']
+    .filter(k=>k!==currentChar).flatMap(k=>ALL_CARDS[k]||[]);
+  function findCard(name) {
+    return charCards.find(x=>x.name===name) || colorlessCards.find(x=>x.name===name) || allOtherChars.find(x=>x.name===name);
+  }
 
-  // 1. Attack (old dmg)
-  const attackScore = Math.min(100, Math.round((stats.atk / playable) * 200));
+  // Per-turn output model: estimate how much damage/block the deck can produce
+  // in a single turn given energy and draw budget.
+  // Energy/draw from VEL_ENERGY_BONUS and VEL_DRAW_BONUS increase budget.
+  var atkCards = [], defCards = [];
+  Object.entries(deck).forEach(function(e) {
+    var name = e[0], count = e[1];
+    var card = findCard(name);
+    if (!card) return;
+    var val = estimateCardValue(card);
+    var cost = card.cost !== undefined ? (card.cost === 'X' ? 2 : card.cost) : 1;
+    if (val.dmg > 0) atkCards.push({name: name, val: val.dmg, cost: cost, count: count});
+    if (val.blk > 0) defCards.push({name: name, val: val.blk, cost: cost, count: count});
+  });
 
-  // 2. Defense (old blk)
-  let defenseScore = Math.min(100, Math.round((stats.def / playable) * 200));
-  const blockPowers = ['Barricade','Juggernaut','Afterimage','Stone Armor','Crimson Mantle','Feel No Pain','Shroud'];
-  blockPowers.forEach(n => { if (deck[n]) defenseScore = Math.min(100, defenseScore + 15); });
+  // Bonus: block-generating powers — treat as +8 block per turn each (passive)
+  var blockPowers = ['Barricade','Juggernaut','Afterimage','Stone Armor','Crimson Mantle','Feel No Pain','Shroud'];
+  var passiveBlk = 0;
+  blockPowers.forEach(function(n) { if (deck[n]) passiveBlk += 8; });
+  if (passiveBlk > 0) defCards.push({name: '(block powers)', val: passiveBlk, cost: 0, count: 1});
+
+  function calcPerTurnOutput(cards, playableTotal) {
+    if (cards.length === 0 || playableTotal <= 0) return 0;
+    var totalCount = cards.reduce(function(s, c) { return s + c.count; }, 0);
+
+    // Base budgets: 3 energy, 5 draws per turn
+    // Enhanced by energy/draw cards in deck (scaled by type share)
+    var baseEnergy = 3;
+    var baseDraw = 5;
+    var energyCards = ENERGY_CARDS[currentChar] || [];
+    var drawCards = DRAW_CARDS[currentChar] || [];
+    Object.keys(deck).forEach(function(n) {
+      var c = deck[n];
+      if (VEL_ENERGY_BONUS[n]) baseEnergy += VEL_ENERGY_BONUS[n] * c;
+      if (VEL_DRAW_BONUS[n]) baseDraw += VEL_DRAW_BONUS[n] * c;
+    });
+
+    var expectedDraws = (totalCount / playableTotal) * baseDraw;
+    var energyBudget = (totalCount / playableTotal) * baseEnergy;
+
+    // Build a flat list of individual card plays (value, cost)
+    var plays = [];
+    cards.forEach(function(c) {
+      for (var i = 0; i < c.count; i++) plays.push({val: c.val, cost: c.cost});
+    });
+
+    // Sort by cost ascending — cheaper cards first (more efficient use of budget)
+    // Among same cost, higher value first
+    plays.sort(function(a, b) {
+      if (a.cost !== b.cost) return a.cost - b.cost;
+      return b.val - a.val;
+    });
+
+    var output = 0;
+    var remainingEnergy = energyBudget;
+    var remainingDraws = expectedDraws;
+
+    for (var i = 0; i < plays.length; i++) {
+      if (remainingDraws <= 0) break;
+      var p = plays[i];
+      var effCost = typeof p.cost === 'number' ? Math.max(p.cost, 0.5) : 2; // X-cost cards use 2 energy heuristic
+      if (effCost <= remainingEnergy) {
+        output += p.val;
+        remainingEnergy -= effCost;
+        remainingDraws -= 1;
+      }
+    }
+
+    return output;
+  }
+
+  var playable = Math.max(1, total - (stats.other||0));
+  var perTurnDmg = calcPerTurnOutput(atkCards, playable);
+  var perTurnBlk = calcPerTurnOutput(defCards, playable);
+
+  // Scale: ~50 per-turn output = Act 1 solved (axis 100)
+  var attackScore = Math.min(100, Math.round(perTurnDmg * 2));
+  var defenseScore = Math.min(100, Math.round(perTurnBlk * 2));
 
   // 3. Scaling (old scl)
+  var playable = Math.max(1, total - (stats.other||0));
   const scalingScore = Math.min(100, Math.round((stats.scl / playable) * 300));
 
   // 4. Efficiency (old vel)
