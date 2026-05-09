@@ -2134,6 +2134,14 @@ const COLORLESS_CARDS = [
       "description": "ALL players gain 17 StS2 Intent Defend.png Block.",
       "isUpgraded": true,
       "baseCard": "Rally"
-    }
+    },
+  {
+    "name": "Ascender's Bane",
+    "type": "cur",
+    "cost": -2,
+    "rarity": "special",
+    "note": "Curse — cannot be removed. Added at Ascension 5+. Unplayable.",
+    "description": "Unplayable. Cannot be removed from your deck."
+  }
 ];
 

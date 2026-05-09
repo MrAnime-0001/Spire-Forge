@@ -197,7 +197,16 @@ function renderRewardVerdictHtml() {
     if (rCtx) html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;opacity:.8">'+rCtx+'</div>';
 
     // Inline card detail
-    var costStr = s.card.cost !== undefined ? (s.card.cost === 'X' ? 'X' : '⚡'.repeat(Number(s.card.cost))) : '';
+    var costStr = '';
+    if(currentChar === 'regent') {
+      var starCost = s.card.starCost || 0;
+      var enCost = s.card.cost !== undefined ? s.card.cost : 0;
+      costStr = (enCost === 'X' ? 'X' : (Number(enCost) > 0 ? '⚡'.repeat(Number(enCost)) : '')) +
+                (starCost > 0 ? '✦'.repeat(starCost) : '');
+      if(costStr === '' && enCost === 0) costStr = '0';
+    } else {
+      costStr = s.card.cost !== undefined ? (s.card.cost === 'X' ? 'X' : '⚡'.repeat(Number(s.card.cost))) : '';
+    }
     var typeLabel = (s.card.type||'skl').replace(/_/g,'·').toUpperCase();
     var descHtml = formatCardDescription(s.card.description || '');
     html += '<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-bottom:6px">'+typeLabel+(costStr?' · '+costStr:'')+(descHtml?' — '+descHtml:'')+'</div>';
@@ -395,7 +404,16 @@ function renderPickerAdd() {
       html += `</div>`;
 
       // Inline card detail
-      const costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
+      var costStr = '';
+      if(currentChar === 'regent') {
+        var starCost = card.starCost || 0;
+        var enCost = card.cost !== undefined ? card.cost : 0;
+        costStr = (enCost === 'X' ? 'X' : (Number(enCost) > 0 ? '⚡'.repeat(Number(enCost)) : '')) +
+                  (starCost > 0 ? '✦'.repeat(starCost) : '');
+        if(costStr === '' && enCost === 0) costStr = '0';
+      } else {
+        costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
+      }
       const typeLabel = (t||'skl').replace(/_/g,'·').toUpperCase();
       const descHtml = formatCardDescription(card.description || '');
       if (descHtml) {

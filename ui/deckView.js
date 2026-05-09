@@ -54,18 +54,19 @@ function renderDeckList() {
     const hasUpgrade = !isUpgraded && (charCards.find(x=>x.name===name+'+') || colorlessCards.find(x=>x.name===name+'+') || allOtherDeckCards.find(x=>x.name===name+'+'));
     const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600; text-shadow: 0 0 5px rgba(200,146,42,0.3);' : '';
     const safeN = name.replace(/'/g, "\\'");
-    const upgradeBtn = hasUpgrade ? `<button class="qty-btn" onclick="upgradeCard('${safeN}')" title="Upgrade this card" style="border-color:var(--amber); color:var(--amber-bright); font-size:11px; margin-right:4px;">\u2692</button>` : '';
+        var isBane = name === "Ascender's Bane";
+    const upgradeBtn = (hasUpgrade && !isBane) ? `<button class="qty-btn" onclick="upgradeCard('${safeN}')" title="Upgrade this card" style="border-color:var(--amber); color:var(--amber-bright); font-size:11px; margin-right:4px;">\u2692</button>` : '';
 
     return `<div class="deck-item" style="grid-template-columns:1fr auto auto auto;gap:6px">
-      <span class="deck-item-name" style="${nameStyle}">${name}</span>
+      <span class="deck-item-name" style="${nameStyle}${isBane ? ';color:var(--text-muted);font-style:italic' : ''}">${name}</span>
       <div style="display:flex; align-items:center; gap:4px">
         ${upgradeBtn}
-        <span class="deck-item-tag ${typeCls(type)}">${tl}</span>
+        <span class="deck-item-tag ${typeCls(type)}" style="${isBane ? 'background:rgba(100,90,70,.2);color:var(--text-muted)' : ''}">${tl}</span>
       </div>
       <div class="qty-ctrl">
-        <button class="qty-btn" onclick="adjustQty('${safeN}',-1)">−</button>
+        ${isBane ? '<span style="opacity:.3;font-size:11px">✕</span>' : `<button class="qty-btn" onclick="adjustQty('${safeN}',-1)">−</button>`}
         <span class="qty-num">${count}</span>
-        <button class="qty-btn" onclick="adjustQty('${safeN}',+1)">+</button>
+        ${isBane ? '<span style="opacity:.3;font-size:11px">✕</span>' : `<button class="qty-btn" onclick="adjustQty('${safeN}',+1)">+</button>`}
       </div>
     </div>`;
   }).join('');

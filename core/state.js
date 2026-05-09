@@ -24,7 +24,9 @@ function notifyListeners() {
 
 function setAsc(n) {
   currentAsc = n;
+  syncAscendersBane();
   notifyListeners();
+  if(window.__particle) window.__particle.fireAscensionParticle(n);
 }
 
 function selectChar(key) {
@@ -39,6 +41,12 @@ function selectChar(key) {
   document.getElementById('hpMax').value = hp;
   document.getElementById('mainUI').style.display = 'block';
   document.getElementById('inlinePicker').style.display = 'block';
+  if(typeof updateHpBar === 'function') updateHpBar();
+  var btn = document.getElementById('char-' + key);
+  if(btn && window.__particle){
+    var r = btn.getBoundingClientRect();
+    window.__particle.fireBossSelect(r.left + r.width/2, r.top + r.height/2, '#e8b84b');
+  }
   notifyListeners();
 }
 
@@ -46,6 +54,16 @@ function loadDefaultDeck(key) {
   deck = {};
   const defaults = STARTING_DECKS[key] || {};
   Object.entries(defaults).forEach(([name, count]) => { deck[name] = count; });
+  syncAscendersBane();
+}
+
+function syncAscendersBane() {
+  var hasBane = "Ascender's Bane" in deck;
+  if(currentAsc >= 5 && !hasBane) {
+    deck["Ascender's Bane"] = (deck["Ascender's Bane"] || 0) + 1;
+  } else if(currentAsc < 5 && hasBane) {
+    delete deck["Ascender's Bane"];
+  }
 }
 
 function resetRun() {
@@ -57,6 +75,7 @@ function resetRun() {
   document.getElementById('hpCur').value = hp;
   document.getElementById('hpMax').value = hp;
   document.getElementById('inlinePicker').style.display = 'block';
+  if(typeof updateHpBar === 'function') updateHpBar();
   notifyListeners();
 }
 
@@ -68,9 +87,17 @@ function setAct(n) {
 function addCard(name, count = 1) {
   deck[name] = (deck[name] || 0) + count;
   notifyListeners();
+  if(window.__particle){
+    var el = document.querySelector('.card-result:last-child, .deck-card');
+    if(el) {
+      var r = el.getBoundingClientRect();
+      window.__particle.fireCardPick(r.left + r.width/2, r.top);
+    }
+  }
 }
 
 function adjustQty(name, delta) {
+  if(name === "Ascender's Bane") return;
   deck[name] = Math.max(0, (deck[name] || 0) + delta);
   if (deck[name] === 0) delete deck[name];
   notifyListeners();
@@ -97,9 +124,18 @@ function removeCard(cardName) {
 }
 
 function upgradeCard(baseName) {
+  if(baseName === "Ascender's Bane") return;
   if (deck[baseName] && deck[baseName] > 0) {
     const upgradedName = baseName + '+';
     adjustQty(baseName, -1);
     addCard(upgradedName, 1);
+    if(window.__particle){
+      var el = document.querySelector('.deck-item, .deck-card');
+      if(el) {
+        var r = el.getBoundingClientRect();
+        window.__particle.fireVerdict(r.left + r.width/2, r.top + r.height/2, '#4a9a8a');
+        window.__particle.fireCardPick(r.left + r.width/2, r.top);
+      }
+    }
   }
 }

@@ -2,6 +2,79 @@
 
 let selectedBoss = null;
 
+// Intent icons for pattern table display
+// Keys match the pattern icon field used in REGION_DATA
+const INTENT_ICONS = {
+  Attack1:  {icon:'⚔', label:'Small atk', color:'#d06040'},
+  Attack2:  {icon:'⚔', label:'Med atk', color:'#d06040'},
+  Attack3:  {icon:'⚔', label:'Big atk', color:'#d06040'},
+  Attack4:  {icon:'⚔', label:'Heavy atk', color:'#d06040'},
+  Buff:     {icon:'↑', label:'Buff', color:'#80a060'},
+  Debuff:   {icon:'↓', label:'Debuff', color:'#a060c0'},
+  Defend:   {icon:'🛡', label:'Defend', color:'#6090c0'},
+  Status:   {icon:'∅', label:'Status', color:'#c08040'},
+  Sleep:    {icon:'💤', label:'Asleep', color:'#808080'},
+  Stun:     {icon:'★', label:'Stun', color:'c0c060'},
+  Heal:     {icon:'♥', label:'Heal', color:'#60c060'},
+  ['Att+Buff']:   {icon:'⚔↑', label:'Atk+Buff', color:'#b09040'},
+  ['Att+Debuff']: {icon:'⚔↓', label:'Atk+Debuff', color:'#b06080'},
+  ['Att+Defend']: {icon:'⚔🛡', label:'Atk+Defend', color:'#a08060'},
+  ['Attack2+Status']:{icon:'⚔∅', label:'Atk+Status',color:'#b07050'},
+  ['Attack4+Status']:{icon:'⚔∅', label:'Hvy+Status',color:'#b07050'},
+  ['Buff+Status']:{icon:'↑∅', label:'Buff+Status',color:'#a08050'},
+  power:    {icon:'✦', label:'Passive', color:'#60a0c0'},
+  cycle:    {icon:'↻', label:'Repeats', color:'#808080'},
+  note:     {icon:'ℹ', label:'Note', color:'#808080'},
+  phase:    {icon:'◆', label:'Phase', color:'#c08060'},
+  divider:  null,
+  spawn:    {icon:'◇', label:'Spawn', color:'#80a060'},
+};
+
+// Render icon for intent/power using local asset or badge
+function renderIntentBadge(intent, text) {
+  const idata = INTENT_ICONS[intent] || {icon:'?', color:'#808080'};
+  return `<span style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;background:${idata.color}22;color:${idata.color};font-size:9px;border:1px solid ${idata.color}44">${idata.icon}</span><span style="color:var(--text-dim)">${text}</span>`;
+}
+
+function renderPatternTable(pattern) {
+  if (!pattern || pattern.length === 0) return '';
+  let html = '<div style="margin:6px 0;font-family:\'Share Tech Mono\',monospace">';
+  html += '<div style="font-size:8px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">attack pattern</div>';
+  pattern.forEach(step => {
+    const [iconKey, text] = step;
+    if (iconKey === 'divider') {
+      html += '<div style="border-top:1px dashed var(--border);margin:3px 0"></div>';
+      return;
+    }
+    const intent = INTENT_ICONS[iconKey] || {icon:'?', label:'?', color:'#808080'};
+    html += `<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;font-size:10px;line-height:1.35">`;
+    if (iconKey === 'power') {
+      // Check if we have a local icon for this power
+      const powerImg = text.split(':')[0].toLowerCase().replace(/[^a-z]/g,'');
+      const iconFiles = {slippery:'inky',plating:'plating',frail:'frail',weak:'weak',vulnerable:'vulnerable',strength:'strength',intangible:'intangible',block:'block',vigor:'vigor',sandpit:'sandpit',status:'status',plow:'plating',ringing:'frail',slow:'frail',skittish:'shiv',hardenedshell:'block',beckon:'status',infection:'status',wound:'status',burn:'status',frantic:'status',regen:'plating',reattach:'plating',crabrage:'strength',artifact:'block',hex:'soul',dampen:'frail',territorial:'soul',personalhive:'status',vitalspark:'energy-colorless'};
+      const imgFile = iconFiles[powerImg];
+      if (imgFile) {
+        html += `<img src="assets/icons/${imgFile}.png" style="width:16px;height:16px;border-radius:2px;flex-shrink:0">`;
+      } else {
+        html += `<span style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;background:${intent.color}22;color:${intent.color};font-size:9px;border:1px solid ${intent.color}44">${intent.icon}</span>`;
+      }
+      html += `<span style="color:${intent.color}"><strong>${text}</strong></span>`;
+    } else {
+      html += `<span style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;background:${intent.color}22;color:${intent.color};font-size:9px;border:1px solid ${intent.color}44">${intent.icon}</span>`;
+      if (iconKey === 'cycle' || iconKey === 'note') {
+        html += `<span style="color:var(--text-muted);font-style:italic;opacity:.8">${text}</span>`;
+      } else if (iconKey === 'phase') {
+        html += `<span style="color:${intent.color}">${text}</span>`;
+      } else {
+        html += `<span style="color:var(--text-dim)">${text}</span>`;
+      }
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 function updateActUI() {
   [1,2,3].forEach(n => {
     document.getElementById('act'+n+'btn').classList.toggle('active', currentAct === n);
@@ -66,6 +139,8 @@ function renderBossAlert() {
       html += `<div class="boss-bar" style="border-color:${rd.color}40;background:${rd.color}0d;margin-top:0">`;
       html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:8px">${boss.type}</span></div>`;
       if (boss.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${boss.hp}</span></div>`;
+
+      if (boss.pattern) html += renderPatternTable(boss.pattern);
 
       if (selectedBoss === 'The Insatiable' && currentChar) {
         const axes = calcSixAxes();
@@ -135,30 +210,38 @@ function renderBossAlert() {
             'heavy single-hit decks (Slippery wastes big swings)':['strength','block','forge'],
             'slow decks':['poison','doom','ethereal'],
             'slow scaling':['poison','doom','ethereal'],
-            'multi-play combos (Ringing phase 2)':['sly','shiv','claw'],
+            'slow decks (Strength ramp + Wound pollution)':['poison','doom'],
+            'slow kills (Soul Siphon ruins stats)':['poison','doom','ethereal'],
+            'raw damage-reliant decks':['strength','forge'],
+            'card-heavy combos (Ringing = 1 card/turn)':['sly','shiv','claw'],
             'pure burst (wasted in Intangible)':['strength','forge','starfall'],
-            'block-only (Calls bypass armor)':['block'],
+            'block-only (Beckons bypass block)':['block'],
             'Strength-based decks':['strength'],
             'Dex-based decks':['sly','shiv'],
             'pure Poison (Sandpit resolves before tick)':['poison'],
             'pure Poison/Doom (Intangible negates)':['poison','doom'],
-            'draw-heavy decks':['sly'],
-            'wide decks':['big-deck'],
-            '4+ cards-per-turn decks':['sly','infinite','claw'],
-            'draw-starved decks':[],
-            'library/card-cycle decks (Hunger permanently exhausts)':['exhaust','infinite'],
-            'Necrobinder Soul cycles (Scrutiny stops draw)':['soul'],
+            'draw-heavy decks (Mind Rot / Sloth)':['sly'],
+            'high-energy-cost decks (Waste Away)':['big-deck'],
+            'low energy generation':['big-deck','poison'],
+            'low single-target damage':['shiv','poison','doom'],
+            'draw-starved decks (Bound locks cards)':[],
+            'card-dependent builds (Hunger drains energy)':['exhaust','infinite'],
+            'draw-heavy builds (Scrutiny stops draw)':['exhaust','infinite'],
+            'skill-reliant builds (Grasp blocks skills)':[],
             'no compressed lethal':[],
             'no-AoE decks':[],
-            'Ironclad forced facing changes':[],
+            'no facing control':[],
             'single-target only':[],
             'kill-and-done decks with no final-turn cushion':[],
             'entering below 40 HP':[],
+            'slow Phase 1 (Enrage ramps)':[],
+            'wasteful turns in Phase 3 Intangible':['strength','forge','starfall'],
           };
           const rewardMap = {
-            'multi-hit (Shivs, Anger, Twin Strike, Pommel spam)':['shiv','strength'],
+            'multi-hit (Shivs, Anger, Twin Strike)':['shiv','strength'],
             'multi-hit to strip Plating':['shiv','sly'],
             'Weak application':['silent','shiv'],
+            'fast cycling decks':['infinite','sly'],
             'fast decks':['infinite','sly'],
             'AoE (Whirlwind, Shockwave, Seven Stars)':['stars','strength'],
             'Poison (ticks all 3)':['poison'],
@@ -166,31 +249,28 @@ function renderBossAlert() {
             'Poison (ticks regardless of debuffs)':['poison'],
             'hard burst ignoring Followers':['strength','forge','starfall'],
             'Silent Sly-discard hands':['sly'],
-            'Exhaust to nuke Calls':['exhaust'],
+            'Exhaust to clear Beckons':['exhaust'],
             'Discard/cycle engines':['sly'],
-            'burst windows':['strength','forge','starfall','infinite'],
+            'Plow threshold burst to stun':['strength','forge','starfall','infinite'],
+            'single big hit each turn':['strength','forge'],
             'Strength stacking':['strength'],
-            'Sovereign Blade retain':['forge'],
-            'Body Slam finishers':['block'],
-            'burst that ignores horizon':['strength','forge','starfall','infinite'],
             'fast burst':['infinite','sly','claw'],
-            'Shiv spam':['shiv'],
-            'Seven Stars':['stars','starfall'],
+            'high energy generation':['infinite','sly','orb'],
             'draw-spam decks':['sly'],
             '4+ cards per turn decks':['sly','infinite','claw'],
-            'sustain + one preserved burst turn':['forge','starfall'],
-            'Barricade + Body Slam':['block'],
-            'compressed burst winning in 2-3 turns':['infinite','starfall','forge'],
-            'pre-forged Sovereign Blade one-shots':['forge'],
-            'Corruption big turns':['exhaust','infinite'],
-            'No Escape at threshold':['doom'],
-            'No Escape execution':['doom'],
-            'balanced AoE':['stars'],
-            'staggered single-target':[],
+            'burst that kills in 5-6 turns':['strength','forge','starfall','infinite'],
+            'consistent damage per turn':['poison','doom'],
+            'draw-independent builds':['block','strength'],
+            'balanced single-target':[],
+            'targeting cards to face the attacker':[],
             'Silent/Defect high-tempo':['sly','orb'],
-            'Demon Form turn':['strength'],
-            'pre-forged Sovereign Blade':['forge'],
-            'save Catalyst/Limit Break/Void Form/Seven Stars/No Escape for phase 3':['stars','doom','starfall'],
+            'fast Phase 1 kill':['strength','burst'],
+            'burst held for Phase 2':['starfall','forge'],
+            'sustain + patience for Phase 3 windows':['block','poison','doom'],
+            'compressed burst winning in each window':['infinite','starfall','forge'],
+            'Persistent DoT between phases':['poison','doom'],
+            'any damage type that carries through form changes':[],
+            'Wound-exhaust synergies':['exhaust'],
           };
           matrix.punishes.forEach(p => {
             const tags = tagMap[p] || [];
@@ -225,6 +305,7 @@ function renderBossAlert() {
           html += `<div style="padding:.45rem .7rem;border-radius:3px;border:1px solid ${rd.color}25;background:${rd.color}08;margin-bottom:.35rem">`;
           html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:4px">${ename} <span style="opacity:.5;font-size:8px">${elite.type}</span></div>`;
           if (elite.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${elite.hp}</span></div>`;
+          if (elite.pattern) html += renderPatternTable(elite.pattern);
           html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
           html += `<div style="font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:6px">${elite.strategy}</div>`;
           if (elite.killOrder) {

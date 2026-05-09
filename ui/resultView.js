@@ -264,6 +264,19 @@ function updateResult() {
   else if (hpPct < 0.35) hpAdvice = 'Below 35% — rest soon';
   document.getElementById('hpAdvice').textContent = hpAdvice;
 
+  // Trigger verdict particles on scored results
+  if(window.__particle && typeof window.__particle.fireVerdict === 'function'){
+    var verdictEls = document.querySelectorAll('.card-check-verdict, .result-verdict');
+    if(verdictEls.length > 0){
+      verdictEls.forEach(function(el){
+        var rect = el.getBoundingClientRect();
+        if(rect.width > 0 && rect.height > 0){
+          window.__particle.fireVerdict(rect.left + rect.width/2, rect.top + rect.height/2, '#e8b84b');
+        }
+      });
+    }
+  }
+
   if (!currentChar || getDeckSize() === 0) {
     box.innerHTML = '<div class="placeholder"><div class="placeholder-icon">⚔</div><p>Add cards to your deck to see your build path.</p></div>';
     renderDeckHealth();
