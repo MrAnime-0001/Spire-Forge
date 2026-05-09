@@ -14,9 +14,7 @@ High-performance web-based **Build Advisor and Strategy Tool** for *Slay the Spi
 - **Adaptive Phase Scaling** — Scoring evolves across 4 phases: Ascent, Act 2 Elite Prep, Heart Push, and Beyond.
 - **Boss Counter-Play** — Strategy panel with attack patterns, kill order, and deck matchup analysis for every boss and elite.
 - **Engine Tracker** — Build status panel showing committed/building archetypes with progress bars.
-- **Eradicate Burst Estimator** — For Necrobinder: estimates max Eradicate damage ceiling based on energy generation.
 - **Auto-Save & Persistence** — Session auto-saves to localStorage; export/import JSON; named loadouts (up to 20).
-- **Shop Removal Advice** — Prioritizes cards to remove: starters > curses > anti-synergy > falloff > duplicates.
 - **Browse All Modal** — Manual card search/add for theorycrafting.
 - **Responsive 3-Column Layout** — Deck list, stat chips, and reward advisor panels.
 
@@ -43,7 +41,6 @@ Engine calculates real-time `card_score` using current deck state:
 3. **Synergy Modeling** — 200+ card-to-card pairs scored with bond types: Enable, Amplify, Finisher, Loop.
 4. **Boss Adaptation** — Bonus/suppression weights based on selected boss and region.
 5. **Survival Dominance** — Early acts prioritize survival; luxury scaling suppressed until baseline met.
-6. **Eradicate Estimates** — For Necrobinder: calculates burst ceiling from energy generation.
 
 ## Project Structure
 
