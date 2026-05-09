@@ -88,9 +88,10 @@ function renderRewardUnified(el) {
         const addLbl = already ? '&#10003; added' : '+ add';
         const crossLabel = c.crossChar ? ' <span style="font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">'+c.crossCharName+'</span>' : '';
         const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
+  const finalCostStr = (currentChar === 'regent' && c.starCost) ? costStr + '✦'.repeat(c.starCost) : costStr;
         const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
         const descHtml = formatCardDescription(c.description || '');
-        const detailHtml = '<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">'+typeLabel+(costStr?' · '+costStr:'')+(descHtml?' — '+descHtml:'')+'</div>';
+        const detailHtml = '<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">'+typeLabel+(finalCostStr?' · '+finalCostStr:'')+(descHtml?' — '+descHtml:'')+'</div>';
         const noteHtml = c.note ? '<div style="font-size:10px;color:var(--text-muted);font-style:italic;line-height:1.4;margin-top:1px">'+c.note+'</div>' : '';
         const isUpgraded = c.name.endsWith('+');
         const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:'+nameCol;
@@ -414,10 +415,11 @@ function renderPickerAdd() {
       } else {
         costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
       }
+      const finalCostStr = (currentChar === 'regent' && card.starCost) ? costStr + '✦'.repeat(card.starCost) : costStr;
       const typeLabel = (t||'skl').replace(/_/g,'·').toUpperCase();
       const descHtml = formatCardDescription(card.description || '');
       if (descHtml) {
-        html += `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-bottom:5px">${typeLabel}${costStr?' · '+costStr:''} — ${descHtml}</div>`;
+        html += `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-bottom:5px">${typeLabel}${finalCostStr?' · '+finalCostStr:''} — ${descHtml}</div>`;
       }
 
       if (essentialMatches.length > 0) {
@@ -503,14 +505,15 @@ function pickerRowHtmlAdd(c, typeCls, vs) {
   const inDeck = deck[c.name] ? ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber)">(×${deck[c.name]})</span>` : '';
   const crossTag = c.crossChar ? ` <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-muted);opacity:.7;border:1px solid var(--border);border-radius:2px;padding:0 4px">${c.crossCharName}</span>` : '';
   const rowCls = c.cat.v==='rec'?' rec':c.cat.v==='syn'?' syn':'';
-  const safeN = c.name.replace(/'/g,"&#39;");
+  const safeN = c.name.replace(/'/g,"\\'");
   const noteText = [c.cat.reason, c.note].filter(Boolean).join('. ');
   const isUpgraded = c.name.endsWith('+');
   const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : '';
   const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
+  const finalCostStr = (currentChar === 'regent' && c.starCost) ? costStr + '✦'.repeat(c.starCost) : costStr;
   const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
   const descHtml = formatCardDescription(c.description || '');
-  const cardDetail = descHtml ? `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">${typeLabel}${costStr?' · '+costStr:''} — ${descHtml}</div>` : '';
+  const cardDetail = descHtml ? `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">${typeLabel}${finalCostStr?' · '+finalCostStr:''} — ${descHtml}</div>` : '';
   return `<div class="picker-card-row${rowCls}" onclick="pickerAddCard('${safeN}')" style="grid-template-columns:1fr auto auto auto;gap:5px">
     <div style="min-width:0">
       <div class="picker-card-name" style="${nameStyle}">${c.name}${inDeck}${crossTag}</div>

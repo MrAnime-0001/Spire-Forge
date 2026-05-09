@@ -73,9 +73,10 @@ function renderModalCards() {
       const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : '';
       
       const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
+      const finalCostStr = (currentChar === 'regent' && c.starCost) ? costStr + '✦'.repeat(c.starCost) : costStr;
       const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
       const descHtml = formatCardDescription(c.description || '');
-      const cardDetail = `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:2px">${typeLabel}${costStr?' · '+costStr:''}${descHtml?' — '+descHtml:''}</div>`;
+      const cardDetail = `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:2px">${typeLabel}${finalCostStr?' · '+finalCostStr:''}${descHtml?' — '+descHtml:''}</div>`;
 
       html += `<div class="card-option${recommended}" onclick="addCard('${c.name.replace(/'/g,"\\'")}')">
         <div style="min-width:0">

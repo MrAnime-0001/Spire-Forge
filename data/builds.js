@@ -32,8 +32,8 @@ necrobinder: {
 },
 regent: {
   builds: {
-    sovereignblade:{name:"Sovereign Blade",fullName:"Sovereign Blade Build",color:"#e8b84b",rank:"A",winCondition:"Forge the Sovereign Blade to high damage, then use Summon Forth and Conqueror to loop it back into play and double its value.",essential:["Summon Forth","Conqueror","Beat into Shape","Wrought in War","Bulwark","Cosmic Indifference"],synergy:["Seeking Edge","Furnace"],tips:["Find lasting Energy generation. Balancing Blade plays with Forging and staying alive is resource-intensive.","A small Star package helps. Falling Star and Gamma Blast both apply Vulnerable on the same turn as a Blade attack."]},
-    star:{name:"Star",fullName:"Star Build",color:"#6aacda",rank:"S",winCondition:"Build a reliable Star engine, then use Alignment to convert Stars into Energy for explosive, high-damage turns.",essential:["Shining Strike","Genesis","Alignment","Gamma Blast","Hidden Cache"],synergy:["The Smith","Reflect","Dying Star","Cloak of Stars","Convergence","Gather Light","Solar Strike","Glow"],tips:["Do not over-commit to Stars early. Pick up generic cards that work even if you never fully build the Star engine.","Avoid too many pure Star generators. They do nothing on their own and clog your hand. The same risk applies to Star-cost cards drawn together."]}
+    sovereignblade:{name:"Sovereign Blade",fullName:"Sovereign Blade Build",color:"#e8b84b",rank:"A",winCondition:"Forge the Sovereign Blade to high damage, then use Summon Forth and Conqueror to loop it back into play and double its value.",essential:["Summon Forth","Conqueror","Beat into Shape","Wrought in War","Bulwark","Cosmic Indifference"],synergy:["Seeking Edge","Furnace"],tips:["Find lasting Energy generation. Balancing Blade plays with Forging and staying alive is resource-intensive.","Powder and Terraforming help generate Stars for Bulwark and Alignment plays."]},
+    star:{name:"Star",fullName:"Star Build",color:"#6aacda",rank:"S",winCondition:"Build a reliable Star engine, then use Alignment to convert Stars into Energy for explosive, high-damage turns.",essential:["Shining Strike","Genesis","Alignment","Gamma Blast","Hidden Cache"],synergy:["Dying Star","Cloak of Stars","Convergence","Gather Light","Solar Strike","Glow","Pale Blue Dot","Starfall"],tips:["Do not over-commit to Stars early. Pick up generic cards that work even if you never fully build the Star engine.","Avoid too many pure Star generators. They do nothing on their own and clog your hand. The same risk applies to Star-cost cards drawn together."]}
   }
 }
 };
@@ -131,12 +131,12 @@ const SYNERGY_PAIRS = [
   {a:'Alignment',        b:'Glow',            bond:'Loop',     bonus:14, note:'Glow generates Stars — Alignment converts Stars to Energy. Thin deck = Infinite loop'},
   {a:'Alignment',        b:'Genesis',         bond:'Amplify',  bonus:12, note:'Genesis gives 2 Stars/turn — Alignment converts those to free Energy at turn start'},
   {a:'Alignment',        b:'Royal Gamble',    bond:'Amplify',  bonus:10, note:'Royal Gamble generates burst Stars — Alignment converts them all to Energy same turn'},
-  {a:'Void Form',        b:'Seven Stars',     bond:'Finisher', bonus:14, note:'Void Form makes first 2 cards free next turn — Seven Stars in opening 2 = free 49 AoE'},
+  {a:'Void Form',        b:'Seven Stars',     bond:'Finisher', bonus:14, note:'Void Form draws cards and exhausts — feeds Seven Stars fast for massive AoE'},
   {a:'Seven Stars',      b:'Genesis',         bond:'Enable',   bonus:10, note:'Genesis gives 2 Stars/turn — after 3-4 turns Seven Stars (7★ cost) becomes playable'},
-  {a:'Comet',            b:'Child of the Stars',bond:'Amplify',bonus:8,  note:'Child gives 2 Block per Star spent — Comet spends 5 Stars so gives 10 Block simultaneously'},
+  {a:'Comet',            b:'Child of the Stars',bond:'Amplify',bonus:8,  note:'Child gives 2 Block per Star spent — Comet costs 5 Stars so gives 10 Block simultaneously'},
   {a:'Bulwark',          b:'Conqueror',       bond:'Finisher', bonus:12, note:'Bulwark Forges Blade (+10) — Conqueror doubles damage this turn. Burst kill setup'},
   {a:'Seeking Edge',     b:'Summon Forth',    bond:'Amplify',  bonus:10, note:'Seeking Edge makes Blade hit all enemies — Summon Forth fetches it. AoE Blade turn'},
-  {a:'Convergence',      b:'Void Form',       bond:'Loop',     bonus:10, note:'Convergence Retains hand + refunds energy. Void Form gives free plays next turn. Stacks perfectly'},
+  {a:'Convergence',      b:'Void Form',       bond:'Loop',     bonus:10, note:'Convergence Retains hand + generates energy next turn. Void Form draws cards. Both control hand and deck flow'},
 
   // ── IRONCLAD ADDITIONS ──────────────────────────────────────
   // Vulnerable synergy
@@ -240,9 +240,9 @@ const SYNERGY_PAIRS = [
   {a:'Seeking Edge',    b:'Conqueror',       bond:'Finisher', bonus:12, note:'Seeking Edge makes Blade hit all enemies — Conqueror doubles Blade damage this turn. AoE double-damage kill turn'},
   {a:'The Smith',       b:'Conqueror',       bond:'Finisher', bonus:10, note:'The Smith Forges +30 — Conqueror then doubles the Blade on that same massive-Forge turn for a one-shot'},
   // Void Form combos
-  {a:'Void Form',       b:'Comet',           bond:'Finisher', bonus:12, note:'Void Form: first 2 cards next turn are free — Comet costs 3E. A free Comet delivers 33 damage + Weak + Vulnerable at no cost'},
+  {a:'Void Form',       b:'Comet',           bond:'Finisher', bonus:12, note:'Void Form draws and exhausts — thinning the deck helps draw Comet consistently'},
   {a:'Big Bang',        b:'Alignment',       bond:'Amplify',  bonus:8,  note:'Big Bang gives 1 Energy + 1 Star + Forge 5, Exhaust — Alignment converts that Star to extra Energy immediately'},
-  {a:'Big Bang',        b:'Radiate',         bond:'Amplify',  bonus:8,  note:'Big Bang generates a Star — Radiate fires 3 AoE when Stars are gained. Big Bang becomes draw + energy + forge + 3 AoE'},
+  {a:'Big Bang',        b:'Radiate',         bond:'Amplify',  bonus:8,  note:'Big Bang generates a Star and draws — Radiate fires 3 AoE when Stars are gained. Big Bang becomes draw + energy + forge + 3 AoE'},
 ];
 
 // ── SYNERGY PAIR SCORING ──────────────────────────────────

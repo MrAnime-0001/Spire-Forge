@@ -34,6 +34,8 @@ function scoreCard(cardName) {
   var isEnergyCard = ENERGY_CARDS[currentChar] && ENERGY_CARDS[currentChar].includes(baseName);
   var isVelCard    = (VELOCITY_CARDS[currentChar] || []).includes(baseName);
   var isUtility    = isDrawCard || isEnergyCard || isVelCard;
+  var isStarGenCard = currentChar === 'regent' && typeof VEL_STAR_GEN_BONUS !== 'undefined' && VEL_STAR_GEN_BONUS[baseName] > 0;
+  var hasStarCost = currentChar === 'regent' && card.starCost > 0;
 
   // ── Tier Selection ───────────────────────────────────────
   // Tier 1: Act 1, small deck
@@ -226,6 +228,27 @@ function scoreCard(cardName) {
       score += Math.round(effBonus * 1.2);
       if (effGap > 0) reasons.push('CRITICAL: deck needs velocity');
     }
+  }
+
+  // ── Star Economy (Regent) ─────────────────────────────────
+  if (currentChar === 'regent' && typeof VEL_STAR_GEN_BONUS !== 'undefined') {
+    var starGenCount = 0;
+    Object.keys(deck).forEach(function(n) {
+      if (VEL_STAR_GEN_BONUS[n]) starGenCount += deck[n];
+    });
+    var starSpendersInDeck = 0;
+    allCards.forEach(function(c) {
+      if (c.starCost && deck[c.name]) starSpendersInDeck += deck[c.name];
+    });
+    if (hasStarCost && starGenCount === 0 && alreadyHave === 0) {
+      score -= 15;
+      reasons.push('no star generation in deck');
+    }
+    if (isStarGenCard && starSpendersInDeck === 0 && alreadyHave === 0) {
+      score -= 5;
+      reasons.push('no star spenders in deck');
+    }
+    if (isStarGenCard) isUtility = true;
   }
 
   // ── Redundancy & Starters ────────────────────────────────
@@ -426,7 +449,7 @@ function getEradicateNukeEstimate() {
   var hasUpg  = deck['Eradicate+'] > 0;
   if (!hasBase && !hasUpg) return null;
 
-  var baseEnergy = 3 + (deck['Ascender\'s Bane'] > 0 ? 0 : 0); // start at base per turn
+  var baseEnergy = 3 - (deck['Ascender\'s Bane'] > 0 ? 1 : 0); // Ascender's Bane replaces a card, reducing energy generation potential
   var energyBonus = 0;
   Object.keys(VEL_ENERGY_BONUS).forEach(function(card) {
     var count = deck[card] || 0;

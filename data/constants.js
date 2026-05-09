@@ -357,7 +357,7 @@ const TIPS_CARDS = {
     star:     ['Alignment','Child of the Stars','Cloak of Stars','Genesis','Royal Gamble'],
     starfall: ['Alignment','Powder','Radiate','Royal Gamble','Stardust','Terraforming','Vigor'],
     midrange: ['Child of the Stars','Comet','Convergence','Genesis','Reflect'],
-    infinite: ['Alignment','Convergence','Decisions Decisions','Glow','Guards']
+    infinite: ['Alignment','Convergence','Decisions Decisions','Glow','GUARDS!!!']
   }
 };
 
@@ -375,7 +375,7 @@ const DRAW_CARDS = {
   silent:      ['Acrobatics','Backflip','Prepared','Reflex','Dagger Throw','Adrenaline','Expertise'],
   defect:      ['Skim','Scrape','FTL','Compile Driver','Flash of Steel','Machine Learning'],
   necrobinder: ['Fetch','Grave Blast','Parse','Dredge','Reave','Wisp','Neurosurge'],
-  regent:      ['Prophesize','Glimmer','Photon Cut','Guiding Star','Decisions Decisions']
+  regent:      ['Prophesize','Glimmer','Photon Cut','Decisions Decisions','Glow']
 };
 
 // Energy cards — generate extra energy or reduce card costs
@@ -384,7 +384,7 @@ const ENERGY_CARDS = {
   silent:      ['Tactician','Adrenaline','Calculated Gamble','Tools of the Trade'],
   defect:      ['Turbo','Double Energy','Rip the Ether','Meteor Strike','Hologram'],
   necrobinder: ['Borrowed Time','Wisp','Friendship','Neurosurge','Demesne','Scourge','Grave Warden'],
-  regent:      ['Convergence','Alignment','Glow','Void Form']
+  regent:      ['Convergence','Alignment','Bulwark']
 };
 
 // Energy generated per turn by specific cards (adds to baseEnergy budget)
@@ -398,7 +398,7 @@ const VEL_ENERGY_BONUS = {
   // Necrobinder
   'Borrowed Time': 4, 'Wisp': 1, 'Friendship': 1, 'Neurosurge': 3, 'Demesne': 1,
   // Regent
-  'Convergence': 1, 'Alignment': 2, 'Void Form': 2
+  'Convergence': 1, 'Alignment': 2, 'Bulwark': 2
 };
 
 // Extra cards seen when each vel card is played (draw = direct count; energy ≈ extra plays enabled)
@@ -415,7 +415,31 @@ const VEL_DRAW_BONUS = {
   // Necrobinder
   'Wisp':1, 'Borrowed Time':2, 'Dredge':2, 'Parse':3,
   // Regent
-  'Glow':2, 'Convergence':1, 'Glimmer':2, 'Prophesize':6, 'Big Bang':2
+  'Glow':2, 'Convergence':1, 'Glimmer':2, 'Prophesize':6, 'Big Bang':2, 'Monologue':2
+};
+
+// Stars generated per turn by specific Regent cards (adds to baseStar budget)
+const VEL_STAR_GEN_BONUS = {
+  'Venerate': 2, 'Venerate+': 3,
+  'Glow': 1, 'Glow+': 2,
+  'Hidden Cache': 1, 'Hidden Cache+': 2,
+  'Genesis': 2, 'Genesis+': 3,
+  'Shining Strike': 1, 'Shining Strike+': 1,
+  'Gather Light': 1, 'Gather Light+': 1,
+  'Royal Gamble': 9,
+  'Terraforming': 2,
+  'Quasar': 3,
+  'Big Bang': 1,
+  'Manifest Authority': 3, 'Manifest Authority+': 3,
+  'Wrought in War': 2, 'Wrought in War+': 1,
+  'Falling Star': 2, 'Falling Star+': 1,
+  'Powder': 1, 'Powder+': 2
+};
+
+const BASE_STARS_PER_TURN = 0; // Stars don't auto-replenish each turn
+
+const STAR_GEN_CARDS = {
+  regent: Object.keys(VEL_STAR_GEN_BONUS).filter(function(k) { return VEL_STAR_GEN_BONUS[k] > 0; })
 };
 
 // ============================================================
@@ -854,8 +878,8 @@ const ENGINES = {
     {name:'Soul deferral',cards:['Soul','Haunt','Devour Life'],note:'Bank Souls for future draw instead of playing immediately. Use when Energy is tight.'}
   ],
   regent: [
-    {name:'Star/Vigor engine',cards:['Genesis','Alignment','Radiate'],note:'Stack Stars, trade for Energy via Alignment. Radiate = 3 AoE per Star gained. Pattern+Celestial Might = one big hit.'},
-    {name:'Blade/Forge engine',cards:['Summon Forth','Conqueror','The Smith'],note:'Forge the Blade every turn. Conqueror doubles Forge count. Decisions Decisions + Glow are the grease.'},
-    {name:'Starfall mode',cards:['Radiate','Terraforming','Gamma Blast'],note:'25+ Stars in one turn = massive Radiate nuke. Shift to Vigor + Star generation to set up.'}
+    {name:'Star/Vigor engine',cards:['Genesis','Alignment','Radiate'],note:'Stack Stars, trade for Energy via Alignment. Radiate = 3 AoE per Star gained.'},
+    {name:'Blade/Forge engine',cards:['Summon Forth','Conqueror','The Smith'],note:'Forge the Blade every turn. Conqueror doubles Blade damage.'},
+    {name:'Starfall mode',cards:['Radiate','Terraforming','Gamma Blast'],note:'Generate Stars then nuke with Radiate. Vigor + Star generation to set up.'}
   ]
 };

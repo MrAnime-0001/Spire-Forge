@@ -6,12 +6,11 @@ function getEngineTrackerItems() {
   if (!engines) return [];
 
   const archClass = classifyArchetypes();
-  const buildEngines = (BUILD_DATA[currentChar] || {}).builds || {};
   const builds = (BUILD_DATA[currentChar] || {}).builds || {};
   const toShow = [];
 
   function makeItem(key, commitment, commitColor) {
-    const eng = buildEngines[key];
+    const eng = engines.find(function(e) { return e.name === key; });
     const build = builds[key];
     if (!eng || !build) return null;
     const essentialCards = eng.essential || [];

@@ -15,6 +15,25 @@ function estimateCardValue(card) {
   var blkMatch = desc.match(/Gain (\d+) StS2 Intent Defend\.png Block/i);
   if (blkMatch) blk = parseInt(blkMatch[1], 10);
 
+  // Explicit value overrides for star-scaling Regent cards regex can't parse
+  var STAR_VALUE_OVERRIDES = {
+    'Radiate': {dmg: 9, blk: 0}, 'Radiate+': {dmg: 12, blk: 0},
+    'Stardust': {dmg: 10, blk: 0}, 'Stardust+': {dmg: 14, blk: 0},
+    'Black Hole': {dmg: 9, blk: 0}, 'Black Hole+': {dmg: 12, blk: 0},
+    'Supermassive': {dmg: 8, blk: 0}, 'Supermassive+': {dmg: 9, blk: 0},
+    'Heavenly Drill': {dmg: 12, blk: 6}, 'Heavenly Drill+': {dmg: 16, blk: 8},
+    'Orbit': {dmg: 9, blk: 0}, 'Orbit+': {dmg: 12, blk: 0},
+    'Glitterstream': {dmg: 16, blk: 0}, 'Glitterstream+': {dmg: 20, blk: 0},
+    'Resonance': {dmg: 6, blk: 0}, 'Resonance+': {dmg: 8, blk: 0},
+    'Celestial Might': {dmg: 18, blk: 0}, 'Celestial Might+': {dmg: 24, blk: 0},
+    'Seven Stars': {dmg: 49, blk: 0}, 'Seven Stars+': {dmg: 49, blk: 0},
+  };
+  if (card.name && STAR_VALUE_OVERRIDES[card.name]) {
+    var ov = STAR_VALUE_OVERRIDES[card.name];
+    if (ov.dmg > dmg) dmg = ov.dmg;
+    if (ov.blk > blk) blk = ov.blk;
+  }
+
   return {dmg: dmg, blk: blk};
 }
 
@@ -98,7 +117,7 @@ function getDeckSizeProfile() {
   } else if (total < DECK_THRESHOLDS.healthyMin) {
     zone = 'lean'; color = 'var(--amber)'; label = 'Lean';
   } else if (total <= DECK_THRESHOLDS.bloated) {
-    zone = 'sweet'; color = 'var(--green-bright)'; label = 'Healthy';
+    zone = 'sweet'; color = 'var(--verdant-bright)'; label = 'Healthy';
   } else if (total <= DECK_THRESHOLDS.tooLarge) {
     zone = 'bloated'; color = 'var(--amber)'; label = 'Bloated';
   } else {
@@ -159,10 +178,31 @@ function calcSixAxes() {
     var expectedDraws = (totalCount / playableTotal) * baseDraw;
     var energyBudget = (totalCount / playableTotal) * baseEnergy;
 
+    // Star budget for Regent
+    var baseStar = currentChar === 'regent' ? 3 : 0;
+    if (currentChar === 'regent' && typeof VEL_STAR_GEN_BONUS !== 'undefined') {
+      Object.keys(deck).forEach(function(n) {
+        var cnt = deck[n];
+        if (VEL_STAR_GEN_BONUS[n]) baseStar += VEL_STAR_GEN_BONUS[n] * cnt;
+      });
+    }
+    var starBudget = (totalCount / playableTotal) * baseStar;
+
     // Build a flat list of individual card plays (value, cost)
     var plays = [];
+    var allCards = [];
+    if (typeof ALL_CARDS !== 'undefined' && ALL_CARDS[currentChar]) {
+      allCards = ALL_CARDS[currentChar];
+    }
     cards.forEach(function(c) {
-      for (var i = 0; i < c.count; i++) plays.push({val: c.val, cost: c.cost});
+      for (var i = 0; i < c.count; i++) {
+        var sc = 0;
+        if (currentChar === 'regent' && allCards.length > 0) {
+          var found = allCards.find(function(x) { return x.name === c.name; });
+          if (found && found.starCost) sc = found.starCost;
+        }
+        plays.push({val: c.val, cost: c.cost, starCost: sc});
+      }
     });
 
     // Sort by cost ascending — cheaper cards first (more efficient use of budget)
@@ -174,15 +214,18 @@ function calcSixAxes() {
 
     var output = 0;
     var remainingEnergy = energyBudget;
+    var remainingStar = starBudget;
     var remainingDraws = expectedDraws;
 
     for (var i = 0; i < plays.length; i++) {
       if (remainingDraws <= 0) break;
       var p = plays[i];
-      var effCost = typeof p.cost === 'number' ? Math.max(p.cost, 0.5) : 2; // X-cost cards use 2 energy heuristic
-      if (effCost <= remainingEnergy) {
+      var effCost = typeof p.cost === 'number' ? Math.max(p.cost, 0.5) : 2;
+      var effStarCost = p.starCost || 0;
+      if (effCost <= remainingEnergy && effStarCost <= remainingStar) {
         output += p.val;
         remainingEnergy -= effCost;
+        remainingStar -= effStarCost;
         remainingDraws -= 1;
       }
     }

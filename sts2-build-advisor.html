@@ -4,14 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>STS2 Build Advisor</title>
-<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" id="googleFonts">
+<!-- Fallback if Google Fonts fail (file:// or offline) -->
+<script>document.getElementById('googleFonts').onerror=function(){var s=document.createElement('style');s.textContent='body{font-family:Georgia,"Times New Roman",serif}h1{font-family:Georgia,serif}code,.mono{font-family:"Courier New",monospace}';document.head.appendChild(s);};</script>
 <style>
 /* ── Grimoire Theme ── */
 :root{
   --parchment:#0d0b09; --parchment2:#13110e; --vellum:#1a1712; --vellum2:#221f18;
   --gilt:rgba(180,140,60,0.18); --gilt-bright:rgba(180,140,60,0.50); --gilt-glow:rgba(200,146,42,0.12);
+  --border:var(--gilt); --border-bright:var(--gilt-bright);
+  --bg2:var(--vellum); --surface:var(--vellum2);
   --gold:#c8922a; --gold-bright:#e8b84b; --gold-glow:rgba(232,184,75,0.2); --gold-dim:rgba(200,146,42,0.13);
+  --amber:#b8963e; --amber-bright:#d4aa4f;
   --ruby:#c0421a; --ruby-glow:rgba(192,66,26,0.15); --ruby-dim:rgba(192,66,26,0.08);
+  --ember:var(--ruby);
   --blood:#a03030; --blood-bright:#d04040;
   --text:#d4c9a8; --text-dim:#7a705a; --text-muted:#4a4438;
   --verdant:#4a7c3f; --verdant-bright:#6aac5f;
@@ -705,6 +711,10 @@ init();
   var RUBY      = '#d04040';
   var EMBER     = '#d06030';
 
+  var DEFAULT_DECAY = 0.008;
+  var fpsRatio = 1;
+  var fpsLastTime = performance.now();
+
   // ── Burst: short-lived directional particles ──
   function burstParticles(x, y, count, color, spread, opts){
     opts = opts || {};
@@ -777,7 +787,7 @@ init();
       p.wobble += p.wobbleSpeed;
       p.x += p.vx + Math.sin(p.wobble)*p.wobbleAmp;
       p.y += p.vy;
-      p.life -= p.decay;
+      p.life -= p.decay * fpsRatio;
       if(p.life <= 0 || p.y < -20){
         ambientEmbers.splice(i,1);
         i--;
@@ -799,6 +809,11 @@ init();
 
   // ── Main loop ──
   function mainLoop(){
+    // Frame-rate normalisation: compute ratio relative to 60fps
+    var now = performance.now();
+    var dt = Math.min(now - fpsLastTime, 50); // cap at 50ms to avoid spiral
+    fpsRatio = dt / 16.667; // 60fps = 16.667ms per frame
+    fpsLastTime = now;
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     // Draw ambient embers (behind burst particles)
@@ -821,7 +836,7 @@ init();
       p.x += p.vx;
       p.y += p.vy;
       p.vy += p.gravity;
-      p.life -= p.decay;
+      p.life -= p.decay * fpsRatio;
       if(p.life <= 0) continue;
       anyAlive = true;
       ctx.globalAlpha = Math.min(p.life, 0.7);
@@ -846,14 +861,16 @@ init();
 
   // ── Exposed triggers ──
   window.__particle = {
-    // Act transition (existing)
-    fireActTransition: function(x, y){
+    // Act transition — uses act color matching text, slower decay
+    fireActTransition: function(x, y, actN){
+      var actColors = ['#6aac5f','#c8922a','#9a6aba'];
+      var c = (actN >= 1 && actN <= 3) ? actColors[actN-1] : GOLD;
       if(!x || !y){ var w = canvas.width, h = canvas.height; x = w/2; y = h/2; }
       // Full-screen spread, avoid floating text zone (roughly 58%-82%)
       for(var i=0;i<50;i++){
         var sx = Math.random() * canvas.width;
         var sy = Math.random() < 0.6 ? Math.random() * canvas.height * 0.55 : canvas.height * (0.82 + Math.random() * 0.18);
-        burstParticles(sx, sy, Math.floor(Math.random()*4)+2, [GOLD, AMBER, PALE_GOLD][Math.floor(Math.random()*3)], 3, {upBias:Math.random()*2, speedMax:Math.random()*4+2, decay:0.018, glow:5, sizeRange:2});
+        burstParticles(sx, sy, Math.floor(Math.random()*4)+2, c, 3, {upBias:Math.random()*2, speedMax:Math.random()*4+2, decay:0.008, glow:5, sizeRange:2});
       }
     },
     // Boss select: ring burst in region color
@@ -908,7 +925,7 @@ init();
       for(var i=0;i<40;i++){
         var sx = Math.random() * canvas.width;
         var sy = Math.random() < 0.6 ? Math.random() * canvas.height * 0.55 : canvas.height * (0.82 + Math.random() * 0.18);
-        burstParticles(sx, sy, Math.floor(Math.random()*4)+2, color, 3, {upBias:Math.random()*2, speedMax:Math.random()*4+2, decay:0.018, glow:5, sizeRange:2});
+        burstParticles(sx, sy, Math.floor(Math.random()*4)+2, color, 3, {upBias:Math.random()*2, speedMax:Math.random()*4+2, decay:0.008, glow:5, sizeRange:2});
       }
       // Floating text element
       var el = document.createElement('div');
@@ -935,7 +952,7 @@ init();
     var cx, cy;
     if(btn){ var r = btn.getBoundingClientRect(); cx = r.left + r.width/2; cy = r.top + r.height/2; }
     if(n !== currentAct){
-      window.__particle.fireActTransition(cx, cy);
+      window.__particle.fireActTransition(cx, cy, n);
       // Floating text
       var labels = ['ACT I — ASCENT','ACT II — HIVE','ACT III — GLORY'];
       var colors = ['#6aac5f','#c8922a','#9a6aba'];
@@ -1004,6 +1021,8 @@ init();
     return null;
   }
 
+  var popup = null;
+  var hideTimer = null;
   function showPopup(e, name){
     if(hideTimer){ clearTimeout(hideTimer); hideTimer=null; }
     var card = getCardData(name);
@@ -1018,6 +1037,9 @@ init();
     var t = card.type || 'skl';
     var typeLabel = t.replace(/_/g,'·').toUpperCase();
     var costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
+    if (currentChar === 'regent' && card.starCost) {
+      costStr += '✦'.repeat(card.starCost);
+    }
     var rarity = card.rarity || '';
 
     var typeClass = 'popup-';
@@ -1153,6 +1175,9 @@ init();
 
     var typeLabel = t.replace(/_/g,'·').toUpperCase();
     var costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
+    if (currentChar === 'regent' && card.starCost) {
+      costStr += '✦'.repeat(card.starCost);
+    }
     var rarity = card.rarity || '';
     var lines = formatCardDescription(card.description);
 

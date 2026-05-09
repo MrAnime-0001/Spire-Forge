@@ -86,13 +86,19 @@ function setAct(n) {
 
 function addCard(name, count = 1) {
   deck[name] = (deck[name] || 0) + count;
+  window._particleSkipVerdict = true;
   notifyListeners();
+  // Particle highlight on added card
   if(window.__particle){
-    var el = document.querySelector('.card-result:last-child, .deck-card');
-    if(el) {
-      var r = el.getBoundingClientRect();
-      window.__particle.fireCardPick(r.left + r.width/2, r.top);
-    }
+    setTimeout(function(){
+      var el = Array.from(document.querySelectorAll('.deck-item-name')).find(function(e){ return e.textContent === name; });
+      if(el){
+        el.scrollIntoView({block:'center', behavior:'instant'});
+        var r = el.getBoundingClientRect();
+        window.__particle.fireCardPick(r.left + r.width/2, r.top + r.height/2);
+        window.__particle.fireVerdict(r.left + r.width/2, r.top + r.height/2, '#4a9a8a');
+      }
+    }, 0);
   }
 }
 
@@ -127,14 +133,20 @@ function upgradeCard(baseName) {
   if(baseName === "Ascender's Bane") return;
   if (deck[baseName] && deck[baseName] > 0) {
     const upgradedName = baseName + '+';
+    // Verify upgraded card exists in any character's pool, colorless, or cross-class
+    const allPools = ['ironclad','silent','defect','necrobinder','regent','colorless']
+      .reduce(function(acc, k) { return acc.concat(ALL_CARDS[k] || []); }, []);
+    const upgradedExists = allPools.some(function(c) { return c.name === upgradedName; });
+    if (!upgradedExists) return;
     adjustQty(baseName, -1);
     addCard(upgradedName, 1);
     if(window.__particle){
-      var el = document.querySelector('.deck-item, .deck-card');
-      if(el) {
-        var r = el.getBoundingClientRect();
+      var nameEl = Array.from(document.querySelectorAll('.deck-item-name')).find(function(el){ return el.textContent === upgradedName; });
+      if(nameEl) {
+        nameEl.scrollIntoView({block:'center', behavior:'instant'});
+        var r = nameEl.getBoundingClientRect();
+        window.__particle.fireCardPick(r.left + r.width/2, r.top + r.height/2);
         window.__particle.fireVerdict(r.left + r.width/2, r.top + r.height/2, '#4a9a8a');
-        window.__particle.fireCardPick(r.left + r.width/2, r.top);
       }
     }
   }

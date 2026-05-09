@@ -333,6 +333,7 @@ function setBoss(name) {
       const regionAct = REGION_DATA[rk].act;
       if (regionAct !== currentAct) {
         currentAct = regionAct;
+        syncAscendersBane();
         updateActUI();
         updateResult();
       }

@@ -9,7 +9,7 @@ High-performance web-based **Build Advisor and Strategy Tool** for *Slay the Spi
 - **Real-time Card Scoring** — Context-aware verdict for every card reward based on current deck, act, ascension, and boss.
 - **Six Axes Analysis** — Deck balance across Attack, Defense, Scaling, Consistency, Efficiency, and Synergy.
 - **Crisis Detection** — Flags critical gaps (e.g. no block by mid-Act 1) with surge scoring toward survival.
-- **Synergy Engine** — 200+ synergy pairs across Ironclad, Silent, Defect, Necrobinder, and Regent.
+- **Synergy Engine** — 151 synergy pairs across Ironclad, Silent, Defect, Necrobinder, and Regent.
 - **Archetype Classification** — Auto-detects active archetypes (poison, exhaust, shiv, doom, star, etc.).
 - **Adaptive Phase Scaling** — Scoring evolves across 4 phases: Ascent, Act 2 Elite Prep, Heart Push, and Beyond.
 - **Boss Counter-Play** — Strategy panel with attack patterns, kill order, and deck matchup analysis for every boss and elite.
@@ -20,9 +20,9 @@ High-performance web-based **Build Advisor and Strategy Tool** for *Slay the Spi
 
 ## Supported Characters
 
-Ironclad, Silent, Defect, Necrobinder, Regent
+Ironclad, Silent, Defect, Necrobinder, Regent — **583 unique cards** (1,156 counting upgrades) across all characters and colorless pool.
 
-### Build Archetypes
+### Build Archetypes (14 across 5 characters)
 
 | Character | Builds |
 |-----------|--------|
@@ -45,10 +45,14 @@ Engine calculates real-time `card_score` using current deck state:
 ## Project Structure
 
 ```
-data/     — Static game data (9 files): per-character cards, builds, constants, synergy pairs
+data/     — Static game data (9 files): per-character cards, builds, constants, synergy pairs (583 base cards, 151 synergy pairs)
 core/     — Logic engine (6 files): state, deck stats, build analysis, reward advisor, engine tracker, storage
 ui/       — View layer (6 files): deck view, picker view, result view, header controls, modals, helpers
+assets/   — 32 PNG icons for status effects and character energy
+scripts/  — Tooling (4 files): card type classifier, data generators, balance test scenarios
 ```
+
+**~16,300 lines across 26 source files.**
 
 ## Browser Support
 

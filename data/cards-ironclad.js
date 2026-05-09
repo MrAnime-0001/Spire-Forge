@@ -1621,15 +1621,5 @@ const IRONCLAD_CARDS = [
       "description": "Skills cost 0 StS2 EnergyIronclad.png. Whenever you play a Skill, Exhaust it.",
       "isUpgraded": true,
       "baseCard": "Corruption"
-    },
-    {
-      "name": "Tank+",
-      "type": "atk",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Tank. Take double damage from enemies. Allies take half damage from enemies.",
-      "description": "Take double damage from enemies. Allies take half damage from enemies.",
-      "isUpgraded": true,
-      "baseCard": "Tank"
     }
   ];

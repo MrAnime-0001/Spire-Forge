@@ -3,11 +3,13 @@
 const SAVE_KEY = 'sts2_loadouts';
 
 function getSavedLoadouts() {
+  if (typeof localStorage === 'undefined') return [];
   try { return JSON.parse(localStorage.getItem(SAVE_KEY) || '[]'); } catch { return []; }
 }
 
 function setSavedLoadouts(list) {
-  localStorage.setItem(SAVE_KEY, JSON.stringify(list));
+  if (typeof localStorage === 'undefined') return;
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(list)); } catch {}
 }
 
 function openSaveModal() {
@@ -32,9 +34,11 @@ function confirmSave() {
     name,
     char: currentChar,
     act: currentAct,
+    asc: currentAsc,
     hp: document.getElementById('hpCur').value,
     hpMax: document.getElementById('hpMax').value,
     deck: {...deck},
+    boss: selectedBoss,
     saved: new Date().toLocaleDateString()
   });
   // Keep max 20 saves
@@ -77,7 +81,10 @@ function confirmLoad(i) {
   if (!s) return;
   currentChar = s.char;
   currentAct = s.act || 1;
+  currentAsc = s.asc || 0;
   deck = {...(s.deck||{})};
+  syncAscendersBane();
+  selectedBoss = s.boss || null;
   document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
   const cb = document.getElementById('char-' + currentChar);
   if (cb) cb.classList.add('active');
@@ -86,6 +93,9 @@ function confirmLoad(i) {
   document.getElementById('mainUI').style.display = 'block';
   document.getElementById('inlinePicker').style.display = 'block';
   updateActUI();
+  updateAscUI();
+  if(typeof updateHpBar === 'function') updateHpBar();
+  renderBossAlert();
   renderDeckList();
   updateResult();
   updatePriorityPanel();
@@ -135,6 +145,7 @@ function autoRestore() {
     currentAct = s.act || 1;
     currentAsc = s.asc || 0;
     deck = Object.assign({}, s.deck);
+    syncAscendersBane();
     selectedBoss = s.boss || null;
     document.querySelectorAll('.char-btn').forEach(function(b){ b.classList.remove('active'); });
     var charBtn = document.getElementById('char-' + currentChar);
@@ -180,6 +191,10 @@ function exportDeck() {
     alert('Add cards to your deck before exporting.');
     return;
   }
+  if (typeof Blob === 'undefined' || typeof URL === 'undefined') {
+    alert('Export not supported in this browser/context. Try opening via localhost.');
+    return;
+  }
   const data = {
     version: 1,
     char: currentChar,
@@ -210,6 +225,10 @@ function importDeckClick() {
 function importDeckFile(event) {
   const file = event.target.files[0];
   if (!file) return;
+  if (typeof FileReader === 'undefined') {
+    alert('Import not supported in this browser/context. Try opening via localhost.');
+    return;
+  }
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
@@ -219,14 +238,19 @@ function importDeckFile(event) {
       currentChar = data.char;
       deck = data.deck;
       currentAct = data.act || 1;
+      currentAsc = data.asc || 0;
+      syncAscendersBane();
+      selectedBoss = data.boss || null;
       document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
       const charBtn = document.getElementById('char-' + currentChar);
       if (charBtn) charBtn.classList.add('active');
-      if (data.hp) document.getElementById('hpCur').value = data.hp;
-      if (data.hpMax) document.getElementById('hpMax').value = data.hpMax;
+      if (data.hp) document.getElementById('hpCur').value = Math.max(1, Math.min(999, parseInt(data.hp, 10) || 80));
+      if (data.hpMax) document.getElementById('hpMax').value = Math.max(1, Math.min(999, parseInt(data.hpMax, 10) || 80));
       document.getElementById('mainUI').style.display = 'block';
       document.getElementById('inlinePicker').style.display = 'block';
       updateActUI();
+      updateAscUI();
+      if(typeof updateHpBar === 'function') updateHpBar();
       renderDeckList();
       updateResult();
       updatePriorityPanel();
