@@ -395,6 +395,14 @@ h1::after{content:'';display:block;width:80px;height:2px;margin:.6rem auto 0;
 .orn-sep{text-align:center;padding:.4rem 0;color:var(--gold);opacity:.35;font-size:11px;letter-spacing:.8em;user-select:none;}
 .orn-sep::before{content:'⁘ ⁘ ⁘';}
 .marginalia{font-style:italic;font-size:10px;color:var(--text-muted);opacity:.6;padding-left:1rem;border-left:1px solid var(--gilt);margin-top:.3rem;font-weight:300;}
+/* ── Collapsible Priority Builds ── */
+.collapsible-build{border:1px solid var(--gilt);border-radius:3px;margin-bottom:.65rem;overflow:hidden;}
+.collapsible-build-header{display:flex;align-items:center;gap:6px;padding:.45rem .55rem;cursor:pointer;-webkit-user-select:none;user-select:none;transition:background .12s;}
+.collapsible-build-header:hover{background:rgba(180,140,60,.08);}
+.collapsible-build-arrow{font-size:9px;color:var(--text-muted);transition:transform .2s;flex-shrink:0;width:12px;text-align:center;}
+.collapsible-build-arrow.open{transform:rotate(90deg);}
+.collapsible-build-content{padding:.15rem .55rem .55rem;border-top:1px solid var(--gilt);}
+.collapsible-build-content.collapsed{display:none;}
 </style>
 </head>
 <body>

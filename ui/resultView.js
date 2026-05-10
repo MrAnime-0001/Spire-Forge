@@ -99,14 +99,17 @@ function updatePriorityPanel() {
       const _cmtLabel = g.isCommitted ? 'COMMITTED' : g.isBuilding ? 'BUILDING' : '';
       const _cmtColor = g.isCommitted ? 'var(--teal-bright)' : 'var(--amber-bright)';
 
-      html += `<div style="margin-bottom:.6rem">`;
-      html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:.35rem">`;
-      html += `<span style="font-size:12px;font-family:'Cinzel',serif;font-weight:600;color:${build.color}">${build.name}</span>`;
+      const buildId = 'bld_' + key.replace(/[^a-z0-9]/gi,'_');
+      html += `<div class="collapsible-build">
+        <div class="collapsible-build-header" onclick="toggleBuildCollapse('${buildId}')">
+          <span class="collapsible-build-arrow" id="arr_${buildId}">▶</span>
+          <span style="font-size:12px;font-family:'Cinzel',serif;font-weight:600;color:${build.color}">${build.name}</span>`;
       if (build.rank) html += `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;padding:1px 5px;border-radius:2px;border:1px solid ${rankC}50;background:${rankC}18;color:${rankC}">${build.rank}</span>`;
       if (_cmtLabel)  html += `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;padding:1px 5px;border-radius:2px;border:1px solid ${_cmtColor}50;background:${_cmtColor}18;color:${_cmtColor}">${_cmtLabel}</span>`;
       else if (isTop) html += `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;padding:1px 5px;border-radius:2px;background:${build.color}18;color:${build.color};border:1px solid ${build.color}40">best match</span>`;
-      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:auto">${pctStr} match</span>`;
-      html += `</div>`;
+      html += `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);margin-left:auto">${pctStr} match</span>
+        </div>
+        <div class="collapsible-build-content collapsed" id="cnt_${buildId}">`;
 
       if (missingEssential.length > 0) {
         html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;opacity:.8">essential</div>`;
@@ -144,11 +147,7 @@ function updatePriorityPanel() {
         });
       }
 
-      html += `</div>`;
-
-      if (i < activeGroups.length - 1) {
-        html += `<div class="divider" style="margin:.4rem 0 .7rem"></div>`;
-      }
+      html += `</div></div>`;
     });
   }
 
@@ -158,6 +157,14 @@ function updatePriorityPanel() {
 
   panel.innerHTML = html;
   renderEngineTracker();
+}
+
+function toggleBuildCollapse(id) {
+  const content = document.getElementById('cnt_' + id);
+  const arrow   = document.getElementById('arr_' + id);
+  if (!content || !arrow) return;
+  content.classList.toggle('collapsed');
+  arrow.classList.toggle('open');
 }
 
 function quickAddPriority(name) {
