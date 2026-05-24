@@ -38,6 +38,7 @@ function confirmSave() {
     hp: document.getElementById('hpCur').value,
     hpMax: document.getElementById('hpMax').value,
     deck: {...deck},
+    relics: [...relics],
     boss: selectedBoss,
     saved: new Date().toLocaleDateString()
   });
@@ -84,6 +85,7 @@ function confirmLoad(i) {
   currentAsc = s.asc || 0;
   deck = {...(s.deck||{})};
   syncAscendersBane();
+  relics = s.relics ? [...s.relics] : [];
   selectedBoss = s.boss || null;
   document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
   const cb = document.getElementById('char-' + currentChar);
@@ -146,6 +148,7 @@ function autoRestore() {
     currentAsc = s.asc || 0;
     deck = Object.assign({}, s.deck);
     syncAscendersBane();
+    relics = s.relics ? [].concat(s.relics) : [];
     selectedBoss = s.boss || null;
     document.querySelectorAll('.char-btn').forEach(function(b){ b.classList.remove('active'); });
     var charBtn = document.getElementById('char-' + currentChar);

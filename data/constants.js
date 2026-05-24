@@ -13,6 +13,22 @@ const AXIS_TARGETS = {
   3: { Attack: 75, Defense: 50, Scaling: 55, Consistency: 55, Efficiency: 45, Synergy: 60 }
 };
 
+// Per-character axis target overrides. Applied as additive offsets to base AXIS_TARGETS.
+// null = use base targets as-is. Each offset is +/- to the base value for that character.
+// Rationale:
+//   Defect:  Frost orbs provide passive block. Focus scales ALL orbs multiplicatively.
+//   Silent:  Weak + Evasion reduce damage without block cards. Sly discard = free plays.
+//   Regent:  Fewer pure block options. Star economy demands more card coordination.
+//   Necrobinder: Osty IS defense layer. Summon cards fill defense role.
+//   Ironclad: Most straightforward — Barricade/block cards match baseline well.
+const CHAR_AXIS_OVERRIDES = {
+  ironclad:    null,
+  silent:      { Defense: -10, Efficiency: +5 },
+  defect:      { Defense: -15, Scaling: +10 },
+  regent:      { Defense: -10, Synergy: +10 },
+  necrobinder: { Defense: -10 }
+};
+
 // Bosses with long kill windows where scaling matters most (1.5× scl bonus)
 const SCL_PRIORITY_BOSSES = new Set([
   'Knowledge Demon', 'The Queen', 'Doormaker', 'Test Subject #C8'
@@ -200,6 +216,11 @@ const ACT_SCALES_INTO = new Set([
   'Body Slam','Juggernaut','Noxious Fumes','Corruption','Dark Embrace',
   'Feel No Pain','Conqueror','Radiate','Alignment','Seven Stars',
   'Infinite Blades','Claw','All for One','Necro Mastery',
+  'Grave Warden','Afterimage','Nightmare','Blade Dance',
+  'Sword Sage','Seeking Edge','Countdown','Reaper Form',
+  'Dirge','Rattle','Burst','Catalyst','Adrenaline',
+  'Biased Cognition','Glacier','Creative AI',
+  'The Scythe','Void Form',
 ]);
 
 // Cards that are strong in Act 1 but actively fall off by Act 3
@@ -319,6 +340,26 @@ const STARTING_DECKS = {
 };
 
 const CHAR_HP = {ironclad:80, silent:70, defect:75, necrobinder:66, regent:75};
+
+// ============================================================
+// COMBAT MECHANICS CONSTANTS
+// ============================================================
+
+// Multi-hit cards per character — cards that hit multiple times per play.
+// Each hit independently benefits from Strength, making these high-value in Strength builds.
+const MULTI_HIT_CARDS = {
+  ironclad:    {'Twin Strike':2, 'Whirlwind':'X', 'Sword Boomerang':3, 'Heavy Blade':'X', 'Pummel':4, 'Fiend Fire':'X', 'Conflagration':'X', 'Stomp':'X', 'One-Two Punch':2, 'Spite':2, 'Thrash':2, 'Tear Asunder':'X'},
+  silent:      {'Blade Dance':3, 'Finisher':'X', 'Ricochet':4, 'Dagger Spray':2, 'Eviscerate':'X', 'Skewer':'X', 'Grand Finale':1},
+  defect:      {'Claw':'X', 'Rip and Tear':2, 'Gunk Up':3, 'Uproar':2, 'Refract':2, 'Barrage':'X', 'Multi-Cast':'X'},
+  necrobinder: {'The Scythe':'X', 'Blight Strike':1, 'Rattle':'X', "Sic 'Em":'X', 'Eradicate':'X', 'Soul Storm':'X'},
+  regent:      {'Conqueror':'X', 'Seven Stars':7, 'Celestial Might':3, 'Glitterstream':4, 'Heavenly Drill':'X', 'Stardust':'X'}
+};
+
+// Status effect modifier map for pseudo-defense/attack credit
+const STATUS_MATH = {
+  Weak:       { damageReduction: 0.25, defenseCredit: 5 },   // 25% less enemy damage -> +5 defense score
+  Vulnerable: { damageAmplification: 0.50, attackCredit: 5 } // 50% more damage taken -> +5 attack score
+};
 
 // ============================================================
 // STATE
@@ -858,28 +899,39 @@ Object.entries(REGION_DATA).forEach(([rk, rd]) => {
 const ENGINES = {
   ironclad: [
     {name:'Exhaust engine',cards:['Corruption','Dark Embrace','Feel No Pain'],note:'Core Exhaust trinity. Sculpts deck mid-combat. Priority: remove Strikes first.'},
-    {name:'Strength engine',cards:['Demon Form','Inflame','Rupture'],note:'Passive Strength per turn. Go wide with multi-hit.'},
-    {name:'Block engine',cards:['Barricade','Juggernaut','Body Slam'],note:'Block never expires. Juggernaut converts block to damage.'}
+    {name:'Strength engine',cards:['Demon Form','Inflame','Heavy Blade'],note:'Passive Strength per turn. Go wide with multi-hit.'},
+    {name:'Block engine',cards:['Barricade','Juggernaut','Body Slam'],note:'Block never expires. Juggernaut converts block to damage.'},
+    {name:'Bloodletting engine',cards:['Bloodletting','Rupture','Offering'],note:'HP as resource. Bloodletting/Offering pay HP -> energy+draw -> Rupture gives Strength per HP loss.'},
+    {name:'Strike engine',cards:['Perfected Strike','Twin Strike','Hellraiser'],note:'Pump Strike-family cards. Perfected Strike scales per Strike in deck. Hellraiser auto-plays drawn Strikes.'},
+    {name:'Self-Wound engine',cards:['Combust','Rupture','Evolve','Fire Breathing'],note:'Turn HP loss into card draw (Evolve) and Strength (Rupture). Combust + Fire Breathing = passive AoE.'}
   ],
   silent: [
     {name:'Sly engine',cards:['Tactician','Tools of the Trade','Master Planner'],note:'Discard = free Energy. Keep deck thin to cycle fast.'},
     {name:'Shiv engine',cards:['Accuracy','Infinite Blades','Knife Trap'],note:'Scale Shiv damage. Accuracy stacks multiplicatively.'},
-    {name:'Poison engine',cards:['Noxious Fumes','Accelerant','Bubble Bubble'],note:'Stack Poison then double it. Survive the early turns.'}
+    {name:'Poison engine',cards:['Noxious Fumes','Accelerant','Bubble Bubble'],note:'Stack Poison then double it. Survive the early turns.'},
+    {name:'Grand Finale engine',cards:['Grand Finale','Acrobatics','Calculated Gamble'],note:'Empty draw pile = 50 AoE. Acrobatics+Gamble cycle through deck. Keep ~15 cards total.'},
+    {name:'Envenom engine',cards:['Envenom','Accuracy','Blade Dance'],note:'Shivs apply Poison via Envenom. Accuracy buffs the Shivs. Hybrid attack/poison scaling.'},
+    {name:'Combo engine',cards:['Expertise','Setup','Catalyst'],note:'Chain cards in specific order. Expertise fills hand, Setup enables 0-cost next turn.'}
   ],
   defect: [
     {name:'Orb/Focus engine',cards:['Defragment','Loop','Multi-Cast'],note:'Stack Focus ASAP. Remove Strikes — passive orbs outscale them by Act 2.'},
     {name:'Claw engine',cards:['Claw','All for One','Scrape'],note:'Every Claw buffs all Claws. Keep deck small. Feral returns 0-cost attacks.'},
-    {name:'Hologram/TURBO loop',cards:['Hologram','TURBO','Claw'],note:'TURBO generates energy, Hologram retrieves Claw. Infinite-like turns with enough draw.'}
+    {name:'Hologram/TURBO loop',cards:['Hologram','TURBO','Claw'],note:'TURBO generates energy, Hologram retrieves Claw. Infinite-like turns with enough draw.'},
+    {name:'Frost engine',cards:['Glacier','Biased Cog','Coolheaded'],note:'Passive block via Frost orbs. Biased Cog spikes Focus making each Frost orb block more. Glacier channels 2 at once.'},
+    {name:'Dark Orb engine',cards:['Darkness','Dark Orb','Multi-Cast'],note:'Dark orbs store damage (ignores Focus). Let them grow then Multi-Cast for huge burst.'},
+    {name:'Creative AI engine',cards:['Creative AI','Hologram','White Noise'],note:'Random Power each turn. Hologram retrieves key powers from discard. White Noise adds free Power.'}
   ],
   necrobinder: [
     {name:'Borrowed Time engine',cards:['Borrowed Time','Graveblast'],note:'Burst 4 Energy in one turn — cards cost 1 more but Graveblast retrieves key cards from discard. Big turn enabler.'},
-    {name:'Doom engine',cards:['Deathbringer','Death\'s Door','Shroud'],note:'Stack Doom, then trigger. Need Block to survive the wait. End of Days solves timing.'},
-    {name:'Osty engine',cards:['Rattle','Sic \'Em','Necro Mastery'],note:'Stack Osty HP. Rattle+Sic\'Em each turn. Necro Mastery converts Block to attacks.'},
-    {name:'Soul deferral',cards:['Soul','Haunt','Devour Life'],note:'Bank Souls for future draw instead of playing immediately. Use when Energy is tight.'}
+    {name:'Doom engine',cards:['Countdown','Danse Macabre','Capture Spirit'],note:'Stack Doom, then execute. Countdown applies passive Doom. Capture Spirit generates Souls AND Doom.'},
+    {name:'Osty engine',cards:['Rattle','Sic \'Em','Necro Mastery','Flatten'],note:'Stack Osty HP. Rattle+Sic\'Em each turn. Necro Mastery converts Osty attacks to AoE damage.'},
+    {name:'Soul engine',cards:['Haunt','Capture Spirit','Soul Storm'],note:'Souls are 0-cost draw 2 Exhaust. Haunt makes each Soul deal 6 unblockable. Capture Spirit generates 3 Souls.'},
+    {name:'Reaper engine',cards:['Reaper Form','The Scythe','Lethality'],note:'Attacks apply Doom equal to damage. The Scythe deals scaling AoE. Lethality boosts first attack 50%.'}
   ],
   regent: [
-    {name:'Star/Vigor engine',cards:['Genesis','Alignment','Radiate'],note:'Stack Stars, trade for Energy via Alignment. Radiate = 3 AoE per Star gained.'},
-    {name:'Blade/Forge engine',cards:['Summon Forth','Conqueror','The Smith'],note:'Forge the Blade every turn. Conqueror doubles Blade damage.'},
-    {name:'Starfall mode',cards:['Radiate','Terraforming','Gamma Blast'],note:'Generate Stars then nuke with Radiate. Vigor + Star generation to set up.'}
+    {name:'Forge engine',cards:['Sword Sage','Seeking Edge','Conqueror','The Smith'],note:'Forge the Sovereign Blade every turn. Sword Sage doubles all forge gains. Seeking Edge makes Blade AoE.'},
+    {name:'Star Burst engine',cards:['Stardust','Seven Stars','Black Hole','Glow'],note:'Stockpile Stars then unload. Black Hole + Glow = AoE per Star generation. Seven Stars = 7-hit nuke.'},
+    {name:'Void Form engine',cards:['Void Form','Convergence','Comet'],note:'First 2 cards per turn are free. Comet (33 dmg, 5-star cost) becomes zero-cost bomb. Convergence retains hand.'},
+    {name:'Bombardment engine',cards:['Bombardment','Meteor Shower','Gamma Blast'],note:'AoE via Star generation. Bombardment auto-plays from Exhaust pile. Meteor Shower hits all for 14.'}
   ]
 };

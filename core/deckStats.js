@@ -127,6 +127,25 @@ function getDeckSizeProfile() {
   return { total, zone, color, label, advice: getNextFocusTip(), pAtk, pDef, pScl, velScore, heavyAtk, heavyDef, heavyScl, lowVel };
 }
 
+// Build commitment: how much the deck commits to each BUILD_DATA build.
+// Returns {buildKey: 0-1} where 1 = all essential cards present.
+// Used for Synergy axis calculation.
+function getArchetypeCommitment() {
+  var result = {};
+  if (typeof BUILD_DATA === 'undefined' || !BUILD_DATA[currentChar]) return result;
+  var builds = BUILD_DATA[currentChar].builds;
+  if (!builds) return result;
+  Object.keys(builds).forEach(function(bk) {
+    var b = builds[bk];
+    var essential = b.essential || [];
+    if (essential.length === 0) { result[bk] = 0; return; }
+    var have = 0;
+    essential.forEach(function(c) { if (deck[c] || deck[c+'+']) have++; });
+    result[bk] = have / essential.length;
+  });
+  return result;
+}
+
 function calcSixAxes() {
   if (!currentChar || getDeckSize() === 0) return null;
   const stats = getDeckStats();
@@ -241,6 +260,14 @@ function calcSixAxes() {
   var attackScore = Math.min(100, Math.round(perTurnDmg * 2));
   var defenseScore = Math.min(100, Math.round(perTurnBlk * 2));
 
+  // Necrobinder: Summon cards count toward Defense axis (Osty = defense layer)
+  if (currentChar === 'necrobinder') {
+    var SUMMON_TAG = {'Bodyguard':1,'Pull Aggro':1,'Afterlife':1,'Cleanse':1,'Dirge':1,'Spur':1,'Reanimate':1,'Legion of Bone':1,'Invoke':1};
+    var summonCount = 0;
+    Object.keys(deck).forEach(function(n) { if (SUMMON_TAG[n]) summonCount += deck[n]; });
+    defenseScore = Math.min(100, defenseScore + summonCount * 4);
+  }
+
   // 3. Scaling (old scl)
   var playable2 = Math.max(1, total - (stats.other||0));
   const scalingScore = Math.min(100, Math.round((stats.scl / playable2) * 300));
@@ -326,6 +353,142 @@ function getDrawBalance() {
     else if (t === 'other') { deadDraw += count; }
   });
   return { atkDraw, defDraw, sclDraw, deadDraw, velDraw };
+}
+
+// ── getCostDistribution ──────────────────────────────────────
+// Returns array of {cost, count, pct} for 0, 1, 2, 3, 4+ energy costs.
+function getCostDistribution() {
+  var buckets = {0:0, 1:0, 2:0, 3:0, 4:0};
+  var charCards = ALL_CARDS[currentChar] || [];
+  var colorlessCards = ALL_CARDS['colorless'] || [];
+  var allOtherChars = ['ironclad','silent','defect','necrobinder','regent']
+    .filter(function(k){return k!==currentChar;}).flatMap(function(k){return ALL_CARDS[k]||[];});
+  function findCard(n) {
+    return charCards.find(function(x){return x.name===n;}) || colorlessCards.find(function(x){return x.name===n;}) || allOtherChars.find(function(x){return x.name===n;});
+  }
+  var total = 0;
+  Object.keys(deck).forEach(function(n) {
+    var c = findCard(n);
+    if (!c) return;
+    var cost = c.cost;
+    if (cost === 'X') cost = 2; // treat X-cost as 2 for curve purposes
+    cost = Number(cost);
+    if (isNaN(cost) || cost < 0) cost = 0;
+    if (cost >= 4) cost = 4;
+    buckets[cost] += deck[n];
+    total += deck[n];
+  });
+  var result = [];
+  var labels = {0:'0',1:'1',2:'2',3:'3',4:'4+'};
+  [0,1,2,3,4].forEach(function(k) {
+    result.push({cost:k, label:labels[k], count:buckets[k], pct:total>0?Math.round(buckets[k]/total*100):0});
+  });
+  return result;
+}
+
+// ── getStarCostDistribution ─────────────────────────────────
+// Regent-only. Fixed buckets 0,1,2,3,4-5,6+ — always shown.
+function getStarCostDistribution() {
+  if (currentChar !== 'regent') return [];
+  var buckets = {0:0, 1:0, 2:0, 3:0, 45:0, 67:0};
+  var labels = {0:'0★', 1:'1★', 2:'2★', 3:'3★', 45:'4-5★', 67:'6+★'};
+  var charCards = ALL_CARDS['regent'] || [];
+  var total = 0;
+  Object.keys(deck).forEach(function(n) {
+    var c = charCards.find(function(x){return x.name===n;});
+    if (!c) return;
+    var sc = c.starCost || 0;
+    if (sc === 0) buckets[0] += deck[n];
+    else if (sc === 1) buckets[1] += deck[n];
+    else if (sc === 2) buckets[2] += deck[n];
+    else if (sc === 3) buckets[3] += deck[n];
+    else if (sc <= 5) buckets[45] += deck[n];
+    else buckets[67] += deck[n];
+    total += deck[n];
+  });
+  var result = [];
+  [0,1,2,3,45,67].forEach(function(k) {
+    result.push({cost:k, label:labels[k], count:buckets[k], pct:total>0?Math.round(buckets[k]/total*100):0});
+  });
+  return result;
+}
+
+// ── getUpgradeCandidates ─────────────────────────────────────
+// Returns top 5 un-upgraded cards that benefit most from upgrade.
+function getUpgradeCandidates() {
+  var candidates = [];
+  var charCards = ALL_CARDS[currentChar] || [];
+  var allCards = charCards.concat(ALL_CARDS['colorless']||[]);
+  Object.keys(deck).forEach(function(name) {
+    if (name.endsWith('+')) return; // already upgraded
+    var upgraded = name + '+';
+    if ((deck[name] || 0) > (deck[upgraded] || 0)) {
+      var card = allCards.find(function(c){return c.name===name;});
+      if (!card) return;
+      // Score upgrade value based on card description delta
+      var baseValue = 0;
+      var desc = card.description || '';
+      if (desc.match(/Deal (\d+) damage/)) baseValue += parseInt(desc.match(/Deal (\d+) damage/)[1], 10);
+      if (desc.match(/Gain (\d+).*Block/i)) baseValue += parseInt(desc.match(/Gain (\d+).*Block/i)[1], 10);
+      // Check existing scoring for upgrade value
+      var scoreResult = scoreCard(name);
+      var upgradeBonus = scoreResult && scoreResult.score ? Math.min(30, Math.max(0, scoreResult.score)) : 10;
+      candidates.push({name:name, score:upgradeBonus, hasEssential:false});
+    }
+  });
+  // Check if any are build-essential
+  if (typeof BUILD_DATA !== 'undefined' && BUILD_DATA[currentChar]) {
+    var builds = BUILD_DATA[currentChar].builds;
+    if (builds) {
+      Object.keys(builds).forEach(function(bk) {
+        var b = builds[bk];
+        (b.essential||[]).concat(b.mustPick||[]).concat(b.highPriority||[]).forEach(function(cn) {
+          var found = candidates.find(function(c){return c.name===cn;});
+          if (found) found.score += 20;
+        });
+      });
+    }
+  }
+  candidates.sort(function(a,b){return b.score-a.score;});
+  return candidates.slice(0, 5);
+}
+
+// ── getRemoveCandidates ──────────────────────────────────────
+// Returns cards to remove at campfire: starters > low-value > off-build.
+function getRemoveCandidates() {
+  var result = [];
+  var starters = ['Strike','Defend','Strike+','Defend+'];
+  var count = {'Strike':0,'Defend':0};
+  Object.keys(deck).forEach(function(n) {
+    if (n === 'Strike' || n === 'Strike+') count.Strike += deck[n];
+    if (n === 'Defend' || n === 'Defend+') count.Defend += deck[n];
+  });
+  // Tier 1: starters if 3+ remaining
+  if (count.Strike >= 3) result.push({name:'Strike', reason:'starter — remove first', tier:1});
+  if (count.Defend >= 3) result.push({name:'Defend', reason:'starter — remove second', tier:1});
+  // Tier 2: cards not in any build and low axis contribution
+  var scored = [];
+  Object.keys(deck).forEach(function(name) {
+    if (name.endsWith('+')) return;
+    if (starters.indexOf(name) >= 0) return;
+    var isEssential = false;
+    if (typeof BUILD_DATA !== 'undefined' && BUILD_DATA[currentChar]) {
+      var builds = BUILD_DATA[currentChar].builds;
+      if (builds) {
+        Object.keys(builds).forEach(function(bk) {
+          if ((builds[bk].essential||[]).indexOf(name) >= 0 || (builds[bk].mustPick||[]).indexOf(name) >= 0) isEssential = true;
+        });
+      }
+    }
+    if (isEssential) return;
+    var res = scoreCard(name);
+    if (res && res.score < 20) {
+      scored.push({name:name, score:res.score||0, reason:'low value (score:'+(res.score||0)+')', tier:2});
+    }
+  });
+  scored.sort(function(a,b){return a.score-b.score;});
+  result = result.concat(scored.slice(0, 3));
+  return result.slice(0, 5);
 }
 
 // ── getCrisisStates ──────────────────────────────────────────

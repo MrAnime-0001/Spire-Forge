@@ -16,23 +16,14 @@ function renderModalCards() {
   if (!currentChar) { body.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:.5rem">Select a character first.</p>'; return; }
 
   const allCards = getAllCardsForPicker();
-  const builds = (BUILD_DATA[currentChar] || {}).builds || {};
-  const topBuildKey = getTopBuild();
-  const topBuild = topBuildKey ? builds[topBuildKey] : null;
   const stats = getDeckStats();
 
   function categorise(card) {
-    const inTop = topBuild && topBuild.essential && topBuild.essential.includes(card.name);
-    const inTopSyn = topBuild && topBuild.synergy && topBuild.synergy.includes(card.name);
-    const inAnyBuild = Object.values(builds).some(b => (b.essential && b.essential.includes(card.name)) || (b.synergy && b.synergy.includes(card.name)));
     const needsDef = stats.def < 3 && (card.type.includes('def'));
     const needsAtk = stats.atk < 3 && (card.type.includes('atk'));
     const tooMany = deck[card.name] && deck[card.name] >= 2 && (card.type.includes('atk'));
-    if (inTop) return {verdict:'take', label:'TAKE', cls:'verdict-take', reason: needsDef?'Priority + fixes low defense': needsAtk?'Priority + fixes low attacks':'Core card for your leading build'};
-    if (inTopSyn) return {verdict:'synergy', label:'SYNERGY', cls:'verdict-synergy', reason:'Good synergy with your leading build'};
     if (needsDef && card.type==='def') return {verdict:'take', label:'TAKE', cls:'verdict-take', reason:'Fixes low defense in your deck'};
-    if (needsAtk && card.type==='atk' && inAnyBuild) return {verdict:'synergy', label:'SYNERGY', cls:'verdict-synergy', reason:'Fixes low attacks + fits a build'};
-    if (inAnyBuild) return {verdict:'shop', label:'CONSIDER', cls:'verdict-shop', reason:'Useful for one of your builds'};
+    if (needsAtk && card.type==='atk') return {verdict:'take', label:'TAKE', cls:'verdict-take', reason:'Fixes low attacks in your deck'};
     if (tooMany) return {verdict:'skip', label:'SKIP', cls:'verdict-skip', reason:'You already have 2+ copies'};
     return {verdict:'skip', label:'SKIP', cls:'verdict-skip', reason:'Does not contribute to your current path'};
   }

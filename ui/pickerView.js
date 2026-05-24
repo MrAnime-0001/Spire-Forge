@@ -2,7 +2,6 @@
 
 let pickerTab = 'reward';
 let rewardOffered = [];
-let rewardBuildKey = null;
 let rewardStage = 'select'; // 'select' | 'verdict'
 
 function showInlinePicker() {
@@ -17,7 +16,7 @@ function switchPickerTab(tab) {
   document.getElementById('pickerSearch').value = '';
   document.getElementById('pickerSearch').placeholder = tab === 'reward' ? 'Search cards being offered...' : 'Search to see build details, or browse below...';
   if (tab === 'reward') {
-    rewardOffered = []; rewardBuildKey = null; rewardStage = 'select';
+    rewardOffered = []; rewardStage = 'select';
     renderPickerReward();
   } else {
     renderPickerAdd();
@@ -81,8 +80,8 @@ function renderRewardUnified(el) {
         const already = rewardOffered.includes(c.name);
         const safeN = c.name.replace(/'/g,"\\'");
         const clickFn = already ? 'rewardRemoveOffered(\''+safeN+'\')' : 'rewardAddOffered(\''+safeN+'\')';
-        const borderCol = already ? 'var(--amber)' : (c.crossChar ? 'rgba(100,90,70,.3)' : 'var(--border)');
-        const bgCol = already ? 'var(--amber-dim)' : 'var(--bg2)';
+        const borderCol = already ? 'var(--amber)' : (c.crossChar ? 'rgba(100,90,70,.3)' : 'rgba(100,90,70,.2)');
+        const bgCol = already ? 'rgba(40,30,10,.4)' : 'rgba(0,0,0,.45)';
         const nameCol = already ? 'var(--amber-bright)' : (c.crossChar ? 'var(--text-dim)' : 'var(--text)');
         const addCol = already ? 'var(--amber)' : 'var(--green-bright)';
         const addLbl = already ? '&#10003; added' : '+ add';
@@ -99,7 +98,24 @@ function renderRewardUnified(el) {
         html += '<div style="min-width:0"><div style="font-size:13px;'+nameStyle+';overflow:hidden;text-overflow:ellipsis">'+c.name+crossLabel+'</div>'+detailHtml+noteHtml+'</div>';
         html += '<span class="deck-item-tag '+typeCls(c.type)+'" style="font-size:9px;padding:1px 5px">'+(c.type||'skl').replace(/_/g,'·').toUpperCase()+'</span>';
         html += rarityBadgeHtml(getRarity(c));
-        html += '<span style="font-size:9px;color:'+addCol+';min-width:40px;text-align:right;white-space:nowrap">'+addLbl+'</span>';
+        // Build tier badge
+        var bBadge = '';
+        if (currentChar && typeof BUILD_DATA !== 'undefined' && BUILD_DATA[currentChar]) {
+          var bdBuilds = BUILD_DATA[currentChar].builds;
+          if (bdBuilds) {
+            for (var bi = 0; bi < Object.keys(bdBuilds).length; bi++) {
+              var bk = Object.keys(bdBuilds)[bi];
+              var bd = bdBuilds[bk];
+              if (bd.mustPick && bd.mustPick.indexOf(c.name) >= 0) { bBadge = 'MUST PICK'; break; }
+              if (bd.highPriority && bd.highPriority.indexOf(c.name) >= 0) { bBadge = 'HIGH'; break; }
+              if (bd.essential && bd.essential.indexOf(c.name) >= 0) { bBadge = 'essential'; break; }
+            }
+          }
+        }
+        var bc = bBadge === 'MUST PICK' ? '#ff6040' : bBadge === 'HIGH' ? 'var(--amber-bright)' : 'var(--teal-bright)';
+        if (bBadge) {
+          html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+bc+'60;color:'+bc+';background:'+bc+'15;font-weight:600;margin-left:auto">'+bBadge+'</span>';
+        }
         html += '</div>';
       });
     }
@@ -120,8 +136,7 @@ function renderRewardUnified(el) {
 }
 
 function renderRewardVerdictHtml() {
-  if (!currentChar || !BUILD_DATA[currentChar]) return '';
-  var builds = (BUILD_DATA[currentChar] || {}).builds || {};
+  if (!currentChar) return '';
   var total = getDeckSize();
   var typeCls = function(t){
     if (!t) return 'tag-skl';
@@ -175,8 +190,8 @@ function renderRewardVerdictHtml() {
 
   scored.forEach(function(s, i) {
     var isBest = i===0 && !allSkip;
-    var outerBorder = isBest ? (s.verdict==='pick'?'rgba(106,172,95,.5)':'rgba(200,146,42,.4)') : 'var(--border)';
-    var outerBg = isBest ? (s.verdict==='pick'?'rgba(74,124,63,.1)':'rgba(200,146,42,.07)') : 'var(--bg2)';
+    var outerBorder = isBest ? (s.verdict==='pick'?'rgba(106,172,95,.5)':'rgba(200,146,42,.4)') : 'rgba(100,90,70,.15)';
+    var outerBg = isBest ? (s.verdict==='pick'?'rgba(74,124,63,.1)':'rgba(200,146,42,.07)') : 'rgba(0,0,0,.45)';
     var borderW = isBest ? '1.5px' : '1px';
     var typeTag = (s.card.type||'skl').replace(/_/g,'·').toUpperCase();
 
@@ -192,6 +207,11 @@ function renderRewardVerdictHtml() {
     if (deck[s.name]) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×'+deck[s.name]+'</span>';
     html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);margin-left:auto;min-width:20px;text-align:right">'+s.score+'</span>';
     html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+'">'+s.vLabel+'</span>';
+    // Build context: show "Essential for [build]" when card is build core
+    if (s.priorityBuilds && s.priorityBuilds.length > 0) {
+      var buildNames = s.priorityBuilds.map(function(p) { return p.b.name; }).join(', ');
+      html += '<span style="font-size:8px;color:var(--text-muted);margin-left:4px">for '+buildNames+'</span>';
+    }
     html += '</div>';
 
     var rCtx = rarityContext(sRarity, s.verdict);
@@ -212,6 +232,32 @@ function renderRewardVerdictHtml() {
     var descHtml = formatCardDescription(s.card.description || '');
     html += '<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-bottom:6px">'+typeLabel+(costStr?' · '+costStr:'')+(descHtml?' — '+descHtml:'')+'</div>';
 
+    // X-cost card calculator
+    if (s.card.cost === 'X') {
+      var xDmg = extractXCostDamage(s.card);
+      if (xDmg > 0) {
+        var energies = [3,4,5,6];
+        html += '<div style="display:flex;gap:3px;margin-bottom:6px;flex-wrap:wrap;padding:3px 0">';
+        html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);letter-spacing:.06em;margin-right:3px">X dmg:</span>';
+        energies.forEach(function(e) {
+          html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:1px 5px;border-radius:2px;border:1px solid rgba(100,90,70,.2);color:' + (e === 3 ? 'var(--text-dim)' : 'var(--amber-bright)') + '">' + e + '⚡=' + (xDmg * e) + '</span>';
+        });
+        html += '</div>';
+      }
+    }
+
+    // Potion priority from detected builds
+    var potionShown = {};
+    (s.priorityBuilds||[]).concat(s.tipsBuilds||[]).concat(s.fitsBuilds||[]).concat(s.synergyBuilds||[]).forEach(function(entry) {
+      if (entry.b.potionPriority && !potionShown[entry.b.name]) {
+        potionShown[entry.b.name] = true;
+        html += '<div style="font-size:10px;color:var(--teal);margin-bottom:3px">';
+        html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;letter-spacing:.06em">☗ potion:</span> ';
+        html += '<span style="color:var(--text-dim)">' + entry.b.potionPriority + ' <span style="color:var(--text-muted)">(' + entry.b.name + ')</span></span>';
+        html += '</div>';
+      }
+    });
+
     var hasIndicators = s.tipsBuilds.length>0 || s.priorityBuilds.length>0 || s.synergyBuilds.length>0 || s.fitsBuilds.length>0;
     if (hasIndicators) {
       html += '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">';
@@ -223,7 +269,10 @@ function renderRewardVerdictHtml() {
       });
       s.priorityBuilds.forEach(function(entry){
         if (tipsShown.has(entry.key)) return;
-        html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+entry.b.color+'60;color:'+entry.b.color+';background:'+entry.b.color+'18">\u2B06 '+entry.b.name+'</span>';
+        var isMustPick = entry.b.mustPick && entry.b.mustPick.indexOf(s.name) >= 0;
+        var isHigh = entry.b.highPriority && entry.b.highPriority.indexOf(s.name) >= 0;
+        var label = isMustPick ? '\u2605 MUST PICK' : isHigh ? '\u2191 HIGH' : '\u2B06';
+        html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+entry.b.color+'60;color:'+entry.b.color+';background:'+entry.b.color+'18">'+label+' '+entry.b.name+'</span>';
       });
       s.fitsBuilds.forEach(function(entry){
         if (tipsShown.has(entry.key)) return;
@@ -264,8 +313,16 @@ function renderRewardVerdictHtml() {
       html += '</div>';
     }
 
+    // Scoring transparency: expandable reason breakdown
     if (s.reasons.length > 0) {
-      html += '<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.55">'+s.reasons.join(' · ')+'</div>';
+      var reasonId = 'reasonDetail_'+i;
+      html += '<div style="margin-bottom:3px">';
+      html += '<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.55">'+s.reasons.slice(0,3).join(' · ')+'</div>';
+      if (s.reasons.length > 3) {
+        html += '<div onclick="var e=document.getElementById(\''+reasonId+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\';this.textContent=this.textContent===\'▸ show all\'?\'▾ show less\':\'▸ show all\'" style="font-size:9px;color:var(--amber);cursor:pointer;margin-top:2px;user-select:none">▸ show all ('+s.reasons.length+' reasons)</div>';
+        html += '<div id="'+reasonId+'" style="display:none;font-size:10px;color:var(--text-dim);line-height:1.6;padding:6px 8px;border:1px solid rgba(100,90,70,.15);border-radius:3px;background:rgba(100,90,70,.04);margin-top:4px">'+s.reasons.join('<br>')+'</div>';
+      }
+      html += '</div>';
     }
 
     if (s.card.note) {
@@ -316,13 +373,10 @@ function rewardRemoveOffered(name) {
 }
 function rewardProceed() {
   if (!rewardOffered.length) return;
-  rewardBuildKey = getTopBuild();
   rewardStage = 'verdict';
   document.getElementById('pickerSearch').value = '';
   renderPickerReward();
 }
-function rewardSelectBuild(key) { rewardBuildKey = key; }
-function rewardShowVerdict() { if (!rewardBuildKey) return; rewardStage = 'verdict'; renderPickerReward(); }
 function rewardBack() {
   rewardStage = 'select';
   document.getElementById('pickerSearch').value = '';
@@ -330,7 +384,7 @@ function rewardBack() {
 }
 function rewardConfirm(name) { addCard(name); rewardReset(); }
 function rewardReset() {
-  rewardOffered=[]; rewardBuildKey=null; rewardStage='select';
+  rewardOffered=[]; rewardStage='select';
   document.getElementById('pickerSearch').value='';
   renderPickerReward();
 }
@@ -341,9 +395,7 @@ function renderPickerAdd() {
   if (!currentChar) { el.innerHTML = '<div class="picker-empty">Select a character first.</div>'; return; }
   const q = (document.getElementById('pickerSearch').value || '').toLowerCase();
   const allCards = getAllCardsForPicker();
-  const builds = (BUILD_DATA[currentChar] || {}).builds || {};
-  const topBuildKey = getTopBuild();
-  const topBuild = topBuildKey ? builds[topBuildKey] : null;
+  const builds = BUILD_DATA[currentChar] ? BUILD_DATA[currentChar].builds : {};
   const stats = getDeckStats();
   const typeCls = t => {
     if (!t) return 'tag-skl';
@@ -365,16 +417,28 @@ function renderPickerAdd() {
 
       const essentialMatches = [];
       const synergyMatches   = [];
+      const mustPickBuilds = [];
+      const highPriBuilds = [];
       Object.values(builds).forEach(build => {
-        if ((build.essential || []).includes(name)) {
-          essentialMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
-        } else if ((build.synergy || []).includes(name)) {
-          synergyMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
-        }
+        var mp = (build.mustPick || []).indexOf(name) >= 0;
+        var hp = (build.highPriority || []).indexOf(name) >= 0;
+        var es = (build.essential || []).indexOf(name) >= 0;
+        if (mp) mustPickBuilds.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
+        if (hp) highPriBuilds.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
+        if (es) essentialMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
+        else if ((build.synergy || []).includes(name)) synergyMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
       });
 
       let borderColor, bgColor, verdictLabel, verdictStyle;
-      if (essentialMatches.length > 0) {
+      if (mustPickBuilds.length > 0) {
+        borderColor = 'rgba(192,66,26,.5)'; bgColor = 'rgba(192,66,26,.08)';
+        verdictLabel = 'MUST PICK';
+        verdictStyle = 'background:rgba(192,66,26,.2);color:#ff6040;border:1px solid rgba(192,66,26,.4)';
+      } else if (highPriBuilds.length > 0) {
+        borderColor = 'rgba(200,146,42,.5)'; bgColor = 'rgba(200,146,42,.08)';
+        verdictLabel = 'HIGH PRIORITY';
+        verdictStyle = 'background:rgba(200,146,42,.2);color:var(--amber-bright);border:1px solid rgba(200,146,42,.4)';
+      } else if (essentialMatches.length > 0) {
         borderColor = 'rgba(74,154,138,.5)'; bgColor = 'rgba(74,154,138,.08)';
         verdictLabel = 'ESSENTIAL';
         verdictStyle = 'background:rgba(74,154,138,.2);color:var(--teal-bright);border:1px solid rgba(74,154,138,.4)';
@@ -383,7 +447,7 @@ function renderPickerAdd() {
         verdictLabel = 'SYNERGY';
         verdictStyle = 'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)';
       } else {
-        borderColor = 'var(--border)'; bgColor = 'var(--bg2)';
+        borderColor = 'rgba(100,90,70,.15)'; bgColor = 'rgba(0,0,0,.35)';
         verdictLabel = 'NOT A PRIORITY';
         verdictStyle = 'background:rgba(100,90,70,.15);color:var(--text-muted);border:1px solid var(--border)';
       }
@@ -422,6 +486,19 @@ function renderPickerAdd() {
         html += `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-bottom:5px">${typeLabel}${finalCostStr?' · '+finalCostStr:''} — ${descHtml}</div>`;
       }
 
+      // X-cost calculator in add tab
+      if (card.cost === 'X') {
+        var xDmg = extractXCostDamage(card);
+        if (xDmg > 0) {
+          html += '<div style="display:flex;gap:3px;margin-bottom:6px;flex-wrap:wrap;padding:3px 0">';
+          html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);letter-spacing:.06em;margin-right:3px">X dmg:</span>';
+          [3,4,5,6].forEach(function(e) {
+            html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:1px 5px;border-radius:2px;border:1px solid rgba(100,90,70,.2);color:' + (e===3?'var(--text-dim)':'var(--amber-bright)') + '">' + e + '⚡=' + (xDmg * e) + '</span>';
+          });
+          html += '</div>';
+        }
+      }
+
       if (essentialMatches.length > 0) {
         essentialMatches.forEach(e => {
           html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${e.buildColor};font-family:'Cinzel',serif;font-size:11px">${e.buildName}</span>`;
@@ -456,16 +533,10 @@ function renderPickerAdd() {
 
   // No query: grouped priority list for quick browsing
   function categorise(card) {
-    const inTopEssential = topBuild && (topBuild.essential || []).includes(card.name);
-    const inTopSyn = topBuild && (topBuild.synergy || []).includes(card.name);
-    const inAnyBuild = Object.values(builds).some(b=>(b.essential||[]).includes(card.name)||(b.synergy||[]).includes(card.name));
     const needsDef = stats.def < 3 && (card.type==='def'||card.type.includes('def'));
     const needsAtk = stats.atk < 3 && (card.type==='atk'||card.type.includes('atk'));
-    if (inTopEssential) return {v:'rec', label:'ESSENTIAL', reason:needsDef?'essential + fixes low def':needsAtk?'essential + fixes low atk':'essential build card'};
-    if (inTopSyn) return {v:'syn', label:'SYNERGY', reason:'synergy with your build'};
     if (needsDef) return {v:'rec', label:'ESSENTIAL', reason:'fixes low defense'};
-    if (needsAtk && inAnyBuild) return {v:'syn', label:'CONSIDER', reason:'fixes low attacks'};
-    if (inAnyBuild) return {v:'other', label:'', reason:'fits a build'};
+    if (needsAtk) return {v:'syn', label:'CONSIDER', reason:'fixes low attacks'};
     return {v:'skip', label:'', reason:''};
   }
 
@@ -497,8 +568,12 @@ function renderPickerAdd() {
 }
 
 function renderPickerList() {
-  if (pickerTab === 'reward') { renderRewardUnified(document.getElementById('pickerList')); }
+  var el = document.getElementById('pickerList');
+  var savedScroll = el ? el.scrollTop : 0;
+  if (pickerTab === 'reward') { renderRewardUnified(el); }
   else renderPickerAdd();
+  // Restore scroll position after re-render
+  setTimeout(function() { if (el) el.scrollTop = savedScroll; }, 0);
 }
 
 function pickerRowHtmlAdd(c, typeCls, vs) {
@@ -526,3 +601,16 @@ function pickerRowHtmlAdd(c, typeCls, vs) {
 }
 
 function pickerAddCard(name) { addCard(name); renderPickerAdd(); }
+
+function extractXCostDamage(card) {
+  if (!card) return 0;
+  var text = (card.description || '') + ' ' + (card.note || '');
+  var dmg = 0;
+  var m1 = text.match(/Deal\s+(\d+)\s+damage\s+X\s+times/i);
+  if (m1) dmg = parseInt(m1[1], 10);
+  var m2 = text.match(/^(\d+)\s+(?:AoE\s+)?dmg/i);
+  if (m2 && !dmg) dmg = parseInt(m2[1], 10);
+  var m3 = text.match(/(\d+)\s+(?:AoE\s+)?dmg\s+X\s*times/i);
+  if (m3 && !dmg) dmg = parseInt(m3[1], 10);
+  return dmg;
+}

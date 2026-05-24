@@ -1,20 +1,26 @@
 // core/rewardAdvisor.js
 // Card scoring for reward picks, skip decisions, and shop advice.
 // Returns plain data objects — no DOM, no HTML.
-// Depends on: state.js, buildAnalyzer.js, deckStats.js, builds.js, constants.js
+// Depends on: state.js, deckStats.js, constants.js
 // Also reads globals from HTML scope: selectedBoss, getAllCardsForPicker(), getRarity()
 
 // ── scoreCard ────────────────────────────────────────────────
 // Score a single card against the current run state.
 // Returns a result object used by the reward and shop UI layers.
 function scoreCard(cardName) {
-  if (!currentChar || !BUILD_DATA[currentChar]) return null;
+  if (!currentChar) return null;
 
-  var builds   = (BUILD_DATA[currentChar] || {}).builds || {};
   var allCards = getAllCardsForPicker();
   var total    = getDeckSize();
   var axes     = calcSixAxes();
-  var targets  = AXIS_TARGETS[currentAct] || AXIS_TARGETS[1];
+  var targets  = Object.assign({}, AXIS_TARGETS[currentAct] || AXIS_TARGETS[1]);
+  // Apply per-character axis overrides
+  var charOverride = CHAR_AXIS_OVERRIDES && CHAR_AXIS_OVERRIDES[currentChar];
+  if (charOverride) {
+    Object.keys(charOverride).forEach(function(axis) {
+      targets[axis] = Math.max(0, (targets[axis] || 0) + charOverride[axis]);
+    });
+  }
   var crisis   = getCrisisStates(axes, targets);
 
   var name  = cardName;
@@ -70,10 +76,10 @@ function scoreCard(cardName) {
         reasons.push('fills attack gap (+' + bonus + ')');
       }
 
-      // In Phase A, starter deck always reads as attack-heavy due to low targets. Only penalize extreme overshoot.
-      var atkHeavyThreshold = isPhaseA ? targets.Attack + 50 : targets.Attack + 20;
+      // Only penalize extreme attack overshoot — strong attack cards still worth picking.
+      var atkHeavyThreshold = isPhaseA ? targets.Attack + 50 : targets.Attack + 35;
       if (axes.Attack > atkHeavyThreshold) {
-        score -= 10; reasons.push('deck already attack-heavy');
+        score -= 4; reasons.push('deck already attack-heavy');
       }
     }
 
@@ -92,9 +98,9 @@ function scoreCard(cardName) {
         reasons.push('fills defense gap (+' + bonus + ')');
       }
 
-      var defHeavyThreshold = isPhaseA ? targets.Defense + 50 : targets.Defense + 20;
+      var defHeavyThreshold = isPhaseA ? targets.Defense + 50 : targets.Defense + 35;
       if (axes.Defense > defHeavyThreshold) {
-        score -= 10; reasons.push('deck already defense-heavy');
+        score -= 4; reasons.push('deck already defense-heavy');
       }
     }
 
@@ -112,71 +118,10 @@ function scoreCard(cardName) {
     }
   }
 
-  // Survival health check — used to suppress scaling/builds when survival gaps exist
+  // Survival health check — used to suppress scaling when survival gaps exist
   var survivalOk = axes && targets
     ? (axes.Attack || 0) >= (targets.Attack * 0.8) && (axes.Defense || 0) >= (targets.Defense * 0.8)
     : true;
-  var RANK_SCORE = {S:4, A:3, B:2, C:1};
-  var priorityBuilds = [];
-  var synergyBuilds  = [];
-  var fitsBuilds     = [];
-
-  Object.entries(builds).forEach(function(entry) {
-    var key = entry[0], b = entry[1];
-    var inEssential = (b.essential || []).includes(baseName);
-    var inSyn  = (b.synergy || []).includes(baseName);
-    var rankMult = RANK_SCORE[b.rank] || 1;
-    if (inEssential && alreadyHave === 0)  priorityBuilds.push({key: key, b: b, rankMult: rankMult});
-    else if (inEssential)                   fitsBuilds.push({key: key, b: b, rankMult: rankMult});
-    else if (inSyn)                         synergyBuilds.push({key: key, b: b, rankMult: rankMult});
-  });
-
-  var archClass = classifyArchetypes();
-  
-  // Calculate build multiplier based on commitment level
-  // Hierarchical: Committed (1.5) > Building (0.8) > Exploring (0.4)
-  var buildMult = 0.2; // Default baseline for random synergy
-  
-  var buildBonus = 0;
-  var buildReason = '';
-
-  if (priorityBuilds.length > 0) {
-    var priBest = priorityBuilds.reduce(function(best, e) { return e.rankMult > best.rankMult ? e : best; }, priorityBuilds[0]);
-    
-    // Determine multiplier for this specific build
-    var bKey = priBest.key;
-    var bConf = (archClass.confidence || {})[bKey] || 0;
-    var currentBuildMult = 0.4; // exploring
-    if (archClass.committed === bKey) currentBuildMult = 1.5;
-    else if (archClass.building.includes(bKey)) currentBuildMult = 0.8;
-
-    var basePri = (20 + priBest.rankMult * 10);
-
-    // Tier 1 cap to prevent forcing builds too early
-    if (tier === 1) basePri = Math.min(basePri, 15);
-
-    // Phase A (early Act 1): essential builds suppressed further — survival takes priority
-    if (isPhaseA && !survivalOk) basePri = Math.min(basePri, 8);
-
-    buildBonus = Math.round(basePri * currentBuildMult);
-    buildReason = (currentBuildMult >= 1.5 ? 'core for ' : 'essential for ') + priBest.b.name;
-    if (priorityBuilds.length > 1) { buildBonus += 5; buildReason += ' (+multi-build)'; }
-  } else if (synergyBuilds.length > 0) {
-    var synBest = synergyBuilds.reduce(function(best, e) { return e.rankMult > best.rankMult ? e : best; }, synergyBuilds[0]);
-    
-    var sKey = synBest.key;
-    var currentSynMult = 0.3;
-    if (archClass.committed === sKey) currentSynMult = 1.0;
-    else if (archClass.building.includes(sKey)) currentSynMult = 0.6;
-
-    buildBonus = Math.round((8 + synBest.rankMult * 4) * currentSynMult);
-    buildReason = 'synergy: ' + synergyBuilds.map(function(e) { return e.b.name; }).join(', ');
-  }
-
-  if (buildBonus > 0) {
-    score += buildBonus;
-    reasons.push(buildReason);
-  }
 
   // ── Scaling ──────────────────────────────────────────────
   if (isScl) {
@@ -189,15 +134,15 @@ function scoreCard(cardName) {
     }
 
     if (tier === 1) {
-      // Stricter cap for very early game — survival must come first
-      if (currentAct === 1 && total < 14) {
-        sclBonus = Math.min(sclBonus, 4); // Down from 8
-        if (!survivalOk) sclBonus = 0;     // No scaling if survival gaps exist
+      // Strict cap only for very small decks (lean = 10) — scaling valued earlier
+      if (currentAct === 1 && total < DECK_THRESHOLDS.lean) {
+        sclBonus = Math.min(sclBonus, 4);
+        if (!survivalOk) sclBonus = 0;
         if (sclBonus > 0) reasons.push('early scaling (heavily dampened)');
         else if (!survivalOk) reasons.push('scaling suppressed: survival gap remains');
         else reasons.push('early scaling (minimal)');
       } else {
-        sclBonus = Math.min(sclBonus, 8); // Existing cap
+        sclBonus = Math.min(sclBonus, 8);
         if (sclBonus > 0) reasons.push('early scaling (capped)');
       }
     } else if (tier === 2) {
@@ -214,17 +159,14 @@ function scoreCard(cardName) {
     var effGap = Math.max(0, targets.Efficiency - axes.Efficiency);
     var effBonus = Math.round(effGap * 1.0); // Slightly higher base weight for utilities
 
-    // Velocity is a priority only for larger decks
-    if (total < 15) {
-      // Small deck: Natural cycle is enough
+    // Velocity matters once deck grows past 20 cards
+    if (total < DECK_THRESHOLDS.velocityThreshold) {   // < 20
       score += Math.round(effBonus * 0.2);
       if (effBonus > 0) reasons.push('natural efficiency enough');
-    } else if (total < 25) {
-      // Medium deck: Starting to need draw
+    } else if (total < DECK_THRESHOLDS.tooLarge) {     // < 30
       score += Math.round(effBonus * 0.6);
       if (effGap > 0) reasons.push('improves consistency');
     } else {
-      // Bloated deck: Velocity is critical
       score += Math.round(effBonus * 1.2);
       if (effGap > 0) reasons.push('CRITICAL: deck needs velocity');
     }
@@ -251,8 +193,250 @@ function scoreCard(cardName) {
     if (isStarGenCard) isUtility = true;
   }
 
+  // ── Energy Generation Check ──────────────────────────────
+  // Boost energy-generating cards when deck has grown but lacks energy
+  if (isEnergyCard || (typeof VEL_ENERGY_BONUS !== 'undefined' && VEL_ENERGY_BONUS[baseName] > 0)) {
+    var deckEnergyTotal = 0;
+    Object.keys(deck).forEach(function(n) {
+      if (VEL_ENERGY_BONUS[n]) deckEnergyTotal += VEL_ENERGY_BONUS[n] * deck[n];
+    });
+    if (total >= 15 && deckEnergyTotal < 3) {
+      score += 10;
+      reasons.push('deck low on energy generation (+10)');
+    }
+  }
+
+  // ── Per-Character Scoring Hooks ──────────────────────────
+  // Guide-derived bonuses for unique character mechanics
+
+  // Necrobinder: Grave Warden is best common card in the game
+  if (currentChar === 'necrobinder' && baseName === 'Grave Warden') {
+    score += 10; reasons.push('Grave Warden: best common card (+10)');
+  }
+
+  // Defect: Defragment is #1 priority when no Focus sources
+  if (currentChar === 'defect' && baseName === 'Defragment') {
+    var hasFocus = false;
+    Object.keys(deck).forEach(function(n) {
+      if (n === 'Defragment' || n === 'Defragment+' || n === 'Biased Cognition' || n === 'Biased Cognition+' || n === 'Loop' || n === 'Loop+') hasFocus = true;
+    });
+    if (!hasFocus) { score += 12; reasons.push('no Focus source — Defragment is #1 priority (+12)'); }
+  }
+
+  // Defect: Claw scaling — if deck has 1+ Claw, boost more Claws and support
+  if (currentChar === 'defect' && (baseName === 'Claw' || baseName === 'All for One' || baseName === 'Scrape')) {
+    var clawCount = (deck['Claw'] || 0) + (deck['Claw+'] || 0);
+    if (clawCount >= 1) {
+      if (baseName === 'Claw') { score += 5; reasons.push('Claw scaling (+5)'); }
+      else if (baseName === 'All for One') { score += 5; reasons.push('Claw loop support (+5)'); }
+      else if (baseName === 'Scrape') { score += 3; reasons.push('Claw cycling (+3)'); }
+    }
+  }
+
+  // Silent: Nightmare combo — Nightmare in deck boosts Catalyst and Wraith Form
+  if (currentChar === 'silent' && (deck['Nightmare'] || deck['Nightmare+'])) {
+    if (baseName === 'Catalyst') { score += 10; reasons.push('Nightmare -> Catalyst combo (+10)'); }
+    if (baseName === 'Wraith Form') { score += 8; reasons.push('Nightmare -> Wraith Form combo (+8)'); }
+  }
+
+  // Silent: Calculated Gamble + discard engine
+  if (currentChar === 'silent' && (deck['Calculated Gamble'] || deck['Calculated Gamble+'])) {
+    if (baseName === 'Tactician') { score += 8; reasons.push('Calculated Gamble loop (+8)'); }
+    if (baseName === 'Reflex') { score += 6; reasons.push('Calculated Gamble cycle (+6)'); }
+    if (baseName === 'Acrobatics') { score += 5; reasons.push('Gamble + Acrobatics finder (+5)'); }
+  }
+
+  // Regent: Void Form detection — boost 0-2 cost cards
+  if (currentChar === 'regent' && (deck['Void Form'] || deck['Void Form+'])) {
+    if (card.cost === 0 || card.cost === 1 || card.cost === 2) {
+      score += 5; reasons.push('Void Form — low-cost synergy (+5)');
+    }
+  }
+
+  // Regent: Comet is S-tier in Void Form
+  if (currentChar === 'regent' && baseName === 'Comet' && (deck['Void Form'] || deck['Void Form+'])) {
+    score += 8; reasons.push('Comet = 33 dmg 0-cost bomb in Void Form (+8)');
+  }
+
+  // Regent: Sword Sage + Forge synergy
+  if (currentChar === 'regent' && (deck['Sword Sage'] || deck['Sword Sage+'])) {
+    var FORGE_CARDS = {'Seeking Edge':1, 'Conqueror':1, 'The Smith':1, 'Refine Blade':1, 'Sword Stage':1, 'Spoils of Battle':1, 'Solar Strike':1, 'Beat into Shape':1, 'Bulwark':1, 'Big Bang':1, 'Hammer Time':1};
+    if (FORGE_CARDS[baseName]) { score += 8; reasons.push('Forge + Sword Sage synergy (+8)'); }
+  }
+
+  // Ironclad: Dead Branch + Corruption infinite detection
+  if (currentChar === 'ironclad' && (deck['Corruption'] || deck['Corruption+']) && relics.indexOf('Dead Branch') >= 0) {
+    if (baseName === 'Corruption') { score += 15; reasons.push('Dead Branch + Corruption infinite (+15)'); }
+  }
+
+  // Ironclad: Mark of Pain + Evolve synergy
+  if (currentChar === 'ironclad' && baseName === 'Evolve') {
+    var hasStatusGen = Object.keys(deck).some(function(n) {
+      return n === 'Mark of Pain' || n === 'Power Through' || n === 'Wild Strike';
+    });
+    if (hasStatusGen) { score += 8; reasons.push('Evolve draws from status cards (+8)'); }
+  }
+
+  // Silent: Poison bypass — Poison cards get bonus in Acts 2-3 (high block enemies)
+  if (currentChar === 'silent' && currentAct >= 2) {
+    var POISON_CARDS = {'Noxious Fumes':1,'Noxious Fumes+':1,'Deadly Poison':1,'Deadly Poison+':1,'Catalyst':1,'Catalyst+':1,'Burst':1,'Burst+':1,'Bubble Bubble':1,'Bubble Bubble+':1,'Bouncing Flask':1,'Bouncing Flask+':1,'Poisoned Stab':1,'Poisoned Stab+':1,'Corrosive Wave':1,'Corrosive Wave+':1,'Haze':1,'Haze+':1,'Envenom':1,'Envenom+':1};
+    if (POISON_CARDS[baseName]) { score += 5; reasons.push('Poison bypasses Block in Act 2-3 (+5)'); }
+  }
+
+  // Defect: Echo Form + powers synergy
+  if (currentChar === 'defect' && (deck['Echo Form'] || deck['Echo Form+'])) {
+    if (isScl && (card.rarity === 'rare' || card.rarity === 'ancient')) {
+      score += 3; reasons.push('Echo Form doubles this power (+3)');
+    }
+  }
+
+  // Defect: Frost automated defense — reduce block card urgency when Frost orbs present
+  if (currentChar === 'defect') {
+    var frostInDeck = Object.keys(deck).some(function(n) { return n === 'Glacier' || n === 'Glacier+' || n === 'Coolheaded' || n === 'Coolheaded+' || n === 'Chill' || n === 'Chill+'; });
+    if (frostInDeck && isDef && alreadyHave === 0) {
+      score -= 2; reasons.push('Frost orbs handle block (-2)');
+    }
+  }
+
+  // Necrobinder: Doom synergy — Countdown/Danse in deck boosts Doom-applying cards
+  if (currentChar === 'necrobinder' && (deck['Countdown'] || deck['Countdown+'] || deck['Danse Macabre'] || deck['Danse Macabre+'])) {
+    var DOOM_CARDS = {'Capture Spirit':1,'Countdown':1,'Danse Macabre':1,'Grave Warden':1,'Scourge':1,'Scourge+':1,'Deathbringer':1,'Deathbringer+':1,'No Escape':1,'No Escape+':1,'End of Days':1,'End of Days+':1,'Time\'s Up':1,'Time\'s Up+':1,'Blight Strike':1,'Blight Strike+':1,'Oblivion':1,'Oblivion+':1,'Negative Pulse':1,'Negative Pulse+':1};
+    if (DOOM_CARDS[baseName]) { score += 6; reasons.push('Doom synergy active (+6)'); }
+  }
+
+  // Necrobinder: Soul generation check — boost Soul generators if <2 sources
+  if (currentChar === 'necrobinder') {
+    var soulGenCount = 0;
+    Object.keys(deck).forEach(function(n) {
+      if (n === 'Capture Spirit' || n === 'Dirge' || n === 'Severance' || n === 'Reave' || n === 'Glimpse Beyond' || n === 'Haunt') soulGenCount += deck[n];
+    });
+    if (soulGenCount < 2) {
+      var SOUL_GEN_CARDS = {'Capture Spirit':1,'Capture Spirit+':1,'Dirge':1,'Dirge+':1,'Severance':1,'Severance+':1,'Reave':1,'Reave+':1,'Glimpse Beyond':1,'Glimpse Beyond+':1};
+      if (SOUL_GEN_CARDS[baseName]) { score += 6; reasons.push('Soul generation needed (+6)'); }
+    }
+  }
+
+  // Ironclad: Bloodletting HP valuation — don't penalize attack-heavy when HP-spending
+  if (currentChar === 'ironclad' && (deck['Bloodletting'] || deck['Bloodletting+'] || deck['Offering'] || deck['Offering+'])) {
+    if (baseName === 'Bloodletting' || baseName === 'Offering' || baseName === 'Rupture' || baseName === 'Combust') {
+      score += 3; reasons.push('HP as resource — intentional tradeoff (+3)');
+    }
+  }
+
+  // HOLY TRINITY detection: check deck for frontload block + damage + scaling coverage
+  var hasFrontloadBlock = axes && axes.Defense >= (targets.Defense * 0.5);
+  var hasFrontloadDmg = axes && axes.Attack >= (targets.Attack * 0.5);
+  var hasScaling = axes && axes.Scaling >= (targets.Scaling * 0.5);
+  if (axes) {
+    if (!hasFrontloadBlock && isDef && alreadyHave === 0) {
+      score += 4; reasons.push('Holy Trinity: missing block (+4)');
+    }
+    if (!hasFrontloadDmg && isAtk && alreadyHave === 0) {
+      score += 4; reasons.push('Holy Trinity: missing damage (+4)');
+    }
+    if (!hasScaling && isScl && alreadyHave === 0) {
+      score += 4; reasons.push('Holy Trinity: missing scaling (+4)');
+    }
+  }
+
+  // Build-dependent value notes — warn when card is weak without support
+  if (baseName === 'Comet' && currentChar === 'regent' && !(deck['Void Form'] || deck['Void Form+'])) {
+    score -= 4; reasons.push('Comet needs Void Form to be efficient (-4)');
+  }
+  if (baseName === 'Body Slam' && !(deck['Barricade'] || deck['Barricade+'])) {
+    score -= 4; reasons.push('Body Slam needs Barricade for full value (-4)');
+  }
+  if (baseName === 'Rupture' && !(deck['Bloodletting'] || deck['Bloodletting+'] || deck['Combust'] || deck['Combust+'])) {
+    score -= 4; reasons.push('Rupture needs self-damage to trigger (-4)');
+  }
+
+  // Weak-applying cards get defense credit
+  var WEAK_CARDS = {'Neutralize':1,'Neutralize+':1,'Sucker Punch':1,'Sucker Punch+':1,'Piercing Wail':1,'Piercing Wail+':1,'Leg Sweep':1,'Leg Sweep+':1,'Go for the Eyes':1,'Go for the Eyes+':1,'Malaise':1,'Malaise+':1};
+  if (WEAK_CARDS[baseName]) {
+    score += 5; reasons.push('applies Weak — pseudo-defense (+5)');
+  }
+
+  // Vulnerable-applying cards get attack credit
+  var VULN_CARDS = {'Bash':1,'Bash+':1,'Tremble':1,'Tremble+':1,'Thunderclap':1,'Thunderclap+':1,'Uppercut':1,'Uppercut+':1,'Beam Cell':1,'Beam Cell+':1,'Expose':1,'Expose+':1,'Fear':1,'Fear+':1,'Know Thy Place':1,'Know Thy Place+':1,'Molten Fist':1,'Molten Fist+':1,'Break':1,'Break+':1,'Assassinate':1,'Assassinate+':1};
+  if (VULN_CARDS[baseName]) {
+    score += 5; reasons.push('applies Vulnerable — damage amp (+5)');
+  }
+
+  // ── Ascension Modifiers ───────────────────────────────────
+  // Guide-derived bonuses that scale with ascension level
+  if (typeof currentAsc !== 'undefined' && currentAsc > 0) {
+    // Global: A8+ Tough Enemies — scaling cards more valuable
+    if (currentAsc >= 8 && isScl) { score += 3; reasons.push('A8: scaling needed (+3)'); }
+    // Global: A9+ Deadly Enemies — defense cards more valuable
+    if (currentAsc >= 9 && (isDef || isUtility)) { score += 3; reasons.push('A9: more block needed (+3)'); }
+    // A10+ general difficulty awareness
+    if (currentAsc >= 10) { score += 2; reasons.push('A10: high difficulty (+2)'); }
+
+    // Ironclad: A10+ Strength sources boost
+    if (currentAsc >= 10 && currentChar === 'ironclad' && (baseName === 'Demon Form' || baseName === 'Inflame' || baseName === 'Spot Weakness' || baseName === 'Rupture')) {
+      score += 5; reasons.push('A10+ Strength priority (+5)');
+    }
+    // Silent: A5+ Wraith Form priority
+    if (currentAsc >= 5 && currentChar === 'silent' && (baseName === 'Wraith Form')) { score += 8; reasons.push('A5+ Wraith Form saves runs (+8)'); }
+    // Silent: A15+ Catalyst priority
+    if (currentAsc >= 15 && currentChar === 'silent' && (baseName === 'Catalyst')) { score += 6; reasons.push('A15+ Catalyst scaling (+6)'); }
+    // Defect: A10+ Biased Cog priority
+    if (currentAsc >= 10 && currentChar === 'defect' && (baseName === 'Biased Cognition')) { score += 6; reasons.push('A10+ Focus priority (+6)'); }
+    // Defect: A18+ Echo Form priority
+    if (currentAsc >= 18 && currentChar === 'defect' && (baseName === 'Echo Form')) { score += 8; reasons.push('A18+ Echo Form doubles (+8)'); }
+    // Regent: A15+ Child of the Stars priority
+    if (currentAsc >= 15 && currentChar === 'regent' && (baseName === 'Child of the Stars')) { score += 6; reasons.push('A15+ Star economy (+6)'); }
+    // Necrobinder: A5+ Summon cards priority
+    if (currentAsc >= 5 && currentChar === 'necrobinder') {
+      var SUMMON_CARDS = {'Dirge':1,'Bodyguard':1,'Pull Aggro':1,'Cleanse':1,'Afterlife':1,'Spur':1,'Reanimate':1,'Legion of Bone':1};
+      if (SUMMON_CARDS[baseName]) { score += 5; reasons.push('A5+ Osty safety (+5)'); }
+    }
+    // Necrobinder: A18+ Soul cards priority
+    if (currentAsc >= 18 && currentChar === 'necrobinder') {
+      var SOUL_CARDS = {'Haunt':1,'Capture Spirit':1,'Soul Storm':1,'Dirge':1,'Devour Life':1,'Severance':1,'Grave Warden':1,'Reave':1,'Glimpse Beyond':1};
+      if (SOUL_CARDS[baseName]) { score += 5; reasons.push('A18+ Soul cycling (+5)'); }
+    }
+  }
+
+  // ── Combat Mechanics Scoring ─────────────────────────────
+  // AoE priority: boost AoE cards in multi-enemy heavy acts
+  var AOE_CARDS = {'Whirlwind':1,'Whirlwind+':1,'Thunderclap':1,'Thunderclap+':1,'Immolate':1,'Immolate+':1,'Stomp':1,'Stomp+':1,'Howl from Beyond':1,'Howl from Beyond+':1,'Conflagration':1,'Conflagration+':1,'Dagger Spray':1,'Dagger Spray+':1,'Sweeping Beam':1,'Sweeping Beam+':1,'Hyperbeam':1,'Hyperbeam+':1,'Electrodynamics':1,'Seven Stars':1,'Seven Stars+':1,'Meteor Shower':1,'Meteor Shower+':1,'Crash Landing':1,'Crash Landing+':1,'Astral Pulse':1,'Astral Pulse+':1,'Lunar Blast':1,'Lunar Blast+':1,'Sow':1,'Sow+':1,'Banshee\'s Cry':1,'Banshee\'s Cry+':1,'Grand Finale':1,'Grand Finale+':1,'Echoing Slash':1,'Echoing Slash+':1};
+  if (currentAct >= 2 && AOE_CARDS[baseName]) {
+    score += 5; reasons.push('AoE valuable in Act 2+ (+5)');
+  }
+
+  // Burst vs Sustain: if deck lacks scaling by Act 3, boost scaling cards
+  if (currentAct >= 3) {
+    var scalingSources = 0;
+    Object.keys(deck).forEach(function(n) {
+      if (ACT_SCALES_INTO.has(n) || ACT_SCALES_INTO.has(n.slice(0, -1))) scalingSources++;
+    });
+    if (scalingSources < 3 && isScl) {
+      score += 8; reasons.push('Act 3: need more scaling (+8)');
+    }
+    // No AoE by Act 3 → urgent
+    var hasAoe = Object.keys(deck).some(function(n) { return AOE_CARDS[n]; });
+    if (!hasAoe && AOE_CARDS[baseName]) {
+      score += 10; reasons.push('Act 3: zero AoE in deck, critical (+10)');
+    }
+  }
+
+  // Multi-hit + Strength synergy
+  var multiHitInDeck = Object.keys(deck).some(function(n) { return MULTI_HIT_CARDS[currentChar] && MULTI_HIT_CARDS[currentChar][n]; });
+  var strengthInDeck = Object.keys(deck).some(function(n) { return n.indexOf('Strength') >= 0 || n === 'Demon Form' || n === 'Inflame' || n === 'Rupture' || n === 'Spot Weakness' || n === 'Fight Me!' || n === 'Limit Break'; });
+  if (multiHitInDeck && strengthInDeck && MULTI_HIT_CARDS[currentChar] && MULTI_HIT_CARDS[currentChar][baseName]) {
+    score += 6; reasons.push('Strength + multi-hit synergy (+6)');
+  }
+
+  // Elite-specific urgency: Byrdonis (Overgrowth elite) demands 3-turn kill
+  // When Byrdonis is selected or if in Overgrowth Act 1
+  var inOvergrowth = currentAct === 1; // Overgrowth is Act 1
+  if (inOvergrowth && isAtk && total <= 12) {
+    score += 4; reasons.push('early Overgrowth: damage urgency (+4)');
+  }
+
   // ── Redundancy & Starters ────────────────────────────────
-  if (alreadyHave === 1 && priorityBuilds.length === 0) {
+  if (alreadyHave === 1) {
     score -= 5; reasons.push('already have 1 copy');
   } else if (alreadyHave >= 2) {
     score -= (10 + alreadyHave * 5); reasons.push('already have ' + alreadyHave + ' copies');
@@ -263,7 +447,13 @@ function scoreCard(cardName) {
   var rarity = card.rarity || 'common';
   if (rarity === 'rare' && score > 20) { score += 12; reasons.push('rare find'); }
   if (rarity === 'ancient') { score += 18; reasons.push('ancient card'); }
-  if (rarity === 'basic' || rarity === 'token') { score = -100; }
+  // Basic/token cards that would score -100 — but some are actually useful (starter non-Strike/Defend)
+  var USEFUL_BASIC_CARDS = {
+    'Falling Star':1, 'Venerate':1, 'Sovereign Blade':1,
+    'Bodyguard':1, 'Unleash':1,
+    'Bash':1, 'Neutralize':1, 'Survivor':1, 'Zap':1, 'Dualcast':1
+  };
+  if ((rarity === 'basic' || rarity === 'token') && !USEFUL_BASIC_CARDS[baseName]) { score = -100; }
 
   if (currentAct >= 2 && ACT_SCALES_INTO.has(baseName)) {
     score += 5; reasons.push('scales well');
@@ -283,21 +473,53 @@ function scoreCard(cardName) {
       var punishHit = bMatrix.punishes.some(function(p) {
         return cardTags.some(function(t) { return p.toLowerCase().includes(t.toLowerCase()); });
       });
-      if (rewardHit) { score += 6; reasons.push('strong vs ' + selectedBoss); }
-      if (punishHit) { score -= 6; reasons.push('weak vs ' + selectedBoss); }
+      if (rewardHit) { score += 10; reasons.push('strong vs ' + selectedBoss + ' (+10)'); }
+      if (punishHit) { score -= 10; reasons.push('weak vs ' + selectedBoss + ' (-10)'); }
     }
   }
 
   // ── Verdict ──────────────────────────────────────────────
   var verdict, vLabel, vBorder, vBg, vColor;
   
-  var _isEssential = priorityBuilds.length > 0 || (tier === 3 && buildBonus >= 30);
+  var _isEssential = false;
   var _bossReward = (typeof selectedBoss !== 'undefined') && selectedBoss && BOSS_MATRIX[selectedBoss] && (CARD_BOSS_TAGS[baseName] || []).length > 0 &&
                     BOSS_MATRIX[selectedBoss].rewards.some(function(r) {
                       return (CARD_BOSS_TAGS[baseName] || []).some(function(t) { return r.toLowerCase().includes(t.toLowerCase()); });
                     });
   var _actScale   = currentAct === 3 && ACT_SCALES_INTO.has(baseName);
-  var _buildCore  = (fitsBuilds.length > 0 || synergyBuilds.length > 0) && score >= 30;
+  // Build detection: check BUILD_DATA for current character
+  var priorityBuilds = [];
+  var synergyBuilds = [];
+  var fitsBuilds = [];
+  var tipsBuilds = [];
+  if (typeof BUILD_DATA !== 'undefined' && BUILD_DATA[currentChar]) {
+    var cb = BUILD_DATA[currentChar].builds;
+    if (cb) {
+      Object.keys(cb).forEach(function(bk) {
+        var b = cb[bk];
+        var isE = (b.essential || []).indexOf(baseName) >= 0;
+        var isS = (b.synergy || []).indexOf(baseName) >= 0;
+        if (isE) { priorityBuilds.push({key:currentChar+'.'+bk, b:b, buildKey:bk}); }
+        else if (isS) { synergyBuilds.push({key:currentChar+'.'+bk, b:b, buildKey:bk}); }
+        if (isE || isS) { fitsBuilds.push({key:currentChar+'.'+bk, b:b, buildKey:bk}); }
+      });
+    }
+  }
+  var _buildCore  = priorityBuilds.length > 0;
+  // Build core bonus: essential build cards get +5
+  if (_buildCore) {
+    score += 5; reasons.push('build core card (+5)');
+  }
+
+  // Build-context boss amplification: extra ±5 when card is boss-relevant AND build core
+  if (selectedBoss && BOSS_MATRIX[selectedBoss] && _buildCore && CARD_BOSS_TAGS[baseName] && CARD_BOSS_TAGS[baseName].length > 0) {
+    var bm = BOSS_MATRIX[selectedBoss];
+    var tags = CARD_BOSS_TAGS[baseName];
+    var bossRewardHit = bm.rewards.some(function(r) { return tags.some(function(t) { return r.toLowerCase().includes(t.toLowerCase()); }); });
+    var bossPunishHit = bm.punishes.some(function(p) { return tags.some(function(t) { return p.toLowerCase().includes(t.toLowerCase()); }); });
+    if (bossRewardHit) { score += 5; reasons.push('build-matched boss reward (+5)'); }
+    if (bossPunishHit) { score -= 5; reasons.push('build-matched boss punish (-5)'); }
+  }
 
   // New Verdict Hierarchy: Survival > Boss Counter > Essential Build > Synergy
   if (score < 15) {
@@ -318,9 +540,6 @@ function scoreCard(cardName) {
   } else if (_buildCore) {
     verdict = 'pick'; vLabel = 'BUILD CORE';
     vBorder = 'rgba(106,172,95,.4)'; vBg = 'rgba(74,124,63,.12)'; vColor = 'var(--green-bright)';
-  } else if (synergyBuilds.length > 0 && score >= 25) {
-    verdict = 'consider'; vLabel = 'SYNERGY PICK';
-    vBorder = 'rgba(200,146,42,.45)'; vBg = 'rgba(200,146,42,.15)'; vColor = 'var(--amber-bright)';
   } else if (_actScale && score >= 20) {
     verdict = 'consider'; vLabel = 'ACT 3 SCALE';
     vBorder = 'rgba(154,106,186,.45)'; vBg = 'rgba(154,106,186,.1)'; vColor = 'var(--purple-bright)';
@@ -335,22 +554,12 @@ function scoreCard(cardName) {
     vBorder = 'var(--border)'; vBg = 'rgba(100,90,70,.12)'; vColor = 'var(--text-muted)';
   }
 
-  // ── Active Synergy Pairs ──────────────────────────────────
-  var activePairs = [];
-  SYNERGY_PAIRS.forEach(function(p) {
-    var isA = p.a === baseName && deck[p.b] > 0;
-    var isB = p.b === baseName && deck[p.a] > 0;
-    if (isA || isB) {
-      activePairs.push({partner: isA ? p.b : p.a, bond: p.bond, note: p.note, bonus: p.bonus});
-    }
-  });
-
   return {
     name, card, score, verdict, vLabel, vBorder, vBg, vColor,
     reasons,
-    tipsBuilds: [], priorityBuilds, synergyBuilds, fitsBuilds,
+    tipsBuilds: tipsBuilds, priorityBuilds: priorityBuilds, synergyBuilds: synergyBuilds, fitsBuilds: fitsBuilds,
     alreadyHave,
-    activePairs, engineMatches: [], eradicateEstimate: null
+    activePairs: [], engineMatches: [], eradicateEstimate: null
   };
 }
 
@@ -411,14 +620,10 @@ function getRemoveCandidates() {
     });
   }
 
-  // Duplicate non-essential cards with 2+ copies
-  var builds_rc = (BUILD_DATA[currentChar] || {}).builds || {};
+  // Duplicate cards with 2+ copies
   Object.keys(deck).forEach(function(name) {
     if ((deck[name] || 0) >= 2) {
-      var isEssential = Object.values(builds_rc).some(function(b) { return (b.essential || []).includes(name); });
-      if (!isEssential) {
-        candidates.push({name, reason: deck[name] + ' copies \u2014 consider removing one', priority: 'low'});
-      }
+      candidates.push({name, reason: deck[name] + ' copies \u2014 consider removing one', priority: 'low'});
     }
   });
 

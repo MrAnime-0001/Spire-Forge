@@ -100,6 +100,21 @@ function updateAscUI() {
   }
 }
 
+function detectDeckArchetypes(deck) {
+  var tags = new Set();
+  if (!deck || !currentChar || typeof BUILD_DATA === 'undefined') return tags;
+  var builds = BUILD_DATA[currentChar] && BUILD_DATA[currentChar].builds;
+  if (builds) {
+    Object.keys(builds).forEach(function(bk) {
+      var b = builds[bk];
+      var essential = b.essential || [];
+      var have = essential.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
+      if (have >= Math.min(2, essential.length)) tags.add(bk);
+    });
+  }
+  return tags;
+}
+
 function renderBossAlert() {
   const el = document.getElementById('bossAlertBar');
   if (!el) return;
@@ -107,7 +122,7 @@ function renderBossAlert() {
 
   const actRegions = Object.entries(REGION_DATA).filter(([, rd]) => rd.act === currentAct);
 
-  let html = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1.1rem">`;
+  let html = `<div style="background:rgba(0,0,0,.5);border:1px solid rgba(100,90,70,.12);border-radius:4px;padding:10px 12px">`;
   html += `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);opacity:.8;margin-bottom:.75rem">boss &amp; region</div>`;
 
   if (actRegions.length === 0) {
@@ -292,6 +307,16 @@ function renderBossAlert() {
               html += `<div style="font-size:11px;color:#c08060">\u26A0 Watch out \u2014 this boss punishes: <em>${punishedBy.map(p=>p.tags.join('/')).join(', ')}</em></div>`;
             }
             html += `</div>`;
+          }
+          // Build-specific boss strategy tip \u2014 show kill window for detected build
+          var buildTagNames = [];
+          deckTags.forEach(function(t) {
+            var bd = BUILD_DATA[currentChar] && BUILD_DATA[currentChar].builds && BUILD_DATA[currentChar].builds[t];
+            if (bd) buildTagNames.push(bd.name);
+          });
+          var bldName = buildTagNames.join(', ');
+          if (bldName && selectedBoss && BOSS_MATRIX[selectedBoss] && BOSS_MATRIX[selectedBoss].killWindow) {
+            html += '<div style="margin-top:6px;padding:5px 8px;border:1px solid ' + rd.color + '40;border-radius:3px;background:' + rd.color + '10;font-size:11px;color:var(--amber-bright)">\u2694 <strong>' + bldName + '</strong> vs ' + selectedBoss + ': ' + BOSS_MATRIX[selectedBoss].killWindow.substring(0, 140) + '</div>';
           }
         }
         html += `</div>`;

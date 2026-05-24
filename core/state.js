@@ -8,6 +8,8 @@ let currentAsc = 0; // ascension level 0-10
 
 let deck = {}; // card name -> count
 
+let relics = []; // relic names
+
 let hpCur = 0;
 
 let hpMax = 0;
@@ -52,9 +54,23 @@ function selectChar(key) {
 
 function loadDefaultDeck(key) {
   deck = {};
+  relics = [];
   const defaults = STARTING_DECKS[key] || {};
   Object.entries(defaults).forEach(([name, count]) => { deck[name] = count; });
   syncAscendersBane();
+}
+
+function addRelic(name) {
+  if (relics.indexOf(name) < 0) { relics.push(name); notifyListeners(); }
+}
+
+function removeRelic(name) {
+  var idx = relics.indexOf(name);
+  if (idx >= 0) { relics.splice(idx, 1); notifyListeners(); }
+}
+
+function hasRelic(name) {
+  return relics.indexOf(name) >= 0;
 }
 
 function syncAscendersBane() {
