@@ -9,7 +9,7 @@ High-performance web-based **Build Advisor and Strategy Tool** for *Slay the Spi
 - **Real-time Card Scoring** — Context-aware verdict for every card reward based on current deck, act, ascension, and boss.
 - **Six Axes Analysis** — Deck balance across Attack, Defense, Scaling, Consistency, Efficiency, and Synergy.
 - **Crisis Detection** — Flags critical gaps (e.g. no block by mid-Act 1) with surge scoring toward survival.
-- **Synergy Engine** — 151 synergy pairs across Ironclad, Silent, Defect, Necrobinder, and Regent.
+- **Build Detection** — Identifies active build archetypes from 25 defined builds across all 5 characters. Labels cards as core/synergy per build.
 - **Archetype Classification** — Auto-detects active archetypes (poison, exhaust, shiv, doom, star, etc.).
 - **Adaptive Phase Scaling** — Scoring evolves across 4 phases: Ascent, Act 2 Elite Prep, Heart Push, and Beyond.
 - **Boss Counter-Play** — Strategy panel with attack patterns, kill order, and deck matchup analysis for every boss and elite.
@@ -20,39 +20,40 @@ High-performance web-based **Build Advisor and Strategy Tool** for *Slay the Spi
 
 ## Supported Characters
 
-Ironclad, Silent, Defect, Necrobinder, Regent — **583 unique cards** (1,156 counting upgrades) across all characters and colorless pool.
+Ironclad, Silent, Defect, Necrobinder, Regent — **571 unique cards** (1,106 counting upgrades) across all characters and colorless pool.
 
-### Build Archetypes (14 across 5 characters)
+### Build Archetypes (25 across 5 characters)
 
 | Character | Builds |
 |-----------|--------|
-| Ironclad | Strength, Block, Exhaust, Bloodletting, Strike |
-| Silent | Shiv, Poison, Sly |
-| Defect | Claw, Simple Orb |
-| Necrobinder | Doom, Osty |
-| Regent | Sovereign Blade, Star |
+| Ironclad | Strength, Block, Exhaust, Bloodletting, Strike, Self-Wound |
+| Silent | Shiv, Poison, Sly, Grand Finale, Envenom, Combo |
+| Defect | Claw, Lightning, Frost, Dark Orb, Creative AI |
+| Necrobinder | Doom, Osty, Soul, Reaper |
+| Regent | Forge, Star Burst, Void Form, Bombardment |
 
 ## How It Works
 
 Engine calculates real-time `card_score` using current deck state:
 
 1. **Six Axes Baseline** — Deck stats across 6 dimensions; gaps produce crisis urgency scores.
-2. **Archetype & Phase Weighting** — Archetype detection combined with act-phase enforcement.
-3. **Synergy Modeling** — 200+ card-to-card pairs scored with bond types: Enable, Amplify, Finisher, Loop.
-4. **Boss Adaptation** — Bonus/suppression weights based on selected boss and region.
-5. **Survival Dominance** — Early acts prioritize survival; luxury scaling suppressed until baseline met.
+2. **Build Detection** — 25 build archetypes matched against deck; cards tagged as core/synergy per build.
+3. **Phase-Aware Scaling** — Act-phase enforcement with survival dominance in early acts.
+4. **Ascension Context** — Guide-derived bonuses per ascension tier (A5–A18) with per-character priority boosts.
+5. **Combat Mechanics** — AoE urgency, multi-hit + Strength synergy, Overgrowth elite timing.
+6. **Boss Adaptation** — Bonus/suppression weights based on selected boss and region.
 
 ## Project Structure
 
 ```
-data/     — Static game data (9 files): per-character cards, builds, constants, synergy pairs (583 base cards, 151 synergy pairs)
-core/     — Logic engine (6 files): state, deck stats, build analysis, reward advisor, engine tracker, storage
+data/     — Static game data (10 files): per-character cards, constants, builds (25 archetypes), boss tips
+core/     — Logic engine (5 loaded + 1 on-disk): state, deck stats, engine tracker, reward advisor, storage. (buildAnalyzer.js exists but not loaded in HTML)
 ui/       — View layer (6 files): deck view, picker view, result view, header controls, modals, helpers
 assets/   — 32 PNG icons for status effects and character energy
 scripts/  — Tooling (4 files): card type classifier, data generators, balance test scenarios
 ```
 
-**~16,300 lines across 26 source files.**
+**~16,300 lines across 27 source files (22 loaded in HTML).**
 
 ## Browser Support
 

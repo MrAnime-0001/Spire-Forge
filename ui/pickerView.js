@@ -149,6 +149,23 @@ function renderRewardVerdictHtml() {
 
   var scored = scoreRewardPool(rewardOffered);
 
+  // Sort by acquisition priority: mustPick > highPriority > synergy > other
+  if (typeof BUILD_DATA !== 'undefined' && BUILD_DATA[currentChar]) {
+    var mustPickSet = {}, highPriSet = {}, synergySet = {};
+    Object.values(BUILD_DATA[currentChar].builds).forEach(function(b) {
+      if (b.priorityOrder) {
+        (b.priorityOrder.mustPick || []).forEach(function(c) { mustPickSet[c] = true; });
+        (b.priorityOrder.high || []).forEach(function(c) { highPriSet[c] = true; });
+        (b.priorityOrder.medium || []).forEach(function(c) { synergySet[c] = true; });
+      }
+    });
+    scored.sort(function(a, b) {
+      var ap = mustPickSet[a.name] ? 0 : highPriSet[a.name] ? 1 : synergySet[a.name] ? 2 : 3;
+      var bp = mustPickSet[b.name] ? 0 : highPriSet[b.name] ? 1 : synergySet[b.name] ? 2 : 3;
+      return ap - bp;
+    });
+  }
+
   var allSkip = currentAct===3 && scored.every(function(s){return s.verdict==='skip';});
 
   var axes = calcSixAxes();
@@ -497,6 +514,22 @@ function renderPickerAdd() {
           });
           html += '</div>';
         }
+      }
+
+      if (mustPickBuilds.length > 0) {
+        mustPickBuilds.forEach(b => {
+          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:#ff6040;font-family:'Cinzel',serif;font-size:11px">${b.buildName}</span>`;
+          if (b.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff6040">[${b.rank}]</span>`;
+          html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#ff6040;letter-spacing:.06em">MUST PICK</span></div>`;
+        });
+      }
+
+      if (highPriBuilds.length > 0) {
+        highPriBuilds.forEach(b => {
+          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:var(--amber-bright);font-family:'Cinzel',serif;font-size:11px">${b.buildName}</span>`;
+          if (b.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber-bright)">[${b.rank}]</span>`;
+          html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--amber-bright);letter-spacing:.06em">HIGH PRIORITY</span></div>`;
+        });
       }
 
       if (essentialMatches.length > 0) {

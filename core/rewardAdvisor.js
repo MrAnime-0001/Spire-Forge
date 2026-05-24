@@ -191,15 +191,32 @@ function scoreCard(cardName) {
       reasons.push('no star spenders in deck');
     }
     if (isStarGenCard) isUtility = true;
+    // Star generation check: if <3 star-gen cards in deck, boost generators
+    if (starGenCount < 3 && isStarGenCard && alreadyHave === 0) {
+      score += 5; reasons.push('star generation needed (+5)');
+    }
   }
 
   // ── Energy Generation Check ──────────────────────────────
   // Boost energy-generating cards when deck has grown but lacks energy
+  // Expanded: accounts for character-specific energy sources (Regent stars, Necrobinder souls)
   if (isEnergyCard || (typeof VEL_ENERGY_BONUS !== 'undefined' && VEL_ENERGY_BONUS[baseName] > 0)) {
     var deckEnergyTotal = 0;
     Object.keys(deck).forEach(function(n) {
       if (VEL_ENERGY_BONUS[n]) deckEnergyTotal += VEL_ENERGY_BONUS[n] * deck[n];
     });
+    // Regent: Star generation acts as energy substitute
+    if (currentChar === 'regent' && typeof VEL_STAR_GEN_BONUS !== 'undefined') {
+      Object.keys(deck).forEach(function(n) { if (VEL_STAR_GEN_BONUS[n]) deckEnergyTotal += VEL_STAR_GEN_BONUS[n] * 0.5; });
+    }
+    // Necrobinder: Soul generation acts as energy substitute (0-cost draw 2)
+    if (currentChar === 'necrobinder') {
+      var soulGenCards = 0;
+      Object.keys(deck).forEach(function(n) {
+        if (n === 'Capture Spirit' || n === 'Dirge' || n === 'Severance' || n === 'Haunt') soulGenCards += deck[n];
+      });
+      deckEnergyTotal += soulGenCards * 0.5;
+    }
     if (total >= 15 && deckEnergyTotal < 3) {
       score += 10;
       reasons.push('deck low on energy generation (+10)');
@@ -212,6 +229,12 @@ function scoreCard(cardName) {
   // Necrobinder: Grave Warden is best common card in the game
   if (currentChar === 'necrobinder' && baseName === 'Grave Warden') {
     score += 10; reasons.push('Grave Warden: best common card (+10)');
+  }
+
+  // Necrobinder: Osty + heal awareness — heal effects heal YOU, not Osty
+  // So heal cards don't get extra Osty protection bonus
+  if (currentChar === 'necrobinder' && baseName === 'Reanimate' && alreadyHave === 0) {
+    score -= 3; reasons.push('Reanimate heals you, not Osty (-3)');
   }
 
   // Defect: Defragment is #1 priority when no Focus sources
@@ -253,15 +276,26 @@ function scoreCard(cardName) {
     }
   }
 
-  // Regent: Comet is S-tier in Void Form
-  if (currentChar === 'regent' && baseName === 'Comet' && (deck['Void Form'] || deck['Void Form+'])) {
-    score += 8; reasons.push('Comet = 33 dmg 0-cost bomb in Void Form (+8)');
-  }
-
   // Regent: Sword Sage + Forge synergy
   if (currentChar === 'regent' && (deck['Sword Sage'] || deck['Sword Sage+'])) {
     var FORGE_CARDS = {'Seeking Edge':1, 'Conqueror':1, 'The Smith':1, 'Refine Blade':1, 'Sword Stage':1, 'Spoils of Battle':1, 'Solar Strike':1, 'Beat into Shape':1, 'Bulwark':1, 'Big Bang':1, 'Hammer Time':1};
     if (FORGE_CARDS[baseName]) { score += 8; reasons.push('Forge + Sword Sage synergy (+8)'); }
+  }
+
+  // Regent: Sovereign Blade forge charge curve — if deck has Blade and many forge cards, it's scaling
+  if (currentChar === 'regent' && (deck['Sovereign Blade'] || deck['Sovereign Blade+'])) {
+    var forgeCount = 0;
+    Object.keys(deck).forEach(function(n) {
+      if (n === 'Seeking Edge' || n === 'Seeking Edge+' || n === 'Conqueror' || n === 'Conqueror+') forgeCount += deck[n];
+      if (n === 'The Smith' || n === 'The Smith+' || n === 'Refine Blade' || n === 'Refine Blade+') forgeCount += deck[n];
+      if (n === 'Sword Stage' || n === 'Sword Stage+' || n === 'Beat into Shape' || n === 'Beat into Shape+') forgeCount += deck[n];
+      if (n === 'Solar Strike' || n === 'Solar Strike+' || n === 'Spoils of Battle' || n === 'Spoils of Battle+') forgeCount += deck[n];
+      if (n === 'Bulwark' || n === 'Bulwark+' || n === 'Big Bang' || n === 'Big Bang+') forgeCount += deck[n];
+      if (n === 'Hammer Time' || n === 'Hammer Time+') forgeCount += deck[n];
+    });
+    if (forgeCount >= 3) {
+      if (baseName === 'Sovereign Blade') { score += 10; reasons.push('Sovereign Blade scales with forge charges (+10)'); }
+    }
   }
 
   // Ironclad: Dead Branch + Corruption infinite detection
@@ -304,6 +338,16 @@ function scoreCard(cardName) {
     if (DOOM_CARDS[baseName]) { score += 6; reasons.push('Doom synergy active (+6)'); }
   }
 
+  // Necrobinder: Eradicate nuke estimate — scales with Doom count and Amplify synergy
+  if (currentChar === 'necrobinder' && baseName === 'Eradicate') {
+    var doomCount = 0;
+    Object.keys(deck).forEach(function(n) {
+      if (n === 'Countdown' || n === 'Countdown+' || n === 'Danse Macabre' || n === 'Danse Macabre+' || n === 'Capture Spirit' || n === 'Capture Spirit+') doomCount += deck[n];
+    });
+    if (doomCount >= 2) { score += 6; reasons.push('Eradicate nuke with Doom setup (+6)'); }
+    if (deck['Lethality'] || deck['Lethality+']) { score += 4; reasons.push('Amplify + Lethality synergy (+4)'); }
+  }
+
   // Necrobinder: Soul generation check — boost Soul generators if <2 sources
   if (currentChar === 'necrobinder') {
     var soulGenCount = 0;
@@ -339,14 +383,18 @@ function scoreCard(cardName) {
     }
   }
 
-  // Build-dependent value notes — warn when card is weak without support
-  if (baseName === 'Comet' && currentChar === 'regent' && !(deck['Void Form'] || deck['Void Form+'])) {
-    score -= 4; reasons.push('Comet needs Void Form to be efficient (-4)');
+  // Build-dependent value: cards whose score varies heavily by build context
+  // Comet: S-tier in Void Form, situational otherwise
+  if (baseName === 'Comet') {
+    if (currentChar === 'regent' && (deck['Void Form'] || deck['Void Form+'])) { score += 8; reasons.push('Comet + Void Form synergy (+8)'); }
+    else { score -= 4; reasons.push('Comet needs Void Form for full value (-4)'); }
   }
-  if (baseName === 'Body Slam' && !(deck['Barricade'] || deck['Barricade+'])) {
+  // Body Slam: only valuable with Barricade or high block gen
+  if (baseName === 'Body Slam' && !(deck['Barricade'] || deck['Barricade+']) && alreadyHave === 0) {
     score -= 4; reasons.push('Body Slam needs Barricade for full value (-4)');
   }
-  if (baseName === 'Rupture' && !(deck['Bloodletting'] || deck['Bloodletting+'] || deck['Combust'] || deck['Combust+'])) {
+  // Rupture: only valuable with self-damage
+  if (baseName === 'Rupture' && !(deck['Bloodletting'] || deck['Bloodletting+'] || deck['Combust'] || deck['Combust+']) && alreadyHave === 0) {
     score -= 4; reasons.push('Rupture needs self-damage to trigger (-4)');
   }
 
@@ -509,6 +557,27 @@ function scoreCard(cardName) {
   // Build core bonus: essential build cards get +5
   if (_buildCore) {
     score += 5; reasons.push('build core card (+5)');
+  }
+
+  // Build context tier display
+  if (priorityBuilds.length > 0) {
+    var priorityBuildNames = priorityBuilds.map(function(p) { return p.b.name; }).join(', ');
+    reasons.push('Must Pick for ' + priorityBuildNames + ' build');
+  } else if (synergyBuilds.length > 0) {
+    var synergyBuildNames = synergyBuilds.map(function(s) { return s.b.name; }).join(', ');
+    reasons.push('Synergizes with ' + synergyBuildNames + ' build');
+  }
+
+  // Relic data UI: show if relics enable detected builds
+  if (relics && relics.length > 0 && priorityBuilds.length > 0) {
+    priorityBuilds.forEach(function(p) {
+      if (p.b.relicPriority) {
+        var matchedRelics = p.b.relicPriority.filter(function(r) { return relics.indexOf(r) >= 0; });
+        if (matchedRelics.length > 0) {
+          reasons.push('Your ' + matchedRelics.join(', ') + ' enables ' + p.b.name + ' build');
+        }
+      }
+    });
   }
 
   // Build-context boss amplification: extra ±5 when card is boss-relevant AND build core

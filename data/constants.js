@@ -361,6 +361,21 @@ const STATUS_MATH = {
   Vulnerable: { damageAmplification: 0.50, attackCredit: 5 } // 50% more damage taken -> +5 attack score
 };
 
+// Card play order priority — defines which card types to play first in different fight contexts
+const CARD_PLAY_ORDER_PRIORITY = {
+  general: ['AoE', 'frontload block', 'scaling (powers/poison/strength)', 'single target damage'],
+  hallway: { priority: 'frontload damage > block > scaling', note: 'End fights fast, minimize HP loss' },
+  elite:   { priority: 'block > scaling > damage', note: 'Survive setup, then outscale' },
+  boss:    { priority: 'scaling > block > damage', note: 'Scale first, boss fights are marathons' }
+};
+
+// Pacing context per act — adjusts scoring urgency based on act pacing needs
+const PACING_CONTEXT = {
+  1: { pace: 'fast', focus: 'frontload damage', hallwayToElite: 'quick damage favored', note: 'Act 1: kill before enemy scales' },
+  2: { pace: 'mid', focus: 'balanced scaling + frontload', note: 'Act 2: mix of hallway attrition and elite scaling checks' },
+  3: { pace: 'slow', focus: 'sustained output', scalingUrgency: 'high', note: 'Act 3: bosses demand sustained scaling, not burst' }
+};
+
 // ============================================================
 // STATE
 // ============================================================
@@ -933,5 +948,66 @@ const ENGINES = {
     {name:'Star Burst engine',cards:['Stardust','Seven Stars','Black Hole','Glow'],note:'Stockpile Stars then unload. Black Hole + Glow = AoE per Star generation. Seven Stars = 7-hit nuke.'},
     {name:'Void Form engine',cards:['Void Form','Convergence','Comet'],note:'First 2 cards per turn are free. Comet (33 dmg, 5-star cost) becomes zero-cost bomb. Convergence retains hand.'},
     {name:'Bombardment engine',cards:['Bombardment','Meteor Shower','Gamma Blast'],note:'AoE via Star generation. Bombardment auto-plays from Exhaust pile. Meteor Shower hits all for 14.'}
+  ]
+};
+
+// RECOMMENDED_RELICS: Global relic recommendations per character
+// Maps to relicPriority fields in BUILD_DATA per build
+// Format: character -> array of {name:string, forBuild:string, reason:string}
+const RECOMMENDED_RELICS = {
+  ironclad: [
+    {name:'Vajra', forBuild:'Strength', reason:'+1 Strength each turn'},
+    {name:'Shuriken', forBuild:'Strength', reason:'+1 Str on 3-attack turn'},
+    {name:'Pen Nib', forBuild:'Strength', reason:'Doubles every 10th attack'},
+    {name:'Dead Branch', forBuild:'Exhaust', reason:'Infinite with Corruption'},
+    {name:'Charon\'s Saddle', forBuild:'Exhaust', reason:'Exhaust synergy'},
+    {name:'Magic Flower', forBuild:'Bloodletting', reason:'Better self-heal offset'},
+    {name:'Calipers', forBuild:'Block', reason:'Block retention'},
+    {name:'Tough Bandages', forBuild:'Block', reason:'Block on discard'},
+    {name:'Mark of Pain', forBuild:'Self-Wound', reason:'Status draw fuel with Evolve'},
+    {name:'Burning Blood', forBuild:'any', reason:'Core sustain for all builds'}
+  ],
+  silent: [
+    {name:'Shuriken', forBuild:'Shiv', reason:'+1 Str on multi-attack turns'},
+    {name:'Kunai', forBuild:'Shiv', reason:'+1 Dex on multi-attack turns'},
+    {name:'Pen Nib', forBuild:'Grand Finale', reason:'100 damage every other Finale'},
+    {name:'Tough Bandages', forBuild:'Sly', reason:'Block on discard triggers'},
+    {name:'Tingsha', forBuild:'Sly', reason:'Damage on discard triggers'},
+    {name:'Snecko Skull', forBuild:'Poison', reason:'Extra Poison per application'},
+    {name:'Twisted Funnel', forBuild:'Poison', reason:'Free Poison each combat'},
+    {name:'Ornamental Fan', forBuild:'Shiv', reason:'Block from attacks'},
+    {name:'Bag of Preparation', forBuild:'any', reason:'+2 draw turn 1'},
+    {name:'Runic Pyramid', forBuild:'any', reason:'Retain cards'}
+  ],
+  defect: [
+    {name:'Inserter', forBuild:'any', reason:'Extra orb slot each turn'},
+    {name:'Runic Capacitor', forBuild:'any', reason:'Start with +3 orb slots'},
+    {name:'Gold-Plated Cables', forBuild:'any', reason:'Dark/Lightning passives dual-hit'},
+    {name:'Symbiotic Virus', forBuild:'any', reason:'Free Dark orb start'},
+    {name:'Nuclear Battery', forBuild:'any', reason:'+1 Energy + Lightning start'},
+    {name:'Cracked Core', forBuild:'any', reason:'Default Lightning orb start'},
+    {name:'Data Disk', forBuild:'any', reason:'+1 Focus start'},
+    {name:'Orange Pellets', forBuild:'Frost', reason:'Clear Biased Cog debuff'},
+    {name:'Mummified Hand', forBuild:'Creative AI', reason:'Powers reduce costs'},
+    {name:'Snecko Eye', forBuild:'Claw', reason:'Randomize costs (0-cost overlap)'}
+  ],
+  necrobinder: [
+    {name:'Soul Crystal', forBuild:'Soul', reason:'Extra Soul generation'},
+    {name:'Osty Treat', forBuild:'Osty', reason:'+Osty HP gain'},
+    {name:'Grave Dust', forBuild:'Doom', reason:'Doom spreads on kill'},
+    {name:'Reaper\'s Scythe', forBuild:'Reaper', reason:'Amplify lifesteal'},
+    {name:'Burial Shroud', forBuild:'Osty', reason:'Osty protection'},
+    {name:'Necronomicon', forBuild:'any', reason:'Double first attack each turn'},
+    {name:'Snecko Eye', forBuild:'any', reason:'Randomize costs'},
+    {name:'Runic Pyramid', forBuild:'any', reason:'Retain key cards'}
+  ],
+  regent: [
+    {name:'Star Chart', forBuild:'Star Burst', reason:'+Star generation'},
+    {name:'Forge Hammer', forBuild:'Forge', reason:'Double Forge gains'},
+    {name:'Void Crystal', forBuild:'Void Form', reason:'+Void trigger value'},
+    {name:'Graviton Lens', forBuild:'Bombardment', reason:'AoE Star burst'},
+    {name:'Snecko Eye', forBuild:'Void Form', reason:'Randomize costs (Void Form free)'},
+    {name:'Runic Pyramid', forBuild:'Forge', reason:'Retain Sovereign Blade'},
+    {name:'Bag of Preparation', forBuild:'any', reason:'+2 draw T1'}
   ]
 };

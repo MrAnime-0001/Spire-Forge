@@ -308,15 +308,24 @@ function renderBossAlert() {
             }
             html += `</div>`;
           }
-          // Build-specific boss strategy tip \u2014 show kill window for detected build
+          // Build-specific boss strategy tip \u2014 show BOSS_TIPS for detected build
           var buildTagNames = [];
           deckTags.forEach(function(t) {
             var bd = BUILD_DATA[currentChar] && BUILD_DATA[currentChar].builds && BUILD_DATA[currentChar].builds[t];
             if (bd) buildTagNames.push(bd.name);
           });
           var bldName = buildTagNames.join(', ');
+          if (selectedBoss && typeof BOSS_TIPS !== 'undefined' && BOSS_TIPS[selectedBoss]) {
+            var tip = BOSS_TIPS[selectedBoss][currentChar] || BOSS_TIPS[selectedBoss].general;
+            if (bldName) {
+              html += '<div style="margin-top:6px;padding:5px 8px;border:1px solid ' + rd.color + '40;border-radius:3px;background:' + rd.color + '10;font-size:11px;color:var(--amber-bright)">\u2694 <strong>' + bldName + '</strong> vs ' + selectedBoss + ': ' + tip.substring(0, 200) + '</div>';
+            } else {
+              html += '<div style="margin-top:6px;padding:5px 8px;border:1px solid ' + rd.color + '40;border-radius:3px;background:' + rd.color + '10;font-size:11px;color:var(--amber-bright)">\ud83d\udca1 vs ' + selectedBoss + ': ' + tip.substring(0, 200) + '</div>';
+            }
+          }
+          // Kill window line
           if (bldName && selectedBoss && BOSS_MATRIX[selectedBoss] && BOSS_MATRIX[selectedBoss].killWindow) {
-            html += '<div style="margin-top:6px;padding:5px 8px;border:1px solid ' + rd.color + '40;border-radius:3px;background:' + rd.color + '10;font-size:11px;color:var(--amber-bright)">\u2694 <strong>' + bldName + '</strong> vs ' + selectedBoss + ': ' + BOSS_MATRIX[selectedBoss].killWindow.substring(0, 140) + '</div>';
+            html += '<div style="margin-top:3px;padding:3px 8px;font-size:10px;color:var(--text-dim)">\u23f1 Kill window: ' + BOSS_MATRIX[selectedBoss].killWindow.substring(0, 140) + '</div>';
           }
         }
         html += `</div>`;
