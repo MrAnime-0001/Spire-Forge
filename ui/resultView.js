@@ -822,70 +822,91 @@ function renderBuildResults() {
   var html = '<div class="result-scroll">';
   html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem">all builds</div>';
 
-  Object.keys(charBuilds).forEach(function(bk) {
+  // Sort builds by owned synergy card count — closest first
+  var buildEntries = Object.keys(charBuilds).map(function(bk) {
     var b = charBuilds[bk];
+    var synergyCards = b.synergy || [];
+    var matchCount = synergyCards.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
+    return { key: bk, build: b, matchCount: matchCount };
+  });
+  buildEntries.sort(function(a, b) { return b.matchCount - a.matchCount; });
+  buildEntries.forEach(function(entry) {
+    var bk = entry.key;
+    var b = entry.build;
     var essential = b.essential || [];
     var synergy = b.synergy || [];
     var mustPick = b.mustPick || [];
     var highPri = b.highPriority || [];
 
-    // Calculate how many essential cards are in deck
+    // Calculate owned counts per category
+    var haveMustPick = mustPick.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
+    var haveHighPri = highPri.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
     var haveEssential = essential.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
-    var pct = essential.length > 0 ? haveEssential / essential.length : 0;
-    var color = pct >= 1 ? 'var(--green-bright)' : pct >= 0.5 ? 'var(--amber-bright)' : 'var(--teal-bright)';
-    var status = pct >= 1 ? '✔ complete' : pct > 0 ? '⚙ building' : '○ not started';
+
+    // Overall status across mustPick + highPri + essential
+    var allCards = mustPick.concat(highPri).concat(essential);
+    var haveAll = haveMustPick + haveHighPri + haveEssential;
+    var totalPct = allCards.length > 0 ? haveAll / allCards.length : 0;
+    var statusColor = totalPct >= 1 ? 'var(--green-bright)' : totalPct > 0 ? 'var(--amber-bright)' : 'var(--teal-bright)';
+    var statusLabel = totalPct >= 1 ? '✔ complete' : totalPct > 0 ? '⚙ building' : '○ not started';
 
     // Build header
     html += '<div style="margin-bottom:.5rem;padding:.5rem;border:1px solid ' + b.color + '30;border-radius:4px;background:' + b.color + '06">';
     html += '<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">';
     html += '<span style="font-size:12px;font-family:Cinzel,serif;color:' + b.color + '">' + b.name + '</span>';
     if (b.rank) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;padding:1px 5px;border-radius:2px;border:1px solid ' + b.color + '50;color:' + b.color + '">' + b.rank + '</span>';
-    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:' + color + ';margin-left:auto">' + status + '</span>';
+    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:' + statusColor + ';margin-left:auto">' + statusLabel + '</span>';
     html += '</div>';
 
-    // Progress bar
-    html += '<div class="axis-row" style="margin-bottom:5px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(pct*100) + '%;background:' + color + '"></div></div><span class="axis-val">' + haveEssential + '/' + essential.length + '</span></div>';
-
-    // Must Pick cards
+    // Must Pick bar + cards
     if (mustPick.length > 0) {
-      html += '<div style="margin-bottom:3px"><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#ff6040;letter-spacing:.06em">MUST PICK</span> <span style="font-size:10px;color:var(--text)">';
+      var mpPct = haveMustPick / mustPick.length;
+      html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#ff6040;letter-spacing:.06em">MUST PICK</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(mpPct*100) + '%;background:#ff6040"></div></div><span class="axis-val" style="color:#ff6040;font-size:9px">' + haveMustPick + '/' + mustPick.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       mustPick.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
         html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
       });
-      html += '</span></div>';
+      html += '</div></div>';
     }
 
-    // High priority cards
+    // High priority bar + cards
     if (highPri.length > 0) {
-      html += '<div style="margin-bottom:3px"><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--amber-bright);letter-spacing:.06em">HIGH PRIORITY</span> <span style="font-size:10px;color:var(--text)">';
+      var hpPct = haveHighPri / highPri.length;
+      html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--amber-bright);letter-spacing:.06em">HIGH PRIORITY</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(hpPct*100) + '%;background:var(--amber-bright)"></div></div><span class="axis-val" style="color:var(--amber-bright);font-size:9px">' + haveHighPri + '/' + highPri.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       highPri.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
         html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
       });
-      html += '</span></div>';
+      html += '</div></div>';
     }
 
-    // Essential cards (not already shown in mustPick/high)
+    // Essential bar + cards (cards in essential not already in mustPick/high)
     var otherEssential = essential.filter(function(c) { return mustPick.indexOf(c) < 0 && highPri.indexOf(c) < 0; });
     if (otherEssential.length > 0) {
-      html += '<div style="margin-bottom:3px"><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.06em">ESSENTIAL</span> <span style="font-size:10px;color:var(--text)">';
+      var haveOther = otherEssential.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
+      var oePct = haveOther / otherEssential.length;
+      html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.06em">ESSENTIAL</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(oePct*100) + '%;background:var(--teal-bright)"></div></div><span class="axis-val" style="color:var(--teal-bright);font-size:9px">' + haveOther + '/' + otherEssential.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       otherEssential.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
         html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
       });
-      html += '</span></div>';
+      html += '</div></div>';
     }
 
     // Synergy cards (collapsed)
     if (synergy.length > 0) {
-      html += '<details style="margin-top:2px"><summary style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);cursor:pointer;letter-spacing:.06em">SYNERGY (' + synergy.length + ')</summary>';
+      var haveSynergy = synergy.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
+      console.debug('[synergy]', bk, 'have:', haveSynergy, 'total:', synergy.length, 'deck keys:', Object.keys(deck).filter(function(k) { return synergy.indexOf(k) >= 0 || synergy.indexOf(k.replace('+','')) >= 0; }));
+      var syPct = haveSynergy / synergy.length;
+      html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--green-bright);letter-spacing:.06em">SYNERGY</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(syPct*100) + '%;background:var(--green-bright)"></div></div><span class="axis-val" style="color:var(--green-bright);font-size:9px">' + haveSynergy + '/' + synergy.length + '</span></div>';
+      html += '<details style="margin-top:1px">';
+      html += '<summary style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--green-bright);cursor:pointer;letter-spacing:.06em">▶ cards</summary>';
       html += '<div style="margin-top:3px;font-size:10px;color:var(--text-dim)">';
       synergy.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
-        html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid rgba(100,90,70,.15);background:rgba(100,90,70,.03);color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
+        html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.15)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.03)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
       });
-      html += '</div></details>';
+      html += '</div></details></div>';
     }
 
     // Recommended relics
