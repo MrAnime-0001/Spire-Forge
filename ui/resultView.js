@@ -162,8 +162,8 @@ function renderDeckHealth() {
   const volColor = volume >= 60 ? 'var(--green-bright)' : volume >= 35 ? 'var(--amber-bright)' : '#c06060';
   const volLabel = volume >= 70 ? 'Optimal' : volume >= 50 ? 'Strong' : volume >= 35 ? 'Functional' : 'Unstable';
 
-  const atkCls = axes.Attack < targets.Attack ? 'stat-warn' : 'stat-ok';
-  const defCls = axes.Defense < targets.Defense ? 'stat-warn' : 'stat-ok';
+  const atkCls = (axes.rawDPT || 0) >= targets.Attack / 2 ? 'stat-ok' : 'stat-warn';
+  const defCls = (axes.rawBPT || 0) >= targets.Defense / 2 ? 'stat-ok' : 'stat-warn';
   const sclCls = axes.Scaling < targets.Scaling ? 'stat-warn' : 'stat-ok';
   const effCls = axes.Efficiency < targets.Efficiency ? 'stat-warn' : 'stat-ok';
   const conCls = axes.Consistency < targets.Consistency ? 'stat-warn' : 'stat-ok';
@@ -183,8 +183,7 @@ function renderDeckHealth() {
 
   if (total > 10 && starters >= 3) warnings.push({msg:`${starters} starter cards diluting draws \u2014 remove at the shop.`, color:'#c8922a'});
   if (playable > 7) {
-    if (drawHeavyAtk) warnings.push({msg:`Draw skewed toward attack (${rAtk}%). Add ${Math.ceil(db.atkDraw - db.defDraw)} block cards.`, color:'#6aacda'});
-    else if (drawHeavyDef) warnings.push({msg:`Draw skewed toward block (${rDef}%). Add ${Math.ceil(db.defDraw - db.atkDraw)} attack cards.`, color:'#c06060'});
+    if (drawHeavyDef) warnings.push({msg:`Draw skewed toward block (${rDef}%). You may need more damage.`, color:'#c06060'});
   }
   if (oth >= 3) warnings.push({msg:`${oth} dead cards diluting draws. Remove at shops.`, color:'#7a6a4a'});
 
@@ -202,8 +201,18 @@ function renderDeckHealth() {
   const barDrawVel  = Math.round(db.velDraw  / drawTotal * 100);
   const barDrawDead = Math.max(0, 100 - barDrawAtk - barDrawDef - barDrawScl - barDrawVel);
 
-  const drawBalanceColor = drawRatioBalanced ? 'var(--green-bright)' : (drawHeavyAtk || drawHeavyDef) ? '#c06060' : 'var(--amber-bright)';
-  const drawBalanceLabel = drawRatioBalanced ? '\u2714 balanced' : drawHeavyAtk ? '\u26A0 atk-heavy' : drawHeavyDef ? '\u26A0 def-heavy' : '~ close';
+  const drawPctAtk  = total > 0 ? Math.round(stats.atk  / total * 100) : 0;
+  const drawPctDef  = total > 0 ? Math.round(stats.def  / total * 100) : 0;
+  const drawPctScl  = total > 0 ? Math.round(stats.scl  / total * 100) : 0;
+  const drawPctVel  = total > 0 ? Math.round(stats.vel  / total * 100) : 0;
+  const drawPctDead = total > 0 ? Math.round(stats.other / total * 100) : 0;
+  const drawBreakdown = [
+    drawPctAtk  > 0 ? `ATK ${drawPctAtk}%`  : '',
+    drawPctDef  > 0 ? `DEF ${drawPctDef}%`  : '',
+    drawPctScl  > 0 ? `SCL ${drawPctScl}%`  : '',
+    drawPctVel  > 0 ? `VEL ${drawPctVel}%`  : '',
+    drawPctDead > 0 ? `Dead ${drawPctDead}%` : ''
+  ].filter(Boolean).join(' | ');
 
   el.innerHTML = `<div class="axes-wrap" style="margin-bottom:.75rem">
     ${renderDeckOneLiner(axes)}
@@ -212,8 +221,8 @@ function renderDeckHealth() {
       <span style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:${volColor}">${volume} <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase">${volLabel}</span></span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:.75rem">
-      <div class="stat-chip"><div class="stat-val ${atkCls}">${axes.Attack}</div><div class="stat-lbl">Attack</div></div>
-      <div class="stat-chip"><div class="stat-val ${defCls}">${axes.Defense}</div><div class="stat-lbl">Defense</div></div>
+      <div class="stat-chip"><div class="stat-val ${atkCls}">~${axes.rawDPT} DPT</div><div class="stat-lbl">need ~${Math.round(targets.Attack/2)}</div></div>
+      <div class="stat-chip"><div class="stat-val ${defCls}">~${axes.rawBPT} BPT</div><div class="stat-lbl">need ~${Math.round(targets.Defense/2)}</div></div>
       <div class="stat-chip"><div class="stat-val ${sclCls}">${axes.Scaling}</div><div class="stat-lbl">Scaling</div></div>
       <div class="stat-chip"><div class="stat-val ${effCls}">${axes.Efficiency}</div><div class="stat-lbl">Efficiency</div></div>
       <div class="stat-chip"><div class="stat-val ${conCls}">${axes.Consistency}</div><div class="stat-lbl">Consistency</div></div>
@@ -233,7 +242,7 @@ function renderDeckHealth() {
 
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
       <span>draw odds</span>
-      <span style="color:${drawBalanceColor};font-size:9px">${db.atkDraw}ATK : ${db.defDraw}DEF  ${drawBalanceLabel}</span>
+      <span style="color:var(--text-muted);font-size:9px">${drawBreakdown}</span>
     </div>
     <div class="balance-bar-track" style="margin:.2rem 0 .3rem;height:8px">
       <div class="balance-seg" style="width:${barDrawAtk}%;background:#c04040" title="Attack draws"></div>
@@ -870,7 +879,9 @@ function renderBuildResults() {
       html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#ff6040;letter-spacing:.06em">MUST PICK</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(mpPct*100) + '%;background:#ff6040"></div></div><span class="axis-val" style="color:#ff6040;font-size:9px">' + haveMustPick + '/' + mustPick.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       mustPick.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
-        html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
+        var safeC = c.replace(/'/g, "\\'");
+        var clickAttr = inDeck ? '' : 'onclick="addCard(\'' + safeC + '\');event.stopPropagation()" title="Click to add to deck" ';
+        html += '<span ' + clickAttr + 'style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + (inDeck ? '' : ';cursor:pointer') + '">' + c + '</span>';
       });
       html += '</div></div>';
     }
@@ -881,7 +892,9 @@ function renderBuildResults() {
       html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--amber-bright);letter-spacing:.06em">HIGH PRIORITY</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(hpPct*100) + '%;background:var(--amber-bright)"></div></div><span class="axis-val" style="color:var(--amber-bright);font-size:9px">' + haveHighPri + '/' + highPri.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       highPri.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
-        html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
+        var safeC = c.replace(/'/g, "\\'");
+        var clickAttr = inDeck ? '' : 'onclick="addCard(\'' + safeC + '\');event.stopPropagation()" title="Click to add to deck" ';
+        html += '<span ' + clickAttr + 'style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + (inDeck ? '' : ';cursor:pointer') + '">' + c + '</span>';
       });
       html += '</div></div>';
     }
@@ -894,7 +907,9 @@ function renderBuildResults() {
       html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.06em">ESSENTIAL</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(oePct*100) + '%;background:var(--teal-bright)"></div></div><span class="axis-val" style="color:var(--teal-bright);font-size:9px">' + haveOther + '/' + otherEssential.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       otherEssential.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
-        html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
+        var safeC = c.replace(/'/g, "\\'");
+        var clickAttr = inDeck ? '' : 'onclick="addCard(\'' + safeC + '\');event.stopPropagation()" title="Click to add to deck" ';
+        html += '<span ' + clickAttr + 'style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.2)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.05)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + (inDeck ? '' : ';cursor:pointer') + '">' + c + '</span>';
       });
       html += '</div></div>';
     }
@@ -907,7 +922,9 @@ function renderBuildResults() {
       html += '<div style="margin-top:3px;font-size:10px;color:var(--text-dim)">';
       synergy.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
-        html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.15)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.03)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
+        var safeC = c.replace(/'/g, "\\'");
+        var clickAttr = inDeck ? '' : 'onclick="addCard(\'' + safeC + '\');event.stopPropagation()" title="Click to add to deck" ';
+        html += '<span ' + clickAttr + 'style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.15)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.03)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + (inDeck ? '' : ';cursor:pointer') + '">' + c + '</span>';
       });
       html += '</div></div>';
     }

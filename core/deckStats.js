@@ -104,7 +104,6 @@ function getDeckSizeProfile() {
     }
 
     // In healthy range — give a directional tip based on what's missing
-    if (heavyAtk && axes && axes.Defense < DECK_THRESHOLDS.heavyAtkBlkReq) return `Attack-heavy (${pAtk}%). Next reward: prioritise block or scaling cards over more attacks.`;
     if (heavyDef && axes && axes.Attack < DECK_THRESHOLDS.heavyDefDmgReq) return `Defense-heavy (${pDef}%). Next reward: you can afford to add damage or scaling instead of more block.`;
     if (heavyScl && axes && axes.Attack < DECK_THRESHOLDS.heavySclDmgReq) return `Scaling-heavy (${pScl}%). Make sure you have enough attacks to apply the scaling before Act 2.`;
     if (lowVel) return `Velocity is low (${velScore}/100). Draw and energy cards will make every other card more consistent.`;
@@ -293,13 +292,15 @@ function calcSixAxes() {
   const maxCommitment = Math.max(0, ...Object.values(commitment));
   const synergyScore = Math.round(maxCommitment * 100);
 
-  return { 
-    Attack: attackScore, 
-    Defense: defenseScore, 
-    Scaling: scalingScore, 
-    Consistency: consistencyScore, 
-    Efficiency: efficiencyScore, 
-    Synergy: synergyScore 
+  return {
+    Attack: attackScore,
+    Defense: defenseScore,
+    Scaling: scalingScore,
+    Consistency: consistencyScore,
+    Efficiency: efficiencyScore,
+    Synergy: synergyScore,
+    rawDPT: Math.round(perTurnDmg),
+    rawBPT: Math.round(perTurnBlk)
   };
 }
 

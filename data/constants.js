@@ -2,15 +2,13 @@
 // Keep this file data-only.
 
 // Phase 8: act-scaling targets for the 6 axes (0–100 scale)
+// Derived from real STS2 DPT/BPT research: score = min(100, round(DPT * 2))
+// Defense targets ~60% of attack — killing is the primary win condition.
+// A0-A4 baseline: Act1 DPT 8-14 (mid 11), Act2 DPT 18-28 (mid 23), Act3 DPT 35-55 (mid 45)
 const AXIS_TARGETS = {
-  // Per-turn output scale: axis = min(100, round(perTurnOutput * 2))
-  // Starter deck: Atk~12, Def~10. One good card each: ~30. Solved: ~50.
-  // Act 1: baseline survival — need ~2-3 strong cards to hit target
-  1: { Attack: 40, Defense: 40, Scaling: 15, Consistency: 20, Efficiency: 25, Synergy: 10 },
-  // Act 2: elite gauntlet — need real damage output and efficient block
-  2: { Attack: 60, Defense: 55, Scaling: 30, Consistency: 40, Efficiency: 35, Synergy: 35 },
-  // Act 3: boss rush — maximum output per turn wins
-  3: { Attack: 75, Defense: 50, Scaling: 55, Consistency: 55, Efficiency: 45, Synergy: 60 }
+  1: { Attack: 22, Defense: 14, Scaling: 15, Consistency: 20, Efficiency: 25, Synergy: 10 },
+  2: { Attack: 46, Defense: 28, Scaling: 30, Consistency: 40, Efficiency: 35, Synergy: 35 },
+  3: { Attack: 90, Defense: 48, Scaling: 55, Consistency: 55, Efficiency: 45, Synergy: 60 }
 };
 
 // Per-character axis target overrides. Applied as additive offsets to base AXIS_TARGETS.
@@ -27,6 +25,15 @@ const CHAR_AXIS_OVERRIDES = {
   defect:      { Defense: -15, Scaling: +10 },
   regent:      { Defense: -10, Synergy: +10 },
   necrobinder: { Defense: -10 }
+};
+
+// Per-ascension-tier axis target offsets. Additive on top of AXIS_TARGETS + CHAR_AXIS_OVERRIDES.
+// Nested by tier threshold → act. A10 reuses tier 8 (same stats; double boss Act 3 only).
+// A5-A7: Ascender's Bane, fewer rest sites, scarcer upgraded cards.
+// A8-A9: Enemy HP/dmg up. A10: double boss Act 3 only, no additional stat change.
+const ASC_AXIS_OVERRIDES = {
+  5: { 1: { Attack:  4, Defense:  3 }, 2: { Attack:  6, Defense:  4 }, 3: { Attack: 10, Defense:  4 } },
+  8: { 1: { Attack:  8, Defense:  6 }, 2: { Attack: 17, Defense: 10 }, 3: { Attack: 10, Defense: 12 } }
 };
 
 // Bosses with long kill windows where scaling matters most (1.5× scl bonus)
@@ -51,11 +58,11 @@ const DECK_THRESHOLDS = {
   lowVelMinDeck: 8,
   // Per-turn output thresholds. Atk/Def measure estimated single-turn output
   // (3 energy, 5 draws). Starter deck gives Atk~12, Def~10.
-  lowBlkScore: 30,
-  lowDmgScore: 35,
-  heavyAtkBlkReq: 40,
-  heavyDefDmgReq: 40,
-  heavySclDmgReq: 35,
+  lowBlkScore: 16,
+  lowDmgScore: 22,
+  heavyAtkBlkReq: 20,
+  heavyDefDmgReq: 20,
+  heavySclDmgReq: 18,
   // Act 1 sub-tier boundaries for survival/scaling rebalance
   act1PhaseAEnd: 16,
   act1PhaseBEnd: 22,
