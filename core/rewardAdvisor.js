@@ -5,37 +5,16 @@
 // Also reads globals from HTML scope: selectedBoss, getAllCardsForPicker(), getRarity()
 
 // ── checkCardPrerequisites ───────────────────────────────────
-// Infer from card description what deck conditions the card requires.
+// Config-driven prerequisite checks — patterns loaded from data/prereq-config.js (PREREQ_PATTERNS).
+// Re-run scripts/generate-prereq-patterns.js after any card database update.
 // Returns {penalty, reason} — penalty is negative, reason is display string or null.
 function checkCardPrerequisites(card, allCards, deckMap, char) {
   if (!card) return { penalty: 0, reason: null };
-  var desc = ((card.description || '') + ' ' + (card.note || '')).toLowerCase();
-  var penalty = 0;
-  var reason = null;
+  var cardName = (card.name || '').trim();
+  var penalty  = 0;
+  var reason   = null;
 
-  // Count cards in deck whose combined description+note matches a regex
-  function countDeckDesc(pattern) {
-    var n = 0;
-    Object.keys(deckMap).forEach(function(name) {
-      if (!deckMap[name]) return;
-      var c = allCards.find(function(x) { return x.name === name; });
-      if (!c) return;
-      var cd = ((c.description || '') + ' ' + (c.note || '')).toLowerCase();
-      if (pattern.test(cd)) n += deckMap[name];
-    });
-    return n;
-  }
-
-  // Count cards in deck where the card NAME matches a regex
-  function countDeckByName(pattern) {
-    var n = 0;
-    Object.keys(deckMap).forEach(function(name) {
-      if (deckMap[name] && pattern.test(name)) n += deckMap[name];
-    });
-    return n;
-  }
-
-  // Count cards in deck by cost
+  // Count cards in deck by cost (used by HIGH_COST providerType)
   function countDeckByCost(minCost) {
     var n = 0;
     Object.keys(deckMap).forEach(function(name) {
@@ -48,7 +27,7 @@ function checkCardPrerequisites(card, allCards, deckMap, char) {
     return n;
   }
 
-  // Count atk-type cards in deck
+  // Count atk-type cards in deck (used by ATTACK_TURN providerType)
   function countDeckAtk() {
     var n = 0;
     Object.keys(deckMap).forEach(function(name) {
@@ -60,164 +39,58 @@ function checkCardPrerequisites(card, allCards, deckMap, char) {
     return n;
   }
 
-  // 1. HIGH_COST trigger — card rewards playing 2+ cost cards
-  if (/costs? [23456]\+|2 or more energy|2\+ energy|energynecrobinder\.pngenerynecrobinder/i.test(desc) ||
-      (card.description || '').includes('StS2 EnergyNecrobinder.pngStS2 EnergyNecrobinder')) {
-    var highCost = countDeckByCost(2);
-    if (highCost < 2) {
-      penalty -= 18;
-      reason = '⚠ Needs 2+ cost cards to trigger (deck has ' + highCost + ')';
+  // Count cards in deck where the card NAME matches a regex (used by STRIKE_SYNERGY providerType)
+  function countDeckByName(pattern) {
+    var n = 0;
+    Object.keys(deckMap).forEach(function(name) {
+      if (deckMap[name] && pattern.test(name)) n += deckMap[name];
+    });
+    return n;
+  }
+
+  var patterns = (typeof PREREQ_PATTERNS !== 'undefined') ? PREREQ_PATTERNS : [];
+
+  for (var i = 0; i < patterns.length; i++) {
+    var p = patterns[i];
+    if (reason) break; // first penalty wins
+
+    // Runtime character filter
+    if (p.charFilter && char !== p.charFilter) continue;
+
+    // Check if this card is a payoff for this pattern (also check base name without '+')
+    var baseName = cardName.replace(/\+$/, '');
+    if (p.payoffCards.indexOf(cardName) === -1 && p.payoffCards.indexOf(baseName) === -1) continue;
+
+    // Self-exclude: skip if this card is also listed as a provider
+    if (p.providerCards && p.providerCards.length > 0) {
+      if (p.providerCards.indexOf(cardName) !== -1 || p.providerCards.indexOf(baseName) !== -1) continue;
+    }
+
+    // Count providers in current deck
+    var count = 0;
+    if (p.providerType === 'attack') {
+      count = countDeckAtk();
+    } else if (p.providerType === 'cost2') {
+      count = countDeckByCost(2);
+    } else if (p.providerType === 'strikeName') {
+      count = countDeckByName(/strike/i);
+    } else {
+      // Explicit providerCards name list — also accept upgraded variants (strip '+')
+      var provList = p.providerCards;
+      Object.keys(deckMap).forEach(function(n) {
+        if (!deckMap[n]) return;
+        var bn = n.replace(/\+$/, '');
+        if (provList.indexOf(n) !== -1 || provList.indexOf(bn) !== -1) count += deckMap[n];
+      });
+    }
+
+    if (count < p.threshold) {
+      penalty += p.penalty; // p.penalty is already negative
+      reason = p.reason;
     }
   }
 
-  // 2. SHIV payoff — Silent only; skip if this card IS a shiv generator
-  if (char === 'silent' && /shiv/i.test(desc)) {
-    var isShivGen = /add.*shiv|shiv.*into your hand/i.test(desc);
-    if (!isShivGen) {
-      var shivGen = countDeckDesc(/add.*shiv|shiv.*into your hand/i);
-      if (shivGen < 2 && !reason) {
-        penalty -= 12;
-        reason = '⚠ Low Shiv generation in deck';
-      }
-    }
-  }
-
-  // 3. DISCARD payoff — uses cards FROM discard pile OR scales with cards discarded
-  if (/from your discard pile|cards? in your discard|each card discarded|card.*discarded this turn/i.test(desc)) {
-    var discardEnabled = countDeckDesc(/discard/i);
-    if (discardEnabled < 2 && !reason) {
-      penalty -= 12;
-      reason = '⚠ Few discard-enabling cards in deck';
-    }
-  }
-
-  // 4. SOUL payoff — Necrobinder only; skip if card generates souls
-  if (char === 'necrobinder' && /per soul|each soul|soul.*exhaust|soul.*in your/i.test(desc)) {
-    var isSoulGen = /add.*soul.*into|soul.*draw pile/i.test(desc);
-    if (!isSoulGen) {
-      var soulGen = countDeckDesc(/add.*soul.*into|soul.*draw pile/i);
-      if (soulGen < 2 && !reason) {
-        penalty -= 15;
-        reason = '⚠ Needs Soul generators (have ' + soulGen + ')';
-      }
-    }
-  }
-
-  // 5. DOOM payoff — scales with enemy Doom stacks OR triggers on applying Doom
-  if (/equal to.*doom|per.*doom|each.*doom|if you applied.*doom|whenever.*apply.*doom/i.test(desc)) {
-    var doomApply = countDeckDesc(/apply.*doom|doom.*to.*enemy|doom to/i);
-    if (doomApply < 2 && !reason) {
-      penalty -= 15;
-      reason = '⚠ Needs Doom application in deck';
-    }
-  }
-
-  // 6. POISON payoff — scales with Poison on enemies
-  if (/poison on.*enem|per.*poison|block.*poison|equal.*poison/i.test(desc)) {
-    var poisonApply = countDeckDesc(/apply.*poison|poisoned stab|noxious|envenom|bubble/i);
-    if (poisonApply < 2 && !reason) {
-      penalty -= 12;
-      reason = '⚠ Needs Poison application in deck';
-    }
-  }
-
-  // 7. DRAW scaling — damage/effect scales with cards drawn this turn
-  if (/card.*drawn.*turn|drawn during|per card drawn|each card drawn|whenever you draw a card/i.test(desc)) {
-    var drawCards = countDeckDesc(/draw \d|draw cards|draw [23456]/i);
-    if (drawCards < 2 && !reason) {
-      penalty -= 8;
-      reason = '⚠ Better with draw velocity cards';
-    }
-  }
-
-  // 8. STRENGTH multiplication — deals bonus damage per Strength
-  if (/per.*strength|each.*strength|strength.*damage/i.test(desc)) {
-    var strGen = countDeckDesc(/gain.*strength|inflame|demon form|rupture/i);
-    if (strGen < 2 && !reason) {
-      penalty -= 10;
-      reason = '⚠ Needs Strength generation in deck';
-    }
-  }
-
-  // 9. EXHAUST payoff — scales with exhaust pile OR triggers whenever a card is exhausted
-  if (/per.*exhaust|in your exhaust pile|exhaust pile|whenever a card is exhausted|if you.*exhausted|for each card exhausted/i.test(desc)) {
-    var exhaustProducers = countDeckDesc(/exhaust/i);
-    if (exhaustProducers < 3 && !reason) {
-      penalty -= 12;
-      reason = '⚠ Needs exhaust engine (few exhaust cards)';
-    }
-  }
-
-  // 10. ATTACK/TURN scaling — bonus per attack played this turn
-  if (/per attack played|each attack.*played/i.test(desc)) {
-    var atkCount = countDeckAtk();
-    if (atkCount < 4 && !reason) {
-      penalty -= 10;
-      reason = '⚠ Better with attack-heavy deck (have ' + atkCount + ' atk cards)';
-    }
-  }
-
-  // 11. ORB payoff — Defect only; skip if card generates orbs
-  if (char === 'defect' && /per orb|for each orb|evoke.*x times|unique orb|whenever.*evoke|if you have.*frost/i.test(desc)) {
-    var isOrbGen = /channel|add.*orb/i.test(desc);
-    if (!isOrbGen) {
-      var orbGen = countDeckDesc(/channel|add.*orb/i);
-      if (orbGen < 3 && !reason) {
-        penalty -= 12;
-        reason = '⚠ Needs orb generation in deck';
-      }
-    }
-  }
-
-  // 12. STAR cost ≥3 — Regent only; high star cost needs generation
-  if (char === 'regent' && card.starCost >= 3) {
-    var starGen = countDeckDesc(/falling star|guiding star|wrought in war|lunar blast|monologue|shining strike|hegemony|gather light/i);
-    if (starGen < 2 && !reason) {
-      penalty -= 15;
-      reason = '⚠ Star cost ' + card.starCost + '★ requires star generation (have ' + starGen + ')';
-    }
-  }
-
-  // 14. VULNERABLE payoff — scales with or conditionally triggers on enemy Vulnerable
-  if (/for each.*vuln|if.*enemy is.*vuln|vuln.*hits twice|each.*vuln.*on.*enem|additional.*damage.*vuln|vuln.*additional/i.test(desc)) {
-    var vulnApply = countDeckDesc(/apply.*vuln|vulnerable to all/i);
-    if (vulnApply < 2 && !reason) {
-      penalty -= 10;
-      reason = '⚠ Needs Vulnerable application in deck';
-    }
-  }
-
-  // 15. STRIKE synergy — scales with or triggers on Strike-named cards
-  if (/containing.*strike|draw.*strike|your cards.*strike/i.test(desc)) {
-    var strikeCount = countDeckByName(/strike/i);
-    if (strikeCount < 3 && !reason) {
-      penalty -= 12;
-      reason = '⚠ Needs Strike cards in deck (have ' + strikeCount + ')';
-    }
-  }
-
-  // 16. HP LOSS payoff — triggers whenever you lose HP; skip if card itself is the HP-loss source
-  if (/lost hp|whenever you lose hp|if you lost hp|each time.*lost hp/i.test(desc)) {
-    var isHPLossSource = /lose \d+ hp/i.test(desc);
-    if (!isHPLossSource) {
-      var hpLossCards = countDeckDesc(/lose \d+ hp/i);
-      if (hpLossCards < 2 && !reason) {
-        penalty -= 10;
-        reason = '⚠ Needs HP loss cards for value (e.g. Bloodletting)';
-      }
-    }
-  }
-
-  // 17. ETHEREAL payoff — Necrobinder; scales with Ethereal cards played or drawn
-  if (char === 'necrobinder' && /for each ethereal|each ethereal.*played|costs.*less.*ethereal|whenever you.*play.*ethereal|whenever you.*draw.*ethereal/i.test(desc)) {
-    var etherealCards = countDeckDesc(/ethereal/i);
-    if (etherealCards < 2 && !reason) {
-      penalty -= 10;
-      reason = '⚠ Needs Ethereal cards in deck';
-    }
-  }
-
-  // 13. Cycle time — if any prereq issue AND deck cycles slowly, compound problem
+  // Cycle time — compound penalty if deck cycles slowly and any prereq issue found
   if (penalty < 0 && typeof calcDeckCycleTime === 'function') {
     var cycleTime = calcDeckCycleTime();
     var hasInnate = /innate/i.test(card.description || '');
