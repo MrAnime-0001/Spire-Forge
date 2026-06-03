@@ -822,14 +822,20 @@ function renderBuildResults() {
   var html = '<div class="result-scroll">';
   html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem">all builds</div>';
 
-  // Sort builds by owned synergy card count — closest first
+  // Sort: mustPick% → highPriority% → synergy% (highest commitment first)
   var buildEntries = Object.keys(charBuilds).map(function(bk) {
     var b = charBuilds[bk];
-    var synergyCards = b.synergy || [];
-    var matchCount = synergyCards.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
-    return { key: bk, build: b, matchCount: matchCount };
+    var mp = b.mustPick || [], hp = b.highPriority || [], sy = b.synergy || [];
+    var mpPct = mp.length > 0 ? mp.filter(function(c){return deck[c]||deck[c+'+'];}).length / mp.length : 0;
+    var hpPct = hp.length > 0 ? hp.filter(function(c){return deck[c]||deck[c+'+'];}).length / hp.length : 0;
+    var syPct = sy.length > 0 ? sy.filter(function(c){return deck[c]||deck[c+'+'];}).length / sy.length : 0;
+    return { key: bk, build: b, mpPct: mpPct, hpPct: hpPct, syPct: syPct };
   });
-  buildEntries.sort(function(a, b) { return b.matchCount - a.matchCount; });
+  buildEntries.sort(function(a, b) {
+    if (b.mpPct !== a.mpPct) return b.mpPct - a.mpPct;
+    if (b.hpPct !== a.hpPct) return b.hpPct - a.hpPct;
+    return b.syPct - a.syPct;
+  });
   buildEntries.forEach(function(entry) {
     var bk = entry.key;
     var b = entry.build;
@@ -896,17 +902,14 @@ function renderBuildResults() {
     // Synergy cards (collapsed)
     if (synergy.length > 0) {
       var haveSynergy = synergy.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
-      console.debug('[synergy]', bk, 'have:', haveSynergy, 'total:', synergy.length, 'deck keys:', Object.keys(deck).filter(function(k) { return synergy.indexOf(k) >= 0 || synergy.indexOf(k.replace('+','')) >= 0; }));
       var syPct = haveSynergy / synergy.length;
       html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--green-bright);letter-spacing:.06em">SYNERGY</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(syPct*100) + '%;background:var(--green-bright)"></div></div><span class="axis-val" style="color:var(--green-bright);font-size:9px">' + haveSynergy + '/' + synergy.length + '</span></div>';
-      html += '<details style="margin-top:1px">';
-      html += '<summary style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--green-bright);cursor:pointer;letter-spacing:.06em">▶ cards</summary>';
       html += '<div style="margin-top:3px;font-size:10px;color:var(--text-dim)">';
       synergy.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
         html += '<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:2px;border:1px solid ' + (inDeck ? '#4a9a8a40' : 'rgba(100,90,70,.15)') + ';background:' + (inDeck ? '#4a9a8a15' : 'rgba(100,90,70,.03)') + ';color:' + (inDeck ? 'var(--green-bright)' : 'var(--text-dim)') + '">' + c + '</span>';
       });
-      html += '</div></details></div>';
+      html += '</div></div>';
     }
 
     // Recommended relics
