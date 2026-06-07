@@ -222,13 +222,7 @@ function renderRewardVerdictHtml() {
     html += '<span class="deck-item-tag '+typeCls(s.card.type)+'" style="font-size:9px;padding:1px 5px">'+typeTag+'</span>';
     html += rarityBadgeHtml(sRarity);
     if (deck[s.name]) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×'+deck[s.name]+'</span>';
-    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);margin-left:auto;min-width:20px;text-align:right">'+s.score+'</span>';
-    html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+'">'+s.vLabel+'</span>';
-    // Build context: show "Essential for [build]" when card is build core
-    if (s.priorityBuilds && s.priorityBuilds.length > 0) {
-      var buildNames = s.priorityBuilds.map(function(p) { return p.b.name; }).join(', ');
-      html += '<span style="font-size:8px;color:var(--text-muted);margin-left:4px">for '+buildNames+'</span>';
-    }
+    html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+';margin-left:auto">'+s.vLabel+'</span>';
     html += '</div>';
 
     var rCtx = rarityContext(sRarity, s.verdict);

@@ -191,8 +191,8 @@ const REGENT_CARDS = [
     "type": "atk",
     "cost": 1,
     "rarity": "common",
-    "note": "Deal 6 damage. Deals 2 additional damage for ALL your cards that have a Star cost.",
-    "description": "Deal 6 damage. Deals 2 additional damage for ALL your cards that have a Star cost.",
+    "note": "Deal 8 damage. Deals 2 additional damage for ALL your cards that have a Star cost.",
+    "description": "Deal 8 damage. Deals 2 additional damage for ALL your cards that have a Star cost.",
     "starCost": 1
   },
   {
@@ -779,8 +779,8 @@ const REGENT_CARDS = [
     "type": "atk",
     "cost": 0,
     "rarity": "uncommon",
-    "note": "Deal 14 damage to ALL enemies.",
-    "description": "Deal 14 damage to ALL enemies.",
+    "note": "Deal 6 damage to ALL enemies twice.",
+    "description": "Deal 6 damage to ALL enemies twice.",
     "starCost": 3
   },
   {
@@ -788,8 +788,8 @@ const REGENT_CARDS = [
     "type": "atk",
     "cost": 0,
     "rarity": "uncommon",
-    "note": "Deal 18 damage to ALL enemies.",
-    "description": "Deal 18 damage to ALL enemies.",
+    "note": "Deal 8 damage to ALL enemies twice.",
+    "description": "Deal 8 damage to ALL enemies twice.",
     "isUpgraded": true,
     "baseCard": "Astral Pulse",
     "starCost": 3
@@ -1423,7 +1423,7 @@ const REGENT_CARDS = [
   {
     "name": "Monarch's Gaze",
     "type": "pow",
-    "cost": 3,
+    "cost": 2,
     "rarity": "rare",
     "note": "Whenever you attack an enemy, it loses 1 Strength this turn.",
     "description": "Whenever you attack an enemy, it loses 1 Strength this turn."
@@ -1431,7 +1431,7 @@ const REGENT_CARDS = [
   {
     "name": "Monarch's Gaze+",
     "type": "pow",
-    "cost": 3,
+    "cost": 1,
     "rarity": "rare",
     "note": "Whenever you attack an enemy, it loses 2 Strength this turn.",
     "description": "Whenever you attack an enemy, it loses 2 Strength this turn.",

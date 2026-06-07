@@ -191,8 +191,8 @@ const DEFECT_CARDS = [
       "type": "atk_vel",
       "cost": 1,
       "rarity": "common",
-      "note": "5 dmg twice + play random Attack from draw. Unpredictable combo.",
-      "description": "Deal 5 damage twice. Play a random Attack from your Draw Pile."
+      "note": "6 dmg twice + play random Attack from draw. Unpredictable combo.",
+      "description": "Deal 6 damage twice. Play a random Attack from your Draw Pile."
     },
     {
       "name": "Boot Sequence",
@@ -293,10 +293,10 @@ const DEFECT_CARDS = [
     {
       "name": "Fusion",
       "type": "vel",
-      "cost": 2,
+      "cost": 1,
       "rarity": "uncommon",
-      "note": "Channel 1 Plasma. Energy Orb generation.",
-      "description": "Channel 1 StS2 PlasmaOrb.png Plasma."
+      "note": "Cost 1. Channel 1 Plasma. Exhaust. Energy Orb generation.",
+      "description": "Channel 1 StS2 PlasmaOrb.png Plasma. Exhaust."
     },
     {
       "name": "Glacier",
@@ -465,8 +465,8 @@ const DEFECT_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "12 dmg. Next Power costs 0. Attack/Power bridge.",
-      "description": "Deal 12 damage. The next Power you play costs 0 StS2 EnergyDefect.png."
+      "note": "14 dmg. Next Power costs 0. Attack/Power bridge.",
+      "description": "Deal 14 damage. The next Power you play costs 0 StS2 EnergyDefect.png."
     },
     {
       "name": "Tempest",
@@ -603,8 +603,8 @@ const DEFECT_CARDS = [
       "type": "atk_skl",
       "cost": 2,
       "rarity": "rare",
-      "note": "26 AoE dmg. Lose 3 Focus. Powerful nuke with downside.",
-      "description": "Deal 26 damage to ALL enemies. Lose 3 StS2 Icon Focus.png Focus."
+      "note": "28 AoE dmg. Lose 3 Focus. Powerful nuke with downside.",
+      "description": "Deal 28 damage to ALL enemies. Lose 3 StS2 Icon Focus.png Focus."
     },
     {
       "name": "Ice Lance",
@@ -675,8 +675,8 @@ const DEFECT_CARDS = [
       "type": "atk",
       "cost": 2,
       "rarity": "rare",
-      "note": "11 AoE dmg. Evoke all Orbs. Mass Evoke finisher.",
-      "description": "Deal 11 damage to ALL enemies. Evoke all of your Orbs."
+      "note": "7 AoE dmg. Evoke all Orbs twice. Mass Evoke finisher.",
+      "description": "Deal 7 damage to ALL enemies. Evoke all of your Orbs twice."
     },
     {
       "name": "Signal Boost",
@@ -1059,8 +1059,8 @@ const DEFECT_CARDS = [
       "type": "atk_vel",
       "cost": 1,
       "rarity": "common",
-      "note": "Upgraded version of Uproar. Deal 7 damage twice. Play a random Attack from your Draw Pile.",
-      "description": "Deal 7 damage twice. Play a random Attack from your Draw Pile.",
+      "note": "Upgraded version of Uproar. Deal 8 damage twice. Play a random Attack from your Draw Pile.",
+      "description": "Deal 8 damage twice. Play a random Attack from your Draw Pile.",
       "isUpgraded": true,
       "baseCard": "Uproar"
     },
@@ -1187,9 +1187,9 @@ const DEFECT_CARDS = [
     {
       "name": "Fusion+",
       "type": "vel",
-      "cost": 2,
+      "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Fusion. Channel 1 StS2 PlasmaOrb.png Plasma.",
+      "note": "Upgraded version of Fusion. Cost 1. Channel 1 Plasma. No Exhaust.",
       "description": "Channel 1 StS2 PlasmaOrb.png Plasma.",
       "isUpgraded": true,
       "baseCard": "Fusion"
@@ -1379,8 +1379,8 @@ const DEFECT_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Synthesis. Deal 18 damage. The next Power you play costs 0 StS2 EnergyDefect.png.",
-      "description": "Deal 18 damage. The next Power you play costs 0 StS2 EnergyDefect.png.",
+      "note": "Upgraded version of Synthesis. Deal 20 damage. The next Power you play costs 0 StS2 EnergyDefect.png.",
+      "description": "Deal 20 damage. The next Power you play costs 0 StS2 EnergyDefect.png.",
       "isUpgraded": true,
       "baseCard": "Synthesis"
     },
@@ -1399,8 +1399,8 @@ const DEFECT_CARDS = [
       "type": "atk_skl",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Tesla Coil. Deal 6 damage. Trigger all StS2 LightningOrb.png Lightning against the enemy.",
-      "description": "Deal 6 damage. Trigger all StS2 LightningOrb.png Lightning against the enemy.",
+      "note": "Upgraded version of Tesla Coil. Deal 4 damage. Trigger all StS2 LightningOrb.png Lightning twice against the enemy.",
+      "description": "Deal 4 damage. Trigger all StS2 LightningOrb.png Lightning twice against the enemy.",
       "isUpgraded": true,
       "baseCard": "Tesla Coil"
     },
@@ -1529,8 +1529,8 @@ const DEFECT_CARDS = [
       "type": "atk_skl",
       "cost": 2,
       "rarity": "rare",
-      "note": "Upgraded version of Hyperbeam. Deal 34 damage to ALL enemies. Lose 3 StS2 Icon Focus.png Focus.",
-      "description": "Deal 34 damage to ALL enemies. Lose 3 StS2 Icon Focus.png Focus.",
+      "note": "Upgraded version of Hyperbeam. Deal 36 damage to ALL enemies. Lose 3 StS2 Icon Focus.png Focus.",
+      "description": "Deal 36 damage to ALL enemies. Lose 3 StS2 Icon Focus.png Focus.",
       "isUpgraded": true,
       "baseCard": "Hyperbeam"
     },
@@ -1619,8 +1619,8 @@ const DEFECT_CARDS = [
       "type": "atk",
       "cost": 2,
       "rarity": "rare",
-      "note": "Upgraded version of Shatter. Deal 15 damage to ALL enemies. Evoke all of your Orbs.",
-      "description": "Deal 15 damage to ALL enemies. Evoke all of your Orbs.",
+      "note": "Upgraded version of Shatter. Deal 11 damage to ALL enemies. Evoke all of your Orbs twice.",
+      "description": "Deal 11 damage to ALL enemies. Evoke all of your Orbs twice.",
       "isUpgraded": true,
       "baseCard": "Shatter"
     },

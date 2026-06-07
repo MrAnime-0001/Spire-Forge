@@ -2,7 +2,7 @@
 // Format: bossName -> { general/character/buildName -> tip text }
 // StS2 boss set: Vantom, The Kin, Ceremonial Beast, Waterfall Giant, Soul Fysh,
 //   Lagavulin Matriarch, The Insatiable, Knowledge Demon, Kaiser Crab,
-//   The Queen, Doormaker, Test Subject #C8
+//   The Queen, Aeonglass, Test Subject #C8
 //
 // Tips reference actual StS2 boss mechanics from REGION_DATA + BOSS_MATRIX.
 // General tip applies to all characters. Per-character tips add class-specific nuance.
@@ -116,13 +116,13 @@ const BOSS_TIPS = {
     necrobinder: 'Souls draw 2 Exhaust — circumvent Bound by Exhausting them. Osty tanks all damage through debuffs. Doom on Queen ignores her massive HP pool\'s defenses.'
   },
 
-  'Doormaker': {
-    general: '489 HP. Cycles: Closed (immune), Hunger (-1 energy/card), Scrutiny (can\'t draw), Grasp (can\'t play Skills). Only damageable in windows between forms. DoT carries through invulnerability.',
-    ironclad: 'Exhaust engine (Corruption+FNP) ignores Grasp (Skills are free). Fiend Fire burst in damage windows. Body Slam barricades through form changes.',
-    silent: 'Poison ticks through Closed/immune phases. Shivs deal pure attack damage unaffected by Grasp. Footwork/Backflip are Skills — time them carefully around Grasp.',
-    defect: 'Orb damage carries through all form changes — Lightning hits during Closed. Frost blocks through any form restriction. Focus scales regardless of debuffs.',
-    regent: 'Sovereign Blade forge scales through all forms — time attacks in windows. Void Form free plays generate value even during Scrutiny (no draw needed). Star burst in damage windows.',
-    necrobinder: 'Doom ticks during Closed phases. Osty tanks restricted turns where you can\'t block. Souls cycle past Scrutiny draw lock. Grave Warden generates value through any form.'
+  'Aeonglass': {
+    general: '~450 HP. Shuffles Wither status cards into your hand — each unplayed Wither deals damage. Withering Presence generates more Wither each turn. Ebb move: Aeonglass gains Block. Increasing Intensity ramps damage.',
+    ironclad: 'Corruption makes Wither cards free Skills — clear them instantly. Second Wind exhausts Wither for Block. Fiend Fire dumps a hand full of Wither for burst damage.',
+    silent: 'Calculated Gamble discards full hand of Wither in one play. Exhaust effects (True Grit, Burning Pact) clear Wither without paying for them. Poison ticks regardless of Wither clutter.',
+    defect: 'Coolheaded/orb channeling lets you skip playing Wither (orbs deal damage passively). Scrape cycles through Wither. Frost passive block tanks Wither chip hits.',
+    regent: 'Void Form free plays offset Wither cost. Convergence retains key cards through Wither pollution. Star burst on Increasing Intensity turns.',
+    necrobinder: 'Souls (draw 2 Exhaust) clear Wither from hand efficiently. Osty tanks Wither chip damage. Doom ticks regardless of Wither hand pollution.'
   },
 
   'Test Subject #C8': {

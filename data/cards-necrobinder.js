@@ -263,8 +263,8 @@ const NECROBINDER_CARDS = [
       "type": "atk_vel",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "8 dmg + 3 extra per card drawn this turn. Pairs with Dirge (Souls added to draw pile count as drawn cards) and Haunt (both scale off Soul generation — they amplify each other).",
-      "description": "Deal 8 damage. Deals 3 additional damage for each card drawn during your turn."
+      "note": "8 dmg + 4 extra per card drawn this turn. Pairs with Dirge (Souls added to draw pile count as drawn cards) and Haunt (both scale off Soul generation — they amplify each other).",
+      "description": "Deal 8 damage. Deals 4 additional damage for each card drawn during your turn."
     },
     {
       "name": "Death's Door",
@@ -287,7 +287,7 @@ const NECROBINDER_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "7 dmg. Vulnerable and Weak 2x effective vs enemy for 3 turns.",
+      "note": "7 dmg. Vulnerable and Weak 2x effective vs enemy for 2 turns.",
       "description": "Deal 10 damage."
     },
     {
@@ -455,7 +455,7 @@ const NECROBINDER_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Osty deals 5 dmg. Per hit this turn, Summon 2. Core Osty growth.",
+      "note": "Osty deals 5 dmg. Per hit this turn, Summon 3. Core Osty growth.",
       "description": ""
     },
     {
@@ -663,8 +663,8 @@ const NECROBINDER_CARDS = [
       "type": "atk_vel",
       "cost": 1,
       "rarity": "rare",
-      "note": "13 dmg. Permanently increases damage by 3. Exhaust. Scaling finisher.",
-      "description": "Deal 13 damage. Permanently increase this card's damage by 3. Exhaust."
+      "note": "13 dmg. Permanently increases damage by 4. Exhaust. Scaling finisher.",
+      "description": "Deal 13 damage. Permanently increase this card's damage by 4. Exhaust."
     },
     {
       "name": "Time's Up",
@@ -1031,8 +1031,8 @@ const NECROBINDER_CARDS = [
       "type": "atk_vel",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Death March. Deal 9 damage. Deals 4 additional damage for each card drawn during your turn.",
-      "description": "Deal 9 damage. Deals 4 additional damage for each card drawn during your turn.",
+      "note": "Upgraded version of Death March. Deal 9 damage. Deals 6 additional damage for each card drawn during your turn.",
+      "description": "Deal 9 damage. Deals 6 additional damage for each card drawn during your turn.",
       "isUpgraded": true,
       "baseCard": "Death March"
     },
@@ -1061,7 +1061,7 @@ const NECROBINDER_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Debilitate. Deal 12 damage.",
+      "note": "Upgraded version of Debilitate. Deal 12 damage. Vulnerable and Weak 2x effective vs enemy for 3 turns.",
       "description": "Deal 12 damage.",
       "isUpgraded": true,
       "baseCard": "Debilitate"
@@ -1271,7 +1271,7 @@ const NECROBINDER_CARDS = [
       "type": "skl",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Sic 'Em. ",
+      "note": "Upgraded version of Sic 'Em. Per hit this turn, Summon 4.",
       "description": "",
       "isUpgraded": true,
       "baseCard": "Sic 'Em"
@@ -1531,8 +1531,8 @@ const NECROBINDER_CARDS = [
       "type": "atk_vel",
       "cost": 1,
       "rarity": "rare",
-      "note": "Upgraded version of The Scythe. Deal 13 damage. Permanently increase this card's damage by 4. Exhaust.",
-      "description": "Deal 13 damage. Permanently increase this card's damage by 4. Exhaust.",
+      "note": "Upgraded version of The Scythe. Deal 13 damage. Permanently increase this card's damage by 5. Exhaust.",
+      "description": "Deal 13 damage. Permanently increase this card's damage by 5. Exhaust.",
       "isUpgraded": true,
       "baseCard": "The Scythe"
     },

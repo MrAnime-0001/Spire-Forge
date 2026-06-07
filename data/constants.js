@@ -38,7 +38,7 @@ const ASC_AXIS_OVERRIDES = {
 
 // Bosses with long kill windows where scaling matters most (1.5× scl bonus)
 const SCL_PRIORITY_BOSSES = new Set([
-  'Knowledge Demon', 'The Queen', 'Doormaker', 'Test Subject #C8'
+  'Knowledge Demon', 'The Queen', 'Aeonglass', 'Test Subject #C8'
 ]);
 
 const DECK_THRESHOLDS = {
@@ -327,11 +327,11 @@ const BOSS_MATRIX = {
     difficulty: 'Moderate — plan phases and it\'s manageable',
     killWindow: 'Phase 1 fast, Phase 2 burst (200 HP), Phase 3 patience (300 HP, attack Intangible gaps)'
   },
-  'Doormaker': {
-    punishes:['card-dependent builds (Hunger drains energy)','draw-heavy builds (Scrutiny stops draw)','slow scaling','skill-reliant builds (Grasp blocks skills)'],
-    rewards: ['compressed burst winning in each window','Persistent DoT between phases','any damage type that carries through form changes'],
-    difficulty: 'Hardest A3 boss',
-    killWindow: 'Damage each form window. Full kill 8-12 turns depending on form cycle.'
+  'Aeonglass': {
+    punishes:['not clearing Wither status cards from hand (each deals damage)','slow decks that let Wither pile up','ignoring Withering Presence power stacks'],
+    rewards: ['exhaust engines that clear Wither for free','fast burst to end before Wither accumulates','block-heavy decks that tank Wither chip damage'],
+    difficulty: 'Hard A3 boss',
+    killWindow: 'Consistent pressure each turn. Wither cards must be cleared every hand — build around free Exhaust or plan plays around them.'
   }
 };
 
@@ -691,15 +691,15 @@ const REGION_DATA = {
       },
       'Skulking Colony': {
         type: 'Gimmick',
-        hp: '70 HP — Hardened Shell 15',
+        hp: '75 HP — Hardened Shell 20',
         pattern: [
-          ['Attack3','Smash: 13 dmg'],
-          ['Buff','Grow: +4 Str + 8 Block'],
-          ['cycle','→ Smash → Grow → repeat'],
-          ['power','Hardened Shell: 15 — max 15 HP loss per turn. Attacks EVERY turn']
+          ['Attack3','Zoom: 13 dmg'],
+          ['Buff','Grow: +4 Str'],
+          ['cycle','→ Zoom → Zoom → Grow → repeat'],
+          ['power','Hardened Shell: 20 — max 20 HP loss per turn. Attacks EVERY turn. No longer gains Block on Grow.']
         ],
-        strategy: 'Hardened Shell caps damage at 15/turn. Alternates heavy hit and stat gain. Attacks every turn.',
-        killOrder: '5-turn minimum. Consistent 15/turn is optimal. Block Smash, attack Grow.'
+        strategy: 'Hardened Shell caps damage at 20/turn. No safe Grow turn — attacks every turn. No Block gained on Grow.',
+        killOrder: '4-turn minimum at cap. Consistent 20/turn optimal.'
       }
     }
   },
@@ -825,21 +825,17 @@ const REGION_DATA = {
         strategy: 'Queen hides behind Torch Head Amalgam. Applies Chains of Binding (can\'t play drawn cards) and mass debuffs.',
         killOrder: 'Kill Amalgam first to expose Queen. After that, unload everything. Draw power offsets Bound cards.'
       },
-      'Doormaker': {
-        type: 'Phase-Shift',
-        hp: 'Doormaker 489 HP — opens as infinite-HP Door',
+      'Aeonglass': {
+        type: 'Attrition',
+        hp: 'Aeonglass ~450 HP',
         pattern: [
-          ['phase','Opens as Door: infinite HP'],
-          ['phase','↓ Transforms to Doormaker ↓'],
-          ['Debuff','Closed: immune, no target'],
-          ['power','Hunger: lose 1 energy per card played'],
-          ['power','Scrutiny: cannot draw cards'],
-          ['power','Grasp: cannot play Skill cards'],
-          ['cycle','→ Closed → Hunger → Scrutiny → Grasp → repeat'],
-          ['note','Only vulnerable between form changes. DoT carries through invulnerability.']
+          ['power','Withering Presence: generates Wither cards into player hand each turn'],
+          ['Status','Wither: shuffled into player hand. Each unplayed Wither deals damage at turn end'],
+          ['Debuff','Ebb: Aeonglass gains Block (v0.107 — no longer debuffs player)'],
+          ['Attack','Increasing Intensity: damage ramps each cycle']
         ],
-        strategy: 'Cycles through forms that disable different card types. Only damageable in short windows between forms.',
-        killOrder: 'Deal damage in brief windows between forms. DoT carries through invulnerability.'
+        strategy: 'Wither status cards pollute your hand and deal chip damage if unplayed. Exhaust engines clear them for free.',
+        killOrder: 'Clear Wither every turn. Consistent damage each cycle. Block Ebb turns. Burst during Increasing Intensity windows.'
       },
       'Test Subject #C8': {
         type: 'Phase-Shift',

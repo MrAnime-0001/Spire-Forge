@@ -299,12 +299,12 @@ const SILENT_CARDS = [
       "description": "Deal 5 damage for each Skill in your Hand."
     },
     {
-      "name": "Follow Through",
+      "name": "Scare",
       "type": "atk",
       "cost": 1,
-      "rarity": "common",
-      "note": "6 AoE dmg. If last card was Skill, apply 1 Weak to all. Hybrid.",
-      "description": "Deal 7 damage. If you have 5 or more other cards in your Hand, hits an additional time."
+      "rarity": "uncommon",
+      "note": "Reworked + renamed from Follow Through in v0.106. Verify exact effect in-game.",
+      "description": "Reworked in v0.106. Check in-game for current effect."
     },
     {
       "name": "Footwork",
@@ -407,8 +407,8 @@ const SILENT_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "12 dmg. Next Skill costs 0. Attack/Skill bridge.",
-      "description": "Deal 12 damage. The next Skill you play costs 0 StS2 EnergySilent.png."
+      "note": "14 dmg. Next Skill costs 0. Attack/Skill bridge.",
+      "description": "Deal 14 damage. The next Skill you play costs 0 StS2 EnergySilent.png."
     },
     {
       "name": "Precise Cut",
@@ -422,7 +422,7 @@ const SILENT_CARDS = [
       "name": "Predator",
       "type": "atk_vel",
       "cost": 2,
-      "rarity": "uncommon",
+      "rarity": "common",
       "note": "15 dmg. Draw 2 next turn if enemy dies. Good single target.",
       "description": "Deal 15 damage. Next turn, draw 2 cards."
     },
@@ -527,7 +527,7 @@ const SILENT_CARDS = [
       "type": "atk_def",
       "cost": 1,
       "rarity": "rare",
-      "note": "Reworked in v0.103. Now generates Shivs enchanted with Inky (+2 dmg, apply 1 Weak). Shiv/Sly crossover card.",
+      "note": "Reworked in v0.103. Now generates Shivs enchanted with Inky (+1 dmg, apply 1 Weak). Shiv/Sly crossover card.",
       "description": "Add 2 Enchant Inky.png Inky StS2 CardIcon Colorless Attack Token.png Shivs into your Hand."
     },
     {
@@ -901,14 +901,14 @@ const SILENT_CARDS = [
       "baseCard": "Flick-Flack"
     },
     {
-      "name": "Follow Through+",
+      "name": "Scare+",
       "type": "atk",
       "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Follow Through. Deal 9 damage. If you have 5 or more other cards in your Hand, hits an additional time.",
-      "description": "Deal 9 damage. If you have 5 or more other cards in your Hand, hits an additional time.",
+      "rarity": "uncommon",
+      "note": "Upgraded Scare. Reworked + renamed from Follow Through+ in v0.106. Verify exact effect in-game.",
+      "description": "Reworked in v0.106. Check in-game for current effect.",
       "isUpgraded": true,
-      "baseCard": "Follow Through"
+      "baseCard": "Scare"
     },
     {
       "name": "Leading Strike+",
@@ -1265,8 +1265,8 @@ const SILENT_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Pounce. Deal 18 damage. The next Skill you play costs 0 StS2 EnergySilent.png.",
-      "description": "Deal 18 damage. The next Skill you play costs 0 StS2 EnergySilent.png.",
+      "note": "20 dmg. Next Skill costs 0.",
+      "description": "Deal 20 damage. The next Skill you play costs 0 StS2 EnergySilent.png.",
       "isUpgraded": true,
       "baseCard": "Pounce"
     },
@@ -1415,7 +1415,7 @@ const SILENT_CARDS = [
       "type": "skl",
       "cost": 1,
       "rarity": "rare",
-      "note": "Upgraded version of Blade of Ink. Add 3 Enchant Inky.png Inky StS2 CardIcon Colorless Attack Token.png Shivs into your Hand.",
+      "note": "Add 3 Inky Shivs into your Hand. Inky: +1 dmg, apply 1 Weak.",
       "description": "Add 3 Enchant Inky.png Inky StS2 CardIcon Colorless Attack Token.png Shivs into your Hand.",
       "isUpgraded": true,
       "baseCard": "Blade of Ink"

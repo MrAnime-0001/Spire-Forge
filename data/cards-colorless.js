@@ -68,8 +68,8 @@ const COLORLESS_CARDS = [
       "type": "def",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Defend cards give 5 extra Block. Passive block scaling.",
-      "description": "Gain an additional 5 StS2 Intent Defend.png Block from Defend cards."
+      "note": "Defend cards give 4 extra Block. Passive block scaling.",
+      "description": "Gain an additional 4 StS2 Intent Defend.png Block from Defend cards."
     },
 {
       "name": "Finesse",
@@ -1210,8 +1210,8 @@ const COLORLESS_CARDS = [
       "type": "def",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Fasten. Gain an additional 7 StS2 Intent Defend.png Block from Defend cards.",
-      "description": "Gain an additional 7 StS2 Intent Defend.png Block from Defend cards.",
+      "note": "Upgraded version of Fasten. Gain an additional 6 StS2 Intent Defend.png Block from Defend cards.",
+      "description": "Gain an additional 6 StS2 Intent Defend.png Block from Defend cards.",
       "isUpgraded": true,
       "baseCard": "Fasten"
     },

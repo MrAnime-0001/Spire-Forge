@@ -262,11 +262,11 @@ const IRONCLAD_CARDS = [
     },
     {
       "name": "Drum of Battle",
-      "type": "vel",
+      "type": "skl",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Draw 2 now. Exhaust top card each turn. Draw engine with tempo cost.",
-      "description": "Draw 2 cards. At the start of your turn, Exhaust the top card of your Draw Pile."
+      "note": "Draw 2. When Exhausted, gain 2 Energy. Reworked v0.104 — Exhaust payoff, not cost.",
+      "description": "Draw 2 cards. When this card is Exhausted, gain 2 Energy."
     },
     {
       "name": "Evil Eye",
@@ -329,8 +329,8 @@ const IRONCLAD_CARDS = [
       "type": "atk_vel",
       "cost": 2,
       "rarity": "uncommon",
-      "note": "16 AoE. Plays from Exhaust at turn start. Great Exhaust payoff.",
-      "description": "Deal 16 damage to ALL enemies. At the start of your turn, if this is in your Exhaust Pile, play it."
+      "note": "16 AoE. Plays from Exhaust at turn end. Great Exhaust payoff.",
+      "description": "Deal 16 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it."
     },
     {
       "name": "Infernal Blade",
@@ -449,8 +449,8 @@ const IRONCLAD_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "12 dmg. Next Attack costs 0. Combo enabler.",
-      "description": "Deal 12 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png."
+      "note": "14 dmg. Next Attack costs 0. Combo enabler.",
+      "description": "Deal 14 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png."
     },
     {
       "name": "Uppercut",
@@ -521,8 +521,8 @@ const IRONCLAD_CARDS = [
       "type": "atk",
       "cost": 2,
       "rarity": "rare",
-      "note": "8 AoE + 2 more per other Attack played this turn. Combo finisher.",
-      "description": "Deal 8 damage to ALL enemies. Deals 2 additional damage for each other Attack you've played this turn."
+      "note": "2 dmg × 4 hits to ALL enemies. Reworked v0.104 — no longer scales with Attacks played.",
+      "description": "Deal 2 damage to ALL enemies 4 times."
     },
     {
       "name": "Corruption",
@@ -601,8 +601,8 @@ const IRONCLAD_CARDS = [
       "type": "skl",
       "cost": 2,
       "rarity": "rare",
-      "note": "Whenever you gain Block, deal 5 to random enemy. Pairs with Impervious (30 Block = 30 damage in one card) and Barricade (persistent Block keeps triggering).",
-      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 5 damage to a random enemy."
+      "note": "Whenever you gain Block, deal 6 to random enemy. Pairs with Impervious (30 Block = 30 damage in one card) and Barricade (persistent Block keeps triggering).",
+      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 6 damage to a random enemy."
     },
     {
       "name": "Mangle",
@@ -1074,11 +1074,11 @@ const IRONCLAD_CARDS = [
     },
     {
       "name": "Drum of Battle+",
-      "type": "vel",
+      "type": "skl",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Drum of Battle. Draw 3 cards. At the start of your turn, Exhaust the top card of your Draw Pile.",
-      "description": "Draw 3 cards. At the start of your turn, Exhaust the top card of your Draw Pile.",
+      "note": "Draw 2. When Exhausted, gain 3 Energy.",
+      "description": "Draw 2 cards. When this card is Exhausted, gain 3 Energy.",
       "isUpgraded": true,
       "baseCard": "Drum of Battle"
     },
@@ -1157,8 +1157,8 @@ const IRONCLAD_CARDS = [
       "type": "atk_vel",
       "cost": 2,
       "rarity": "uncommon",
-      "note": "Upgraded version of Howl from Beyond. Deal 21 damage to ALL enemies. At the start of your turn, if this is in your Exhaust Pile, play it.",
-      "description": "Deal 21 damage to ALL enemies. At the start of your turn, if this is in your Exhaust Pile, play it.",
+      "note": "21 AoE. Plays from Exhaust at turn end.",
+      "description": "Deal 21 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.",
       "isUpgraded": true,
       "baseCard": "Howl from Beyond"
     },
@@ -1307,8 +1307,8 @@ const IRONCLAD_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Upgraded version of Unrelenting. Deal 18 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png.",
-      "description": "Deal 18 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png.",
+      "note": "20 dmg. Next Attack costs 0.",
+      "description": "Deal 20 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png.",
       "isUpgraded": true,
       "baseCard": "Unrelenting"
     },
@@ -1387,8 +1387,8 @@ const IRONCLAD_CARDS = [
       "type": "atk",
       "cost": 2,
       "rarity": "rare",
-      "note": "Upgraded version of Conflagration. Deal 9 damage to ALL enemies. Deals 3 additional damage for each other Attack you've played this turn.",
-      "description": "Deal 9 damage to ALL enemies. Deals 3 additional damage for each other Attack you've played this turn.",
+      "note": "2 dmg × 5 hits to ALL enemies.",
+      "description": "Deal 2 damage to ALL enemies 5 times.",
       "isUpgraded": true,
       "baseCard": "Conflagration"
     },
@@ -1477,8 +1477,8 @@ const IRONCLAD_CARDS = [
       "type": "skl",
       "cost": 2,
       "rarity": "rare",
-      "note": "Upgraded version of Juggernaut. Whenever you gain StS2 Intent Defend.png Block, deal 7 damage to a random enemy.",
-      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 7 damage to a random enemy.",
+      "note": "Whenever you gain Block, deal 8 to random enemy.",
+      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 8 damage to a random enemy.",
       "isUpgraded": true,
       "baseCard": "Juggernaut"
     },
