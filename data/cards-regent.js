@@ -43,20 +43,20 @@ const REGENT_CARDS = [
     "type": "atk",
     "cost": 0,
     "rarity": "basic",
-    "note": "Deal 8 damage. Gain ★★. Put this card on top of your Draw Pile.",
-    "description": "Deal 8 damage. Gain StS2 StarRegent.pngStS2 StarRegent.png. Put this card on top of your Draw Pile.",
-    "starCost": 1
+    "note": "Deal 8 damage. Apply 1 Vulnerable. Apply 1 Weak. Put this card on top of your Draw Pile.",
+    "description": "Deal 8 damage. Apply 1 Vulnerable. Apply 1 Weak. Put this card on top of your Draw Pile.",
+    "starCost": 2
   },
   {
     "name": "Falling Star+",
     "type": "atk",
     "cost": 0,
     "rarity": "basic",
-    "note": "Deal 9 damage. Gain ★. Put this card on top of your Draw Pile.",
-    "description": "Deal 9 damage. Gain StS2 StarRegent.png. Put this card on top of your Draw Pile.",
+    "note": "Deal 9 damage. Apply 1 Vulnerable. Apply 1 Weak. Put this card on top of your Draw Pile.",
+    "description": "Deal 9 damage. Apply 1 Vulnerable. Apply 1 Weak. Put this card on top of your Draw Pile.",
     "isUpgraded": true,
     "baseCard": "Falling Star",
-    "starCost": 1
+    "starCost": 2
   },
   {
     "name": "Venerate",
@@ -759,20 +759,20 @@ const REGENT_CARDS = [
     "type": "atk",
     "cost": 1,
     "rarity": "uncommon",
-    "note": "Deal 8 damage. Gain ★★. Put this card on top of your Draw Pile.",
-    "description": "Deal 8 damage. Gain StS2 StarRegent.pngStS2 StarRegent.png. Put this card on top of your Draw Pile.",
-    "starCost": 1
+    "note": "Deal 12 damage. Draw 2 cards.",
+    "description": "Deal 12 damage. Draw 2 cards.",
+    "starCost": 2
   },
   {
     "name": "Guiding Star+",
     "type": "atk",
     "cost": 1,
     "rarity": "uncommon",
-    "note": "Deal 9 damage. Gain ★. Put this card on top of your Draw Pile.",
-    "description": "Deal 9 damage. Gain StS2 StarRegent.png. Put this card on top of your Draw Pile.",
+    "note": "Deal 13 damage. Draw 3 cards.",
+    "description": "Deal 13 damage. Draw 3 cards.",
     "isUpgraded": true,
     "baseCard": "Guiding Star",
-    "starCost": 1
+    "starCost": 2
   },
   {
     "name": "Astral Pulse",

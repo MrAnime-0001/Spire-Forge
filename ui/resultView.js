@@ -28,7 +28,7 @@ function updatePriorityPanel() {
       const charPool = ALL_CARDS[currentChar] || [];
       const bestCards = charPool
         .filter(c => c.type && c.type.includes(typeFilter) && !c.name.endsWith('+'))
-        .map(c => ({ card: c, score: scoreCard(c.name).score }))
+        .map(c => { const r = scoreCard(c.name); return { card: c, score: r ? r.score : 0 }; })
         .sort((a, b) => b.score - a.score)
         .slice(0, 3);
 
@@ -123,6 +123,57 @@ function updateResult() {
   box.innerHTML = '<div style="background:rgba(0,0,0,.5);border-radius:4px;padding:8px 10px;margin-bottom:6px">' + renderBuildResults() + '</div>';
 }
 
+function renderDeckProfile(p) {
+  function statColor(val, min) {
+    if (val >= min) return 'var(--green-bright)';
+    if (val >= min * 0.7) return 'var(--amber-bright)';
+    return '#c06060';
+  }
+  function row(icon, label, main, sub) {
+    return `<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
+      <span style="font-size:10px;width:14px;text-align:center;flex-shrink:0">${icon}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);width:62px;flex-shrink:0">${label}</span>
+      <span style="font-size:12px;font-family:'Cinzel',serif;font-weight:600;${main.color ? 'color:'+main.color : ''}">${main.val}</span>
+      ${sub ? `<span style="font-size:9px;color:var(--text-muted);margin-left:auto;white-space:nowrap">${sub}</span>` : ''}
+    </div>`;
+  }
+
+  var dmgColor = statColor(p.dmgPerTurn, p.dmgMin);
+  var blkColor = statColor(p.blkPerTurn, p.blkMin);
+
+  var html = `<div style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:.55rem .65rem;margin-bottom:.6rem">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.45rem">deck profile</div>`;
+
+  html += row('⚔', 'Damage', {val: p.dmgPerTurn + ' dmg/turn', color: dmgColor}, 'target ' + p.dmgTarget);
+  if (p.poisonPerCycle > 0)
+    html += row('', 'Poison', {val: '+' + p.poisonDmgEquiv + ' dmg equiv', color: 'var(--teal-bright)'}, p.poisonPerCycle + ' stacks/cycle');
+  if (p.strengthPerCycle > 0)
+    html += row('', 'Strength', {val: '+' + p.strengthPerCycle + '/cycle', color: 'var(--amber-bright)'}, 'scales each attack');
+  if (p.orbDmgPerTurn > 0)
+    html += row('', 'Orb dmg', {val: '+' + p.orbDmgPerTurn + '/turn', color: 'var(--teal-bright)'}, 'lightning passive');
+
+  html += row('🛡', 'Block', {val: p.blkPerTurn + ' blk/turn', color: blkColor}, 'target ' + p.blkTarget);
+  if (p.orbBlkPerTurn > 0)
+    html += row('', 'Orb blk', {val: '+' + p.orbBlkPerTurn + '/turn', color: 'var(--teal-bright)'}, 'frost passive');
+
+  if (p.summonPerCycle > 0)
+    html += row('💀', 'Osty pool', {val: '~' + p.summonPerCycle + ' HP/cycle', color: 'var(--amber-bright)'}, 'Unleash damage');
+
+  html += row('⚡', 'Energy', {val: 'avg ' + p.avgEnergyCost + '/card'}, p.energyGenPerCycle > 0 ? '+' + p.energyGenPerCycle + ' gen/cycle' : null);
+
+  if (p.char === 'regent')
+    html += row('★', 'Stars', {val: 'avg ' + p.avgStarCost + '/card'}, p.starGenPerCycle > 0 ? '+' + p.starGenPerCycle + ' gen/cycle' : '3 start/combat');
+
+  var ctColor = p.cycleTime <= 3 ? 'var(--green-bright)' : p.cycleTime <= 5 ? 'var(--amber-bright)' : '#c06060';
+  html += row('🔄', 'Cycle', {val: p.cycleTime.toFixed(1) + ' turns', color: ctColor}, null);
+
+  if (p.cycleWarning)
+    html += `<div style="margin-top:4px;font-size:10px;color:var(--amber-bright)">⚠ ${p.cycleWarning}</div>`;
+
+  html += '</div>';
+  return html;
+}
+
 function renderDeckHealth() {
   const el = document.getElementById('deckHealth');
   if (!el) return;
@@ -162,13 +213,7 @@ function renderDeckHealth() {
   const volColor = volume >= 60 ? 'var(--green-bright)' : volume >= 35 ? 'var(--amber-bright)' : '#c06060';
   const volLabel = volume >= 70 ? 'Optimal' : volume >= 50 ? 'Strong' : volume >= 35 ? 'Functional' : 'Unstable';
 
-  const atkCls = (axes.rawDPT || 0) >= targets.Attack / 2 ? 'stat-ok' : 'stat-warn';
-  const defCls = (axes.rawBPT || 0) >= targets.Defense / 2 ? 'stat-ok' : 'stat-warn';
-  const sclCls = axes.Scaling < targets.Scaling ? 'stat-warn' : 'stat-ok';
-  const effCls = axes.Efficiency < targets.Efficiency ? 'stat-warn' : 'stat-ok';
-  const conCls = axes.Consistency < targets.Consistency ? 'stat-warn' : 'stat-ok';
-  const synCls = axes.Synergy < targets.Synergy ? 'stat-warn' : 'stat-ok';
-
+  const profile = (typeof calcDeckProfile === 'function') ? calcDeckProfile() : null;
   const tte = calcTurnsToEmpty();
   const tteCls = tte !== null && tte <= 3 ? 'stat-ok' : tte !== null && tte > 5 ? 'stat-warn' : '';
 
@@ -220,14 +265,7 @@ function renderDeckHealth() {
       <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">deck evaluation</span>
       <span style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:${volColor}">${volume} <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase">${volLabel}</span></span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:.75rem">
-      <div class="stat-chip"><div class="stat-val ${atkCls}">~${axes.rawDPT} DPT</div><div class="stat-lbl">need ~${Math.round(targets.Attack/2)}</div></div>
-      <div class="stat-chip"><div class="stat-val ${defCls}">~${axes.rawBPT} BPT</div><div class="stat-lbl">need ~${Math.round(targets.Defense/2)}</div></div>
-      <div class="stat-chip"><div class="stat-val ${sclCls}">${axes.Scaling}</div><div class="stat-lbl">Scaling</div></div>
-      <div class="stat-chip"><div class="stat-val ${effCls}">${axes.Efficiency}</div><div class="stat-lbl">Efficiency</div></div>
-      <div class="stat-chip"><div class="stat-val ${conCls}">${axes.Consistency}</div><div class="stat-lbl">Consistency</div></div>
-      <div class="stat-chip"><div class="stat-val ${synCls}">${axes.Synergy}</div><div class="stat-lbl">Synergy</div></div>
-    </div>
+    ${profile ? renderDeckProfile(profile) : ''}
 
     <div style="padding:.55rem .75rem;background:rgba(0,0,0,.5);border:1px solid ${szp.color}40;border-left:3px solid ${szp.color};border-radius:4px;margin-bottom:.75rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem">
@@ -690,7 +728,7 @@ function renderEncounterTips() {
   html += '<div onclick="__encounterTipsOpen.encTips=!__encounterTipsOpen.encTips;updatePriorityPanel()" style="cursor:pointer;font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;user-select:none">';
   html += '<span style="display:inline-block;width:12px">' + arrow + '</span> encounter tips</div>';
 
-  if (!isOpen) return html + '</div>'; // close outer if not open
+  if (!isOpen) return html;
 
   html += '<div style="display:' + display + ';font-size:10px;line-height:1.5;color:var(--text-dim)">';
 

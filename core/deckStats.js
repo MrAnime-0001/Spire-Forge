@@ -2,18 +2,53 @@
 
 // ── estimateCardValue ──────────────────────────────────────────
 // Extract estimated damage/block from card description text.
-// Returns {dmg, blk} where each is numeric (0 = unknown/variable).
+// Returns {dmg, blk, strengthGain, summonHP, poisonApplied, orbsDmg, orbsBlk}
 function estimateCardValue(card) {
-  if (!card || !card.description) return {dmg: 0, blk: 0};
+  if (!card || !card.description) return {dmg:0,blk:0,strengthGain:0,summonHP:0,poisonApplied:0,orbsDmg:0,orbsBlk:0};
   var desc = card.description;
+  // Strip inline PNG icon markup (e.g. "StS2 Intent Defend.png") so regexes match correctly
+  var cleanDesc = desc.replace(/StS2\s+\S+\.png\s*/gi, '');
 
   var dmg = 0;
-  var dmgMatch = desc.match(/Deal (\d+) damage/);
-  if (dmgMatch) dmg = parseInt(dmgMatch[1], 10);
-
   var blk = 0;
-  var blkMatch = desc.match(/Gain (\d+) StS2 Intent Defend\.png Block/i);
+  var strengthGain = 0;
+  var summonHP = 0;
+  var poisonApplied = 0;
+  var orbsDmg = 0;
+  var orbsBlk = 0;
+
+  // Multi-hit: "Deal X damage Y times" — captures X×Y total
+  var multiHit = cleanDesc.match(/Deal (\d+) damage (\d+) times/i);
+  if (multiHit) {
+    dmg = parseInt(multiHit[1], 10) * parseInt(multiHit[2], 10);
+  } else {
+    var dmgMatch = cleanDesc.match(/Deal (\d+) damage/i);
+    if (dmgMatch) dmg = parseInt(dmgMatch[1], 10);
+  }
+
+  // Block
+  var blkMatch = cleanDesc.match(/Gain (\d+)\s*Block/i);
   if (blkMatch) blk = parseInt(blkMatch[1], 10);
+
+  // Poison (Silent) — each stack ≈ 2 dmg equivalent
+  var poisonMatch = cleanDesc.match(/Apply (\d+) Poison/i);
+  if (poisonMatch) poisonApplied = parseInt(poisonMatch[1], 10);
+
+  // Strength (Ironclad) — tracked separately, not added to dmg
+  var strMatch = cleanDesc.match(/Gain (\d+) Strength/i);
+  if (strMatch) strengthGain = parseInt(strMatch[1], 10);
+
+  // Osty / Summon (Necrobinder)
+  var summonMatch = cleanDesc.match(/Summon (\d+)/i);
+  if (summonMatch) summonHP = parseInt(summonMatch[1], 10) * 10; // ~10 HP per summon unit
+
+  // Orbs (Defect): Lightning ≈ 3 passive dmg/turn, Frost ≈ 3 blk/turn
+  var lMatch = cleanDesc.match(/Channel (\d+)[^.]*Lightning/i);
+  if (lMatch) orbsDmg = parseInt(lMatch[1], 10) * 3;
+  else if (/Channel[^.]*Lightning/i.test(cleanDesc)) orbsDmg = 3;
+  var fMatch = cleanDesc.match(/Channel (\d+)[^.]*Frost/i);
+  if (fMatch) orbsBlk = parseInt(fMatch[1], 10) * 3;
+  else if (/Channel[^.]*Frost/i.test(cleanDesc)) orbsBlk = 3;
 
   // Explicit value overrides for star-scaling Regent cards regex can't parse
   var STAR_VALUE_OVERRIDES = {
@@ -27,6 +62,9 @@ function estimateCardValue(card) {
     'Resonance': {dmg: 6, blk: 0}, 'Resonance+': {dmg: 8, blk: 0},
     'Celestial Might': {dmg: 18, blk: 0}, 'Celestial Might+': {dmg: 24, blk: 0},
     'Seven Stars': {dmg: 49, blk: 0}, 'Seven Stars+': {dmg: 49, blk: 0},
+    // Necrobinder Unleash/Flatten fixed equivalents
+    'Flatten': {dmg: 12, blk: 0}, 'Flatten+': {dmg: 16, blk: 0},
+    'Bone Smash': {dmg: 10, blk: 0}, 'Bone Smash+': {dmg: 14, blk: 0},
   };
   if (card.name && STAR_VALUE_OVERRIDES[card.name]) {
     var ov = STAR_VALUE_OVERRIDES[card.name];
@@ -34,7 +72,107 @@ function estimateCardValue(card) {
     if (ov.blk > blk) blk = ov.blk;
   }
 
-  return {dmg: dmg, blk: blk};
+  return {dmg, blk, strengthGain, summonHP, poisonApplied, orbsDmg, orbsBlk};
+}
+
+// ── calcDeckProfile ────────────────────────────────────────────
+// Aggregates per-cycle concrete stats for the deck profile panel.
+function calcDeckProfile() {
+  var deckSize = getDeckSize();
+  if (deckSize === 0) return null;
+  var cycleTime = calcDeckCycleTime() || 1;
+
+  var charCards = (typeof ALL_CARDS !== 'undefined' && ALL_CARDS[currentChar]) ? ALL_CARDS[currentChar] : [];
+  var colorlessCards = (typeof ALL_CARDS !== 'undefined' && ALL_CARDS['colorless']) ? ALL_CARDS['colorless'] : [];
+  function findCard(name) {
+    return charCards.find(function(x){return x.name===name;}) || colorlessCards.find(function(x){return x.name===name;});
+  }
+
+  var totalDmg = 0, totalBlk = 0;
+  var totalEnergyCost = 0, totalStarCost = 0, starCostCount = 0;
+  var energyGen = 0, starGen = 0;
+  var strengthPerCycle = 0, poisonPerCycle = 0;
+  var summonPerCycle = 0;
+  var orbDmgPerCycle = 0, orbBlkPerCycle = 0;
+  var powerCardCount = 0;
+  var atkCount = 0, atkTotalDmg = 0, atkTotalCost = 0;
+  var defCount = 0, defTotalBlk = 0, defTotalCost = 0;
+
+  Object.keys(deck).forEach(function(name) {
+    var count = deck[name] || 0;
+    var card = findCard(name);
+    if (!card) return;
+    var v = estimateCardValue(card);
+
+    totalDmg         += v.dmg * count;
+    totalBlk         += v.blk * count;
+    poisonPerCycle   += v.poisonApplied * count;
+    strengthPerCycle += v.strengthGain * count;
+    summonPerCycle   += v.summonHP * count;
+    orbDmgPerCycle   += v.orbsDmg * count;
+    orbBlkPerCycle   += v.orbsBlk * count;
+
+    var cost = card.cost;
+    if (cost === 'X') cost = 2;
+    cost = Number(cost);
+    if (!isNaN(cost) && cost >= 0) totalEnergyCost += cost * count;
+
+    var sc = card.starCost || 0;
+    if (sc > 0) { totalStarCost += sc * count; starCostCount += count; }
+
+    energyGen += (typeof VEL_ENERGY_BONUS !== 'undefined' ? (VEL_ENERGY_BONUS[name] || 0) : 0) * count;
+    starGen   += (typeof VEL_STAR_GEN_BONUS !== 'undefined' ? (VEL_STAR_GEN_BONUS[name] || 0) : 0) * count;
+
+    if (card.type === 'pow') powerCardCount += count;
+
+    var cardCost = !isNaN(cost) && cost >= 0 ? cost : 1;
+    if (v.dmg > 0) { atkCount += count; atkTotalDmg += v.dmg * count; atkTotalCost += cardCost * count; }
+    if (v.blk > 0) { defCount += count; defTotalBlk += v.blk * count; defTotalCost += cardCost * count; }
+  });
+
+  // Energy-constrained dmg/blk per turn: cap by 3 energy and 5 draw, shared between atk and def
+  var baseEnergy = 3, baseDraw = 5;
+  Object.keys(deck).forEach(function(name) {
+    var c = deck[name] || 0;
+    if (typeof VEL_ENERGY_BONUS !== 'undefined' && VEL_ENERGY_BONUS[name]) baseEnergy += VEL_ENERGY_BONUS[name] * c;
+    if (typeof VEL_DRAW_BONUS   !== 'undefined' && VEL_DRAW_BONUS[name])   baseDraw   += VEL_DRAW_BONUS[name]   * c;
+  });
+  var avgAtkCost = atkCount > 0 ? atkTotalCost / atkCount : 1;
+  var avgDefCost = defCount > 0 ? defTotalCost / defCount : 1;
+  var atkDrawRate = baseDraw * (atkCount / deckSize);
+  var defDrawRate = baseDraw * (defCount / deckSize);
+  var totalWantCost = atkDrawRate * avgAtkCost + defDrawRate * avgDefCost;
+  var atkEnergyBudget = totalWantCost > 0 ? baseEnergy * (atkDrawRate * avgAtkCost / totalWantCost) : baseEnergy;
+  var defEnergyBudget = baseEnergy - atkEnergyBudget;
+  var effectiveAtkPlays = Math.min(atkDrawRate, avgAtkCost > 0 ? atkEnergyBudget / avgAtkCost : atkDrawRate);
+  var effectiveDefPlays = Math.min(defDrawRate, avgDefCost > 0 ? defEnergyBudget / avgDefCost : defDrawRate);
+  var dmgPerTurn = Math.round(effectiveAtkPlays * (atkCount > 0 ? atkTotalDmg / atkCount : 0));
+  var blkPerTurn = Math.round(effectiveDefPlays * (defCount > 0 ? defTotalBlk / defCount : 0));
+  var poisonDmgEquiv = Math.round(poisonPerCycle * 2);
+
+  var cycleWarning = (cycleTime > 5 && powerCardCount >= 2)
+    ? 'Key scaling cards appear every ' + cycleTime.toFixed(1) + ' turns — thin your deck'
+    : null;
+
+  var dmgTarget = currentAct <= 1 ? '15–20' : currentAct === 2 ? '20–30' : '30+';
+  var blkTarget = currentAct <= 1 ? '8–12'  : currentAct === 2 ? '12–18' : '15–20';
+  var dmgMin = currentAct <= 1 ? 15 : currentAct === 2 ? 20 : 30;
+  var blkMin = currentAct <= 1 ? 8  : currentAct === 2 ? 12 : 15;
+
+  return {
+    dmgPerTurn, blkPerTurn,
+    poisonDmgEquiv, poisonPerCycle,
+    orbDmgPerTurn: orbDmgPerCycle > 0 ? Math.max(1, Math.round(orbDmgPerCycle / cycleTime)) : 0,
+    orbBlkPerTurn: orbBlkPerCycle > 0 ? Math.max(1, Math.round(orbBlkPerCycle / cycleTime)) : 0,
+    strengthPerCycle, summonPerCycle,
+    avgEnergyCost: deckSize > 0 ? (totalEnergyCost / deckSize).toFixed(1) : '0',
+    energyGenPerCycle: energyGen,
+    avgStarCost: starCostCount > 0 ? (totalStarCost / starCostCount).toFixed(1) : '0',
+    starGenPerCycle: starGen,
+    cycleTime, cycleWarning,
+    dmgTarget, blkTarget, dmgMin, blkMin,
+    char: currentChar,
+  };
 }
 
 function getDeckStats() {
@@ -497,8 +635,9 @@ function getRemoveCandidates() {
 function getCrisisStates(axes, targets) {
   if (!axes || !targets) return { attack: false, defense: false, scaling: false };
   return {
-    attack:  axes.Attack  < (targets.Attack  * 0.5),
-    defense: axes.Defense < (targets.Defense * 0.5),
-    scaling: axes.Scaling < (targets.Scaling * 0.3) // Scaling crisis is more lenient
+    attack:      axes.Attack      < (targets.Attack      * 0.5),
+    defense:     axes.Defense     < (targets.Defense     * 0.5),
+    scaling:     axes.Scaling     < (targets.Scaling     * 0.3),
+    consistency: axes.Consistency < (targets.Consistency * 0.5)
   };
 }
