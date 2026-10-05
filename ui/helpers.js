@@ -51,6 +51,14 @@ function cardOrbHtml(card, small) {
   return html;
 }
 
+// Art downloaded by scripts/fetch-card-art.py. Cards the app files under a different pool than the
+// wiki (e.g. Clash) fall back to colorless/; no art at all -> image removed, gradient shows.
+function cardArtHtml(card, pool) {
+  var slug = (card.baseCard || card.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return '<img class="cf-art-img" alt="" src="assets/cards/' + pool + '/' + slug + '.webp" ' +
+    'onerror="this.onerror=function(){this.remove()};this.src=\'assets/cards/colorless/' + slug + '.webp\'">';
+}
+
 function cardFaceHtml(card) {
   var found = findCard(card.name);
   var col = CHAR_COLORS[found ? found.pool : currentChar] || CHAR_COLORS.colorless;
@@ -60,7 +68,7 @@ function cardFaceHtml(card) {
       '<div class="cf-orbs">' + cardOrbHtml(card) + '</div>' +
       (card.multiplayer ? '<span class="cf-coop">CO-OP</span>' : '') +
       '<div class="cf-banner cf-rar-' + rar + '"><span class="cf-name' + (card.isUpgraded ? ' up' : '') + '">' + card.name + '</span></div>' +
-      '<div class="cf-art"></div>' +
+      '<div class="cf-art">' + cardArtHtml(card, found ? found.pool : 'colorless') + '</div>' +
       '<div class="cf-type">' + type + '</div>' +
       '<div class="cf-body">' + formatCardDescription(card.description) + '</div>' +
       '<div class="cf-rarity">' + rar + '</div>' +

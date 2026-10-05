@@ -165,6 +165,8 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 .cf-art{height:92px;margin:6px 0 0;border:2px solid rgba(0,0,0,.6);
   background:radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--char) 60%,#fff2) 0%,color-mix(in srgb,var(--char) 35%,#000) 75%);
   box-shadow:inset 0 0 18px rgba(0,0,0,.7);border-radius:4px;}
+.cf-art{overflow:hidden;height:120px;}
+.cf-art-img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 30%;}
 .cf-attack .cf-art{border-radius:4px 4px 0 0;clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);}
 .cf-power .cf-art{border-radius:50% 50% 6px 6px / 46% 46% 6px 6px;}
 .cf-type{display:inline-block;margin-top:-8px;position:relative;padding:1px 10px;border-radius:2px;
@@ -722,7 +724,7 @@ function formatCardDescription(desc) {
   return lines;
 }
 </script>
-<script src="ui/helpers.js?v=2"></script>
+<script src="ui/helpers.js?v=3"></script>
 <script src="ui/deckView.js?v=2"></script>
 <script src="ui/resultView.js?v=20"></script>
 <script src="ui/pickerView.js?v=15"></script>
