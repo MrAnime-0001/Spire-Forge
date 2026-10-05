@@ -74,6 +74,12 @@ function scoreCard(cardName) {
     reason = 'No clear synergy with current builds';
   }
 
+  // Co-op-only cards never show up in solo rewards — don't recommend them.
+  if (card.multiplayer) {
+    totalScore = 0;
+    reason = 'Co-op only — not offered in solo runs';
+  }
+
   // Verdict thresholds
   var verdict, vLabel, vBorder, vBg, vColor;
   if (totalScore >= 0.75) {

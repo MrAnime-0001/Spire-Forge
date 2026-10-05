@@ -134,22 +134,52 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 .deck-empty{font-size:13px;color:var(--text-muted);font-style:italic;padding:.75rem 0;text-align:center;font-weight:300;}
 
 /* ── Card Hover Popup ── */
-.card-popup{position:fixed;max-width:340px;padding:10px 12px;border-radius:3px;border:1px solid rgba(100,90,70,.15);
-  background:rgba(0,0,0,.5);box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.3);
-  z-index:1000;pointer-events:none;font-family:var(--font-body);line-height:1.4;}
-.card-popup .popup-name{font-family:var(--font-mono);font-size:14px;font-weight:600;margin-bottom:4px;}
-.card-popup .popup-type{font-family:var(--font-mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;
-  margin-bottom:6px;opacity:.8;}
-.card-popup .popup-desc{font-size:12px;color:var(--text-dim);font-weight:300;margin-bottom:4px;}
-.card-popup .popup-cost{font-family:var(--font-mono);font-size:9px;margin-top:4px;}
-.card-popup .popup-note{font-size:11px;color:var(--text-muted);font-style:italic;margin-top:4px;
-  border-top:1px solid rgba(100,90,70,.1);padding-top:4px;font-weight:300;}
-.card-popup.popup-atk{border-color:rgba(208,64,64,.4);}
-.card-popup.popup-def{border-color:rgba(74,140,186,.4);}
-.card-popup.popup-skl{border-color:rgba(200,146,42,.4);}
-.card-popup.popup-vel{border-color:rgba(74,154,138,.4);}
-.card-popup.popup-pow{border-color:rgba(154,106,186,.4);}
-.card-popup.popup-curse{border-color:rgba(100,80,60,.4);}
+.card-popup{position:fixed;width:230px;z-index:1000;pointer-events:none;font-family:var(--font-body);line-height:1.35;
+  filter:drop-shadow(0 10px 24px rgba(0,0,0,.7));animation:cf-in .12s ease-out;}
+@keyframes cf-in{from{opacity:0;transform:translateY(6px) scale(.97);}to{opacity:1;transform:none;}}
+
+/* ── Card Face (game-style mini card) ── */
+.cf{position:relative;padding:30px 12px 22px;border-radius:12px;text-align:center;
+  background:linear-gradient(170deg,color-mix(in srgb,var(--char) 55%,#1a1410),color-mix(in srgb,var(--char) 25%,#0b0907) 70%);
+  border:3px solid color-mix(in srgb,var(--char) 45%,#c8a860);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),inset 0 0 24px rgba(0,0,0,.55);}
+.cf-orbs{position:absolute;top:-8px;left:-8px;display:flex;flex-direction:column;gap:2px;z-index:2;}
+.cf-orb{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;
+  font-family:var(--font-display);font-size:20px;color:#fff;line-height:1;flex-shrink:0;
+  text-shadow:0 0 2px #000,0 1px 2px #000,0 0 4px #000;
+  background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--char) 40%,#fff),var(--char) 45%,color-mix(in srgb,var(--char) 50%,#000));
+  border:2px solid #e8d8a8;box-shadow:0 2px 6px rgba(0,0,0,.6);}
+.cf-orb.cf-star{border-radius:0;border:none;width:30px;height:30px;font-size:15px;margin-left:2px;
+  background:radial-gradient(circle,#fff6c8,#e8b84b 55%,#a06d10);
+  clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);}
+.cf-orb.sm{width:20px;height:20px;font-size:12px;border-width:1px;}
+.cf-orb.cf-star.sm{width:18px;height:18px;font-size:10px;margin-left:-4px;}
+.cf-orb.cf-none{visibility:hidden;}
+.cf-banner{position:absolute;top:8px;left:18px;right:-6px;padding:4px 8px;border-radius:2px;
+  background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.25)),var(--rar,#6a6a60);
+  border:1px solid rgba(0,0,0,.5);box-shadow:0 2px 4px rgba(0,0,0,.5);}
+.cf-rar-uncommon{--rar:#3f78a8;} .cf-rar-rare{--rar:#b8892a;} .cf-rar-ancient{--rar:#2f8f84;}
+.cf-rar-basic,.cf-rar-token{--rar:#55524a;} .cf-rar-event{--rar:#7a4a9a;}
+.cf-name{font-family:var(--font-display);font-size:15px;color:#fff6e0;letter-spacing:.02em;text-shadow:0 1px 2px #000,0 0 3px #000;}
+.cf-name.up{color:#8fe36a;}
+.cf-art{height:92px;margin:6px 0 0;border:2px solid rgba(0,0,0,.6);
+  background:radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--char) 60%,#fff2) 0%,color-mix(in srgb,var(--char) 35%,#000) 75%);
+  box-shadow:inset 0 0 18px rgba(0,0,0,.7);border-radius:4px;}
+.cf-attack .cf-art{border-radius:4px 4px 0 0;clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);}
+.cf-power .cf-art{border-radius:50% 50% 6px 6px / 46% 46% 6px 6px;}
+.cf-type{display:inline-block;margin-top:-8px;position:relative;padding:1px 10px;border-radius:2px;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#e8dcc0;
+  background:#1a1612;border:1px solid rgba(232,216,168,.35);}
+.cf-body{margin-top:8px;font-size:12.5px;color:#f2ead8;font-weight:400;text-shadow:0 1px 2px #000;}
+.cf-body img{width:15px!important;height:15px!important;}
+.cf-rarity{position:absolute;bottom:4px;left:0;right:0;font-family:var(--font-mono);font-size:8px;letter-spacing:.2em;
+  text-transform:uppercase;color:rgba(232,216,168,.5);}
+.cf-coop{position:absolute;top:-8px;right:-6px;z-index:2;padding:1px 6px;border-radius:2px;font-family:var(--font-mono);
+  font-size:8px;letter-spacing:.12em;color:#fff;background:#a03030;border:1px solid #e8d8a8;}
+.cf-note{margin-top:8px;padding:6px 8px;font-size:11px;font-style:italic;color:var(--text-dim);
+  background:rgba(13,11,9,.92);border:1px solid var(--gilt);border-radius:3px;text-align:left;}
+.cf-row-orb{display:inline-flex;align-items:center;margin-right:6px;vertical-align:middle;}
+.kw{color:#e8c86a;white-space:nowrap;}
 
 /* ── Runic Stat Chips ── */
 .deck-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px;margin-bottom:1rem;}
@@ -618,20 +648,20 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 <canvas id="bgCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:-1;"></canvas>
 <canvas id="particleCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:200;"></canvas>
 </div><!-- /page -->
-<script src="data/cards-ironclad.js"></script>
-<script src="data/cards-silent.js"></script>
-<script src="data/cards-defect.js"></script>
-<script src="data/cards-necrobinder.js"></script>
-<script src="data/cards-regent.js"></script>
-<script src="data/cards-colorless.js"></script>
+<script src="data/cards-ironclad.js?v=2"></script>
+<script src="data/cards-silent.js?v=2"></script>
+<script src="data/cards-defect.js?v=2"></script>
+<script src="data/cards-necrobinder.js?v=2"></script>
+<script src="data/cards-regent.js?v=2"></script>
+<script src="data/cards-colorless.js?v=2"></script>
 <script src="data/cards.js"></script>
-<script src="data/constants.js?v=2"></script>
-<script src="data/builds.js?v=6"></script>
+<script src="data/constants.js?v=3"></script>
+<script src="data/builds.js?v=7"></script>
 <script src="data/bossTips.js?v=1"></script>
 <script src="core/state.js?v=2"></script>
 <script src="core/deckStats.js?v=5"></script>
 <script src="core/engineTracker.js?v=1"></script>
-<script src="core/rewardAdvisor.js?v=3"></script>
+<script src="core/rewardAdvisor.js?v=4"></script>
 <script src="core/storage.js?v=1"></script>
 <script>
 // Format card description with icon replacements — shared by popup and inline rendering
@@ -681,20 +711,22 @@ function formatCardDescription(desc) {
   for(var img in iconImg) {
     desc = desc.split(img).join(iconImg[img]);
   }
+  // Keywords keep their word (gold, like in-game) with the icon in front.
   for(var k=0;k<kwIcons.length;k++) {
-    desc = desc.split(kwIcons[k].w).join('<img src="assets/icons/' + kwIcons[k].i + '.png" style="width:14px;height:14px;vertical-align:middle">');
+    desc = desc.split(kwIcons[k].w).join('<span class="kw"><img src="assets/icons/' + kwIcons[k].i + '.png" style="width:14px;height:14px;vertical-align:middle">' + kwIcons[k].w + '</span>');
   }
+  desc = desc.replace(/\b(Block|Exhaust|Retain|Ethereal|Innate|Sly|Channel|Evoke|Forge|Summon|Unplayable|Eternal|Replay|Fatal|Transform|Stun|Osty|Soul|Souls|Shivs?)\b/g, '<span class="kw">$1</span>');
   var lines = desc.split('. ').map(function(l) {
     return l.trim() ? l.replace(/\.+$/,'') + '.' : '';
   }).filter(Boolean).join('<br>');
   return lines;
 }
 </script>
-<script src="ui/helpers.js"></script>
-<script src="ui/deckView.js"></script>
-<script src="ui/resultView.js?v=19"></script>
-<script src="ui/pickerView.js?v=14"></script>
-<script src="ui/modals.js"></script>
+<script src="ui/helpers.js?v=2"></script>
+<script src="ui/deckView.js?v=2"></script>
+<script src="ui/resultView.js?v=20"></script>
+<script src="ui/pickerView.js?v=15"></script>
+<script src="ui/modals.js?v=2"></script>
 <script src="ui/headerControls.js?v=10"></script>
 
 <script>
@@ -1253,246 +1285,30 @@ window.setAsc = function(n){
 })();
 
 // ── Card Hover Popup ─────────────────────────────────
+// Any element with data-card="<name>" shows the game-style card face on hover.
 (function(){
-
-  function getCardData(name){
-    var chars = ['ironclad','silent','defect','necrobinder','regent','colorless'];
-    for(var i=0;i<chars.length;i++){
-      var arr = ALL_CARDS[chars[i]];
-      if(!arr) continue;
-      var c = arr.find(function(x){return x.name===name;});
-      if(c) return c;
-    }
-    return null;
-  }
-
   var popup = null;
-  var hideTimer = null;
-  function showPopup(e, name){
-    if(hideTimer){ clearTimeout(hideTimer); hideTimer=null; }
-    var card = getCardData(name);
-    if(!card) return;
-
+  document.addEventListener('mouseover', function(e){
+    var el = e.target.closest && e.target.closest('[data-card]');
+    if(!el) return;
+    var found = findCard(el.dataset.card);
+    if(!found) return;
     if(!popup){
       popup = document.createElement('div');
       popup.className = 'card-popup';
       document.body.appendChild(popup);
     }
-
-    var t = card.type || 'skl';
-    var typeLabel = t.replace(/_/g,'·').toUpperCase();
-    var costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
-    if (currentChar === 'regent' && card.starCost) {
-      costStr += '✦'.repeat(card.starCost);
-    }
-    var rarity = card.rarity || '';
-
-    var typeClass = 'popup-';
-    if(t.includes('curse')||t.includes('status')) typeClass += 'curse';
-    else if(t.includes('atk')) typeClass += 'atk';
-    else if(t.includes('def')) typeClass += 'def';
-    else if(t.includes('vel')||t.includes('pow')) typeClass += t.includes('vel')?'vel':'pow';
-    else typeClass += 'skl';
-
-    popup.className = 'card-popup ' + typeClass;
-
-    var lines = formatCardDescription(card.description);
-
-    popup.innerHTML =
-      '<div class="popup-name">' + name + '</div>' +
-      '<div class="popup-type">' + rarity + ' · ' + typeLabel + (costStr?' · '+costStr:'') + '</div>' +
-      '<div class="popup-desc">' + lines + '</div>' +
-      (card.starGain ? '<div class="popup-cost">★ +' + card.starGain + ' Stars</div>' : '') +
-      (card.note ? '<div class="popup-note">' + card.note + '</div>' : '');
-
-    var x = e.clientX + 16;
-    var y = e.clientY - 10;
-    var maxW = 340;
-    if(x + maxW > window.innerWidth - 10) x = e.clientX - maxW - 10;
-    popup.style.left = x + 'px';
-    popup.style.top = y + 'px';
-  }
-
-  function hidePopup(){
-    hideTimer = setTimeout(function(){
-      if(popup){ popup.remove(); popup=null; }
-    }, 80);
-  }
-
-  // Deck items (event delegation)
-  document.addEventListener('mouseover', function(e){
-    var item = e.target.closest('.deck-item');
-    if(!item) return;
-    var nameEl = item.querySelector('.deck-item-name');
-    if(!nameEl) return;
-    showPopup(e, nameEl.textContent.trim());
+    popup.innerHTML = cardFaceHtml(found.card);
+    var w = popup.offsetWidth, h = popup.offsetHeight;
+    var x = e.clientX + 16, y = e.clientY - 10;
+    if(x + w > window.innerWidth - 10) x = e.clientX - w - 16;
+    popup.style.left = Math.max(10, x) + 'px';
+    popup.style.top = Math.max(10, Math.min(y, window.innerHeight - h - 10)) + 'px';
   });
-
   document.addEventListener('mouseout', function(e){
-    if(e.target.closest('.deck-item')) hidePopup();
+    var el = e.target.closest && e.target.closest('[data-card]');
+    if(el && !el.contains(e.relatedTarget) && popup){ popup.remove(); popup = null; }
   });
-
-  // Reward pool + picker cards
-  document.addEventListener('mouseover', function(e){
-    var item = e.target.closest('.picker-card-row, .card-option');
-    if(!item) return;
-    var nameEl = item.querySelector('.picker-card-name, .card-opt-name');
-    if(!nameEl) return;
-    showPopup(e, nameEl.textContent.trim().split('×')[0].trim());
-  });
-
-  document.addEventListener('mouseout', function(e){
-    if(e.target.closest('.picker-card-row, .card-option')) hidePopup();
-  });
-
-  // Search result cards (plain divs inside #pickerList)
-  document.addEventListener('mouseover', function(e){
-    var list = document.getElementById('pickerList');
-    if(!list || !list.contains(e.target)) return;
-    var card = e.target.closest('#pickerList > div');
-    if(!card) return;
-    var nameSpan = card.querySelector('div > span:first-child');
-    if(!nameSpan) return;
-    var txt = nameSpan.textContent.trim();
-    if(txt && txt.length < 40) showPopup(e, txt.split('×')[0].trim());
-  });
-
-  document.addEventListener('mouseout', function(e){
-    var list = document.getElementById('pickerList');
-    if(list && list.contains(e.target)) hidePopup();
-  });
-
-  // Priority panel cards (critical needs, essential, synergy — inline-style divs)
-  document.addEventListener('mouseover', function(e){
-    var panel = document.getElementById('priorityPanel');
-    if(!panel || !panel.contains(e.target)) return;
-    // Find the card row div (has onclick=quickAddPriority)
-    var card = e.target.closest('[onclick*="quickAddPriority"]');
-    if(!card) return;
-    // Card name is the main text node (first div > first div > span or just elements with text)
-    var nameEl = card.querySelector('[style*="font-size:13px"]');
-    if(!nameEl) return;
-    showPopup(e, nameEl.textContent.trim());
-  });
-
-  document.addEventListener('mouseout', function(e){
-    var panel = document.getElementById('priorityPanel');
-    if(panel && panel.contains(e.target) && e.target.closest('[onclick*="quickAddPriority"]')) hidePopup();
-  });
-})();
-
-// Direct hover: watch for deck-item and priority-panel hovers after render
-(function(){
-  var popup = null;
-  var hideTimer = null;
-  var hoverTarget = null;
-
-  function getCardData(name){
-    var chars = ['ironclad','silent','defect','necrobinder','regent','colorless'];
-    for(var i=0;i<chars.length;i++){
-      var arr = ALL_CARDS[chars[i]];
-      if(!arr) continue;
-      var c = arr.find(function(x){return x.name===name;});
-      if(c) return c;
-    }
-    return null;
-  }
-
-  function showPopup(e, name){
-    if(hideTimer){ clearTimeout(hideTimer); hideTimer=null; }
-    var card = getCardData(name);
-    if(!card) return;
-
-    if(!popup){
-      popup = document.createElement('div');
-      popup.className = 'card-popup';
-      document.body.appendChild(popup);
-    }
-
-    var t = card.type || 'skl';
-    var typeClass = 'popup-';
-    if(t.includes('curse')||t.includes('status')) typeClass += 'curse';
-    else if(t.includes('atk')) typeClass += 'atk';
-    else if(t.includes('def')) typeClass += 'def';
-    else if(t.includes('vel')||t.includes('pow')) typeClass += t.includes('vel')?'vel':'pow';
-    else typeClass += 'skl';
-    popup.className = 'card-popup ' + typeClass;
-
-    var typeLabel = t.replace(/_/g,'·').toUpperCase();
-    var costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
-    if (currentChar === 'regent' && card.starCost) {
-      costStr += '✦'.repeat(card.starCost);
-    }
-    var rarity = card.rarity || '';
-    var lines = formatCardDescription(card.description);
-
-    popup.innerHTML =
-      '<div class="popup-name">' + name + '</div>' +
-      '<div class="popup-type">' + rarity + ' · ' + typeLabel + (costStr?' · '+costStr:'') + '</div>' +
-      '<div class="popup-desc">' + lines + '</div>' +
-      (card.starGain ? '<div class="popup-cost">★ +' + card.starGain + ' Stars</div>' : '') +
-      (card.note ? '<div class="popup-note">' + card.note + '</div>' : '');
-
-    var x = e.clientX + 16;
-    var y = e.clientY - 10;
-    var maxW = 340;
-    if(x + maxW > window.innerWidth - 10) x = e.clientX - maxW - 10;
-    popup.style.left = x + 'px';
-    popup.style.top = y + 'px';
-  }
-
-  function hidePopup(){
-    hideTimer = setTimeout(function(){
-      if(popup){ popup.remove(); popup=null; }
-    }, 80);
-  }
-
-  // Watch for hovers on deck items via mutation observer (re-renders)
-  function attachDeckHovers() {
-    document.querySelectorAll('.deck-item').forEach(function(el){
-      if(el.dataset.hasHover) return;
-      el.dataset.hasHover = '1';
-      el.addEventListener('mouseover', function(e){
-        var nameEl = this.querySelector('.deck-item-name');
-        if(!nameEl) return;
-        showPopup(e, nameEl.textContent.trim());
-      });
-      el.addEventListener('mouseout', function(){
-        hidePopup();
-      });
-    });
-  }
-
-  // Watch for hovers on priority panel cards
-  function attachPriorityHovers() {
-    var panel = document.getElementById('priorityPanel');
-    if(!panel) return;
-    panel.querySelectorAll('[onclick*="quickAddPriority"]').forEach(function(el){
-      if(el.dataset.hasHover) return;
-      el.dataset.hasHover = '1';
-      el.addEventListener('mouseover', function(e){
-        var nameEl = this.querySelector('[style*="font-size:13px"]');
-        if(!nameEl) return;
-        showPopup(e, nameEl.textContent.trim());
-      });
-      el.addEventListener('mouseout', function(){
-        hidePopup();
-      });
-    });
-  }
-
-  attachDeckHovers();
-  attachPriorityHovers();
-
-  // Re-attach after each render (state changes trigger re-renders)
-  var origNotify = notifyListeners;
-  notifyListeners = function() {
-    origNotify();
-    setTimeout(function(){
-      attachDeckHovers();
-      attachPriorityHovers();
-    }, 0);
-  };
 })();
 </script>
 </body>

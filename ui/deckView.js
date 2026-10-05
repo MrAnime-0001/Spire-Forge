@@ -57,8 +57,9 @@ function renderDeckList() {
         var isBane = name === "Ascender's Bane";
     const upgradeBtn = (hasUpgrade && !isBane) ? `<button class="qty-btn" onclick="upgradeCard('${safeN}')" title="Upgrade this card" style="border-color:var(--amber); color:var(--amber-bright); font-size:11px; margin-right:4px;">\u2692</button>` : '';
 
-    return `<div class="deck-item" style="grid-template-columns:1fr auto auto auto;gap:6px">
-      <span class="deck-item-name" style="${nameStyle}${isBane ? ';color:var(--text-muted);font-style:italic' : ''}">${name}</span>
+    const orb = c ? `<span class="cf-row-orb">${cardOrbHtml(c, true)}</span>` : '';
+    return `<div class="deck-item" data-card="${name}" style="grid-template-columns:1fr auto auto auto;gap:6px">
+      <span style="display:flex;align-items:center;min-width:0">${orb}<span class="deck-item-name" style="${nameStyle}${isBane ? ';color:var(--text-muted);font-style:italic' : ''}">${name}</span></span>
       <div style="display:flex; align-items:center; gap:4px">
         ${upgradeBtn}
         <span class="deck-item-tag ${typeCls(type)}" style="${isBane ? 'background:rgba(100,90,70,.2);color:var(--text-muted)' : ''}">${tl}</span>

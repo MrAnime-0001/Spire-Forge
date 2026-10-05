@@ -1,5 +1,6 @@
-// Card definitions for STS2 Build Advisor — Ironclad
+// Card definitions for STS2 Build Advisor - Ironclad
 // Keep this file data-only.
+// Synced from slaythespire.wiki.gg by scripts/sync-wiki-cards.mjs
 
 const IRONCLAD_CARDS = [
     {
@@ -7,14 +8,47 @@ const IRONCLAD_CARDS = [
       "type": "atk",
       "cost": 1,
       "rarity": "basic",
+      "cardType": "Attack",
       "note": "Starter. Core card until you find better alternatives.",
       "description": "Deal 6 damage."
+    },
+    {
+      "name": "Strike+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "basic",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 9 damage.",
+      "isUpgraded": true,
+      "baseCard": "Strike"
+    },
+    {
+      "name": "Defend",
+      "type": "def",
+      "cost": 1,
+      "rarity": "basic",
+      "cardType": "Skill",
+      "note": "Starter. Remove when possible in Act 3.",
+      "description": "Gain 5 StS2 Intent Defend.png Block."
+    },
+    {
+      "name": "Defend+",
+      "type": "def",
+      "cost": 1,
+      "rarity": "basic",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 8 StS2 Intent Defend.png Block.",
+      "isUpgraded": true,
+      "baseCard": "Defend"
     },
     {
       "name": "Bash",
       "type": "atk",
       "cost": 2,
       "rarity": "basic",
+      "cardType": "Attack",
       "note": "Starter. 8 dmg + 2 Vulnerable.",
       "description": "Deal 8 damage. Apply 2 Vulnerable."
     },
@@ -23,690 +57,1761 @@ const IRONCLAD_CARDS = [
       "type": "atk",
       "cost": 2,
       "rarity": "basic",
-      "note": "Upgraded Bash. 10 dmg + 3 Vulnerable.",
+      "cardType": "Attack",
+      "note": "",
       "description": "Deal 10 damage. Apply 3 Vulnerable.",
       "isUpgraded": true,
       "baseCard": "Bash"
-    },
-    {
-      "name": "Defend",
-      "type": "def",
-      "cost": 1,
-      "rarity": "basic",
-      "note": "Starter. Remove when possible in Act 3.",
-      "description": "Gain 5 StS2 Intent Defend.png Block."
     },
     {
       "name": "Anger",
       "type": "atk",
       "cost": 0,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "0-cost. Adds a copy to discard. Good with Exhaust.",
       "description": "Deal 6 damage. Add a copy of this card into your Discard Pile."
+    },
+    {
+      "name": "Anger+",
+      "type": "atk",
+      "cost": 0,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 8 damage. Add a copy of this card into your Discard Pile.",
+      "isUpgraded": true,
+      "baseCard": "Anger"
     },
     {
       "name": "Armaments",
       "type": "def",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Skill",
       "note": "Block + upgrade a card in hand. Good early utility.",
       "description": "Gain 5 StS2 Intent Defend.png Block. Upgrade a card in your Hand."
+    },
+    {
+      "name": "Armaments+",
+      "type": "def",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 5 StS2 Intent Defend.png Block. Upgrade ALL cards in your Hand.",
+      "isUpgraded": true,
+      "baseCard": "Armaments"
     },
     {
       "name": "Blood Wall",
       "type": "def",
       "cost": 2,
       "rarity": "common",
+      "cardType": "Skill",
       "note": "Lose 2 HP. Gain 16 Block. Efficient panic button.",
       "description": "Lose 2 HP. Gain 16 StS2 Intent Defend.png Block."
+    },
+    {
+      "name": "Blood Wall+",
+      "type": "def",
+      "cost": 2,
+      "rarity": "common",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Lose 2 HP. Gain 20 StS2 Intent Defend.png Block.",
+      "isUpgraded": true,
+      "baseCard": "Blood Wall"
     },
     {
       "name": "Bloodletting",
       "type": "vel",
       "cost": 0,
-      "rarity": "common",
+      "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "Lose 3 HP, gain 2 Energy. Strong with draw.",
       "description": "Lose 3 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png."
+    },
+    {
+      "name": "Bloodletting+",
+      "type": "vel",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Lose 3 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png.",
+      "isUpgraded": true,
+      "baseCard": "Bloodletting"
     },
     {
       "name": "Body Slam",
       "type": "skl",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "Deals damage equal to your current Block. Core Block build.",
       "description": "Deal damage equal to your StS2 Intent Defend.png Block."
+    },
+    {
+      "name": "Body Slam+",
+      "type": "skl",
+      "cost": 0,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal damage equal to your StS2 Intent Defend.png Block.",
+      "isUpgraded": true,
+      "baseCard": "Body Slam"
     },
     {
       "name": "Breakthrough",
       "type": "atk",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "AoE. Costs only 1 HP. Core Bloodletting card.",
       "description": "Lose 1 HP. Deal 9 damage to ALL enemies."
     },
     {
-      "name": "Cinder",
-      "type": "atk_vel",
+      "name": "Breakthrough+",
+      "type": "atk",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Lose 1 HP. Deal 13 damage to ALL enemies.",
+      "isUpgraded": true,
+      "baseCard": "Breakthrough"
+    },
+    {
+      "name": "Cinder",
+      "type": "atk_vel",
+      "cost": 2,
+      "rarity": "common",
+      "cardType": "Attack",
       "note": "17 dmg. Exhausts top card. Good deck thinner.",
       "description": "Deal 18 damage. Exhaust a random card in your Hand."
+    },
+    {
+      "name": "Cinder+",
+      "type": "atk_vel",
+      "cost": 2,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 24 damage. Exhaust a random card in your Hand.",
+      "isUpgraded": true,
+      "baseCard": "Cinder"
     },
     {
       "name": "Havoc",
       "type": "vel",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Skill",
       "note": "Play and Exhaust top card. Useful in Exhaust decks.",
       "description": "Play the top card of your Draw Pile and Exhaust it."
+    },
+    {
+      "name": "Havoc+",
+      "type": "vel",
+      "cost": 0,
+      "rarity": "common",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Play the top card of your Draw Pile and Exhaust it.",
+      "isUpgraded": true,
+      "baseCard": "Havoc"
     },
     {
       "name": "Headbutt",
       "type": "atk_vel",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "9 dmg. Return a card from discard to top of draw.",
       "description": "Deal 9 damage. Put a card from your Discard Pile on top of your Draw Pile."
+    },
+    {
+      "name": "Headbutt+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 12 damage. Put a card from your Discard Pile on top of your Draw Pile.",
+      "isUpgraded": true,
+      "baseCard": "Headbutt"
     },
     {
       "name": "Iron Wave",
       "type": "atk_def",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "5 Block + 5 dmg. Balanced dual-use card.",
       "description": "Gain 5 StS2 Intent Defend.png Block. Deal 5 damage."
+    },
+    {
+      "name": "Iron Wave+",
+      "type": "atk_def",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Gain 7 StS2 Intent Defend.png Block. Deal 7 damage.",
+      "isUpgraded": true,
+      "baseCard": "Iron Wave"
     },
     {
       "name": "Molten Fist",
       "type": "atk_vel",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "10 dmg. Doubles enemy Vulnerable. Exhaust. Great with Vulnerable synergy.",
-      "description": "Deal 10 damage. Double the enemy's StS2 Icon Vulnerable.png Vulnerable. Exhaust."
+      "description": "Deal 10 damage. Double the enemy's Vulnerable. Exhaust."
+    },
+    {
+      "name": "Molten Fist+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 14 damage. Double the enemy's Vulnerable. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Molten Fist"
     },
     {
       "name": "Perfected Strike",
       "type": "atk",
       "cost": 2,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "Core of Strike build. +2 per Strike card in deck.",
       "description": "Deal 6 damage. Deals 2 additional damage for ALL your cards containing “Strike”."
+    },
+    {
+      "name": "Perfected Strike+",
+      "type": "atk",
+      "cost": 2,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 6 damage. Deals 3 additional damage for ALL your cards containing “Strike”.",
+      "isUpgraded": true,
+      "baseCard": "Perfected Strike"
     },
     {
       "name": "Pommel Strike",
       "type": "atk_vel",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "9 dmg. Draw 1. Good in Strike decks.",
       "description": "Deal 9 damage. Draw 1 card."
+    },
+    {
+      "name": "Pommel Strike+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 10 damage. Draw 2 cards.",
+      "isUpgraded": true,
+      "baseCard": "Pommel Strike"
     },
     {
       "name": "Setup Strike",
       "type": "atk_skl",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "7 dmg. Gain 2 Strength this turn. Early Strength enabler.",
-      "description": "Deal 7 damage. Gain 2 StS2 Icon Strength.png Strength this turn."
+      "description": "Deal 7 damage. Gain 3 Strength this turn."
+    },
+    {
+      "name": "Setup Strike+",
+      "type": "atk_skl",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 9 damage. Gain 4 Strength this turn.",
+      "isUpgraded": true,
+      "baseCard": "Setup Strike"
     },
     {
       "name": "Shrug It Off",
       "type": "def_vel",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Skill",
       "note": "8 Block + draw. Great all-rounder.",
       "description": "Gain 8 StS2 Intent Defend.png Block. Draw 1 card."
+    },
+    {
+      "name": "Shrug It Off+",
+      "type": "def_vel",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 11 StS2 Intent Defend.png Block. Draw 1 card.",
+      "isUpgraded": true,
+      "baseCard": "Shrug It Off"
     },
     {
       "name": "Sword Boomerang",
       "type": "atk",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "3 dmg x3 random. Decent Strength multiplier.",
       "description": "Deal 3 damage to a random enemy 3 times."
+    },
+    {
+      "name": "Sword Boomerang+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 3 damage to a random enemy 4 times.",
+      "isUpgraded": true,
+      "baseCard": "Sword Boomerang"
     },
     {
       "name": "Thunderclap",
       "type": "atk",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "4 AoE dmg + Vulnerable to all. Good Act 1 pickup.",
-      "description": "Deal 4 damage and apply 1 StS2 Icon Vulnerable.png Vulnerable to ALL enemies."
+      "description": "Deal 4 damage and apply 1 Vulnerable to ALL enemies."
+    },
+    {
+      "name": "Thunderclap+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 7 damage and apply 1 Vulnerable to ALL enemies.",
+      "isUpgraded": true,
+      "baseCard": "Thunderclap"
     },
     {
       "name": "Tremble",
       "type": "atk_vel",
-      "cost": 0,
+      "cost": 1,
       "rarity": "common",
+      "cardType": "Skill",
       "note": "0-cost. Apply 2 Vulnerable. Good with big nukes.",
-      "description": "Apply 3 StS2 Icon Vulnerable.png Vulnerable. Exhaust"
+      "description": "Apply 3 Vulnerable. Exhaust."
+    },
+    {
+      "name": "Tremble+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Apply 4 Vulnerable. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Tremble"
     },
     {
       "name": "True Grit",
       "type": "def_vel",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Skill",
       "note": "7 Block + Exhaust a random card. Good deck thinner.",
       "description": "Gain 7 StS2 Intent Defend.png Block. Exhaust 1 card at random."
+    },
+    {
+      "name": "True Grit+",
+      "type": "def_vel",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 9 StS2 Intent Defend.png Block. Exhaust 1 card.",
+      "isUpgraded": true,
+      "baseCard": "True Grit"
     },
     {
       "name": "Twin Strike",
       "type": "atk",
       "cost": 1,
       "rarity": "common",
+      "cardType": "Attack",
       "note": "5 dmg twice. Best with Strength.",
       "description": "Deal 5 damage twice."
     },
     {
+      "name": "Twin Strike+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 7 damage twice.",
+      "isUpgraded": true,
+      "baseCard": "Twin Strike"
+    },
+    {
       "name": "Ashen Strike",
       "type": "atk_vel",
-      "cost": 2,
+      "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "6 dmg + 3 extra per Exhaust pile card. Exhaust finisher.",
       "description": "Deal 6 damage. Deals 3 additional damage for each card in your Exhaust Pile."
+    },
+    {
+      "name": "Ashen Strike+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 6 damage. Deals 4 additional damage for each card in your Exhaust Pile.",
+      "isUpgraded": true,
+      "baseCard": "Ashen Strike"
     },
     {
       "name": "Battle Trance",
       "type": "vel",
       "cost": 0,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "Draw 3. Cannot draw more this turn. Great burst draw.",
       "description": "Draw 3 cards. You cannot draw additional cards this turn."
+    },
+    {
+      "name": "Battle Trance+",
+      "type": "vel",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Draw 4 cards. You cannot draw additional cards this turn.",
+      "isUpgraded": true,
+      "baseCard": "Battle Trance"
+    },
+    {
+      "name": "Blaze",
+      "type": "skl",
+      "cost": 2,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Give another player 5 Strength.",
+      "multiplayer": true
+    },
+    {
+      "name": "Blaze+",
+      "type": "skl",
+      "cost": 2,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Give another player 7 Strength.",
+      "multiplayer": true,
+      "isUpgraded": true,
+      "baseCard": "Blaze"
     },
     {
       "name": "Bludgeon",
       "type": "atk",
       "cost": 3,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "32 dmg. Big single hit. Slow but powerful.",
       "description": "Deal 32 damage."
     },
     {
+      "name": "Bludgeon+",
+      "type": "atk",
+      "cost": 3,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 42 damage.",
+      "isUpgraded": true,
+      "baseCard": "Bludgeon"
+    },
+    {
       "name": "Bully",
       "type": "atk",
-      "cost": 1,
+      "cost": 0,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "4 dmg + 2 extra per Vulnerable on enemy. Pairs with Vulnerable setup.",
-      "description": "Deal 4 damage. Deals 2 additional damage for each StS2 Icon Vulnerable.png Vulnerable on the enemy."
+      "description": "Deal 4 damage. Deals 2 additional damage for each Vulnerable on the enemy."
+    },
+    {
+      "name": "Bully+",
+      "type": "atk",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 4 damage. Deals 3 additional damage for each Vulnerable on the enemy.",
+      "isUpgraded": true,
+      "baseCard": "Bully"
     },
     {
       "name": "Burning Pact",
       "type": "vel",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "Exhaust a card, draw 2. Good in Exhaust decks.",
       "description": "Exhaust 1 card. Draw 2 cards."
+    },
+    {
+      "name": "Burning Pact+",
+      "type": "vel",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Exhaust 1 card. Draw 3 cards.",
+      "isUpgraded": true,
+      "baseCard": "Burning Pact"
+    },
+    {
+      "name": "Colossus",
+      "type": "atk_def",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "5 Block + take 50% less damage from Vulnerable enemies this turn.",
+      "description": "Gain 4 StS2 Intent Defend.png Block. You receive 50% less damage from Vulnerable enemies this turn."
+    },
+    {
+      "name": "Colossus+",
+      "type": "atk_def",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 7 StS2 Intent Defend.png Block. You receive 50% less damage from Vulnerable enemies this turn.",
+      "isUpgraded": true,
+      "baseCard": "Colossus"
+    },
+    {
+      "name": "Demonic Shield",
+      "type": "def_vel",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "Lose 1 HP. Give another player Block equal to your Block. Exhaust. Coop defensive card.",
+      "description": "Lose 1 HP. Give another player StS2 Intent Defend.png Block equal to your StS2 Intent Defend.png Block. Exhaust.",
+      "multiplayer": true
+    },
+    {
+      "name": "Demonic Shield+",
+      "type": "def_vel",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Lose 1 HP. Give another player StS2 Intent Defend.png Block equal to your StS2 Intent Defend.png Block.",
+      "multiplayer": true,
+      "isUpgraded": true,
+      "baseCard": "Demonic Shield"
     },
     {
       "name": "Dismantle",
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "8 dmg, hits twice if enemy Vulnerable. Great Vulnerable payoff.",
-      "description": "Deal 8 damage. If the enemy is StS2 Icon Vulnerable.png Vulnerable, hits twice."
+      "description": "Deal 8 damage. If the enemy is Vulnerable, hits twice."
     },
     {
-      "name": "Demonic Shield",
-      "type": "def_vel",
+      "name": "Dismantle+",
+      "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
-      "note": "Lose 1 HP. Give another player Block equal to your Block. Exhaust. Coop defensive card.",
-      "description": "Lose 1 HP. Give another player StS2 Intent Defend.png Block equal to your StS2 Intent Defend.png Block. Exhaust."
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 10 damage. If the enemy is Vulnerable, hits twice.",
+      "isUpgraded": true,
+      "baseCard": "Dismantle"
     },
     {
       "name": "Dominate",
       "type": "atk_skl_vel",
       "cost": 1,
-      "rarity": "uncommon",
+      "rarity": "rare",
+      "cardType": "Skill",
       "note": "Reworked in v0.103. Check in-game for current effect.",
-      "description": "Apply 1 StS2 Icon Vulnerable.png Vulnerable. Gain 1 StS2 Icon Strength.png Strength for each StS2 Icon Vulnerable.png Vulnerable on the enemy. Exhaust."
+      "description": "Apply 1 Vulnerable. Gain 1 Strength for each Vulnerable on the enemy. Exhaust."
+    },
+    {
+      "name": "Dominate+",
+      "type": "atk_skl_vel",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Apply 2 Vulnerable. Gain 1 Strength for each Vulnerable on the enemy. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Dominate"
     },
     {
       "name": "Drum of Battle",
       "type": "skl",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "Draw 2. When Exhausted, gain 2 Energy. Reworked v0.104 — Exhaust payoff, not cost.",
-      "description": "Draw 2 cards. When this card is Exhausted, gain 2 Energy."
+      "description": "Draw 2 cards. When this card is Exhausted, gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png"
+    },
+    {
+      "name": "Drum of Battle+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Draw 2 cards. When this card is Exhausted, gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png",
+      "isUpgraded": true,
+      "baseCard": "Drum of Battle"
     },
     {
       "name": "Evil Eye",
       "type": "def_vel",
-      "cost": 2,
+      "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "8 Block + 8 more if Exhausted this turn. Weak all enemies. Exhaust synergy.",
       "description": "Gain 8 StS2 Intent Defend.png Block. Gain another 8 StS2 Intent Defend.png Block if you have Exhausted a card this turn."
     },
     {
-      "name": "Expect a Fight",
-      "type": "skl",
-      "cost": 0,
+      "name": "Evil Eye+",
+      "type": "def_vel",
+      "cost": 1,
       "rarity": "uncommon",
-      "note": "Reworked in v0.103. Check in-game for current effect.",
-      "description": "Gain StS2 EnergyIronclad.png for each Attack in your Hand. You cannot gain additional StS2 EnergyIronclad.png this turn."
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 11 StS2 Intent Defend.png Block. Gain another 11 StS2 Intent Defend.png Block if you have Exhausted a card this turn.",
+      "isUpgraded": true,
+      "baseCard": "Evil Eye"
+    },
+    {
+      "name": "Expect a Fight",
+      "type": "def",
+      "cost": 3,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "Reworked in v0.111: now a Block card that scales with Strength.",
+      "description": "Gain 15 StS2 Intent Defend.png Block. Gains 5 additional StS2 Intent Defend.png Block for each Strength you have."
+    },
+    {
+      "name": "Expect a Fight+",
+      "type": "def",
+      "cost": 3,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 16 StS2 Intent Defend.png Block. Gains 8 additional StS2 Intent Defend.png Block for each Strength you have.",
+      "isUpgraded": true,
+      "baseCard": "Expect a Fight"
     },
     {
       "name": "Feel No Pain",
       "type": "def_vel",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
       "note": "Gain 3 Block whenever a card Exhausts. Core Exhaust.",
       "description": "Whenever a card is Exhausted, gain 3 StS2 Intent Defend.png Block."
     },
     {
-      "name": "Fight Me!",
-      "type": "atk_skl",
+      "name": "Feel No Pain+",
+      "type": "def_vel",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "Whenever a card is Exhausted, gain 4 StS2 Intent Defend.png Block.",
+      "isUpgraded": true,
+      "baseCard": "Feel No Pain"
+    },
+    {
+      "name": "Fight Me!",
+      "type": "atk_skl",
+      "cost": 2,
+      "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "5 dmg twice + 2 Strength. Enemy gains 1 Strength. Great Strength generator.",
-      "description": "Deal 5 damage twice. Gain 3 StS2 Icon Strength.png Strength. The enemy gains 1 StS2 Icon Strength.png Strength."
+      "description": "Deal 5 damage twice. Gain 3 Strength. The enemy gains 1 Strength."
+    },
+    {
+      "name": "Fight Me!+",
+      "type": "atk_skl",
+      "cost": 2,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 6 damage twice. Gain 4 Strength. The enemy gains 1 Strength.",
+      "isUpgraded": true,
+      "baseCard": "Fight Me!"
     },
     {
       "name": "Flame Barrier",
       "type": "def_skl",
       "cost": 2,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "12 Block + deal 4 back whenever attacked. Expensive but strong.",
       "description": "Gain 12 StS2 Intent Defend.png Block. Whenever you are attacked this turn, deal 4 damage back."
     },
     {
+      "name": "Flame Barrier+",
+      "type": "def_skl",
+      "cost": 2,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 16 StS2 Intent Defend.png Block. Whenever you are attacked this turn, deal 6 damage back.",
+      "isUpgraded": true,
+      "baseCard": "Flame Barrier"
+    },
+    {
       "name": "Forgotten Ritual",
       "type": "vel",
-      "cost": 0,
+      "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "Gain 3 Energy if you Exhausted a card this turn. Core Exhaust engine.",
-      "description": "If you Exhausted a card this turn, gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Exhaust."
+      "description": "Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Exhaust."
+    },
+    {
+      "name": "Forgotten Ritual+",
+      "type": "vel",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 4 StS2 EnergyIronclad.png. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Forgotten Ritual"
     },
     {
       "name": "Hemokinesis",
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "Lose 2 HP, deal 14 dmg. Strong single target. Core Bloodletting.",
       "description": "Lose 2 HP. Deal 15 damage."
     },
     {
+      "name": "Hemokinesis+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Lose 2 HP. Deal 20 damage.",
+      "isUpgraded": true,
+      "baseCard": "Hemokinesis"
+    },
+    {
       "name": "Howl from Beyond",
       "type": "atk_vel",
-      "cost": 2,
+      "cost": 3,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "16 AoE. Plays from Exhaust at turn end. Great Exhaust payoff.",
-      "description": "Deal 16 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it."
+      "description": "Deal 18 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it."
+    },
+    {
+      "name": "Howl from Beyond+",
+      "type": "atk_vel",
+      "cost": 3,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 24 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.",
+      "isUpgraded": true,
+      "baseCard": "Howl from Beyond"
     },
     {
       "name": "Infernal Blade",
       "type": "vel",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "Add a random free Attack to hand. Exhaust. Flexible.",
       "description": "Add a random Attack into your Hand. It's free to play this turn. Exhaust."
     },
     {
+      "name": "Infernal Blade+",
+      "type": "vel",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Add a random Attack into your Hand. It's free to play this turn. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Infernal Blade"
+    },
+    {
       "name": "Inferno",
       "type": "skl",
-      "cost": 3,
+      "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
       "note": "Lose 1 HP per turn. Deal 6 AoE whenever you lose HP. Bloodletting engine.",
       "description": "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 6 damage to ALL enemies."
+    },
+    {
+      "name": "Inferno+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 9 damage to ALL enemies.",
+      "isUpgraded": true,
+      "baseCard": "Inferno"
     },
     {
       "name": "Inflame",
       "type": "skl",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
       "note": "Gain 2 Strength. Cheap Strength generator.",
-      "description": "Gain 2 StS2 Icon Strength.png Strength."
+      "description": "Gain 2 Strength."
+    },
+    {
+      "name": "Inflame+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "Gain 3 Strength.",
+      "isUpgraded": true,
+      "baseCard": "Inflame"
     },
     {
       "name": "Juggling",
       "type": "skl",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
       "note": "Add copy of 3rd Attack played each turn to hand. Combo enabler.",
       "description": "Add a copy of the third Attack you play each turn into your Hand."
+    },
+    {
+      "name": "Juggling+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "Innate. Add a copy of the third Attack you play each turn into your Hand.",
+      "isUpgraded": true,
+      "baseCard": "Juggling"
     },
     {
       "name": "Pillage",
       "type": "atk_vel",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "6 dmg. Draw until you draw a non-Attack. Great with attack-heavy decks.",
       "description": "Deal 6 damage. Draw cards until you draw a non-Attack card."
+    },
+    {
+      "name": "Pillage+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 9 damage. Draw cards until you draw a non-Attack card.",
+      "isUpgraded": true,
+      "baseCard": "Pillage"
     },
     {
       "name": "Rage",
       "type": "skl",
       "cost": 0,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "Gain 3 Block per Attack played this turn. Hybrid offense/defense.",
       "description": "Whenever you play an Attack this turn, gain 3 StS2 Intent Defend.png Block."
+    },
+    {
+      "name": "Rage+",
+      "type": "skl",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Whenever you play an Attack this turn, gain 5 StS2 Intent Defend.png Block.",
+      "isUpgraded": true,
+      "baseCard": "Rage"
+    },
+    {
+      "name": "Outrage",
+      "type": "atk",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 9 damage. Add a copy of this card into EVERYONE'S Discard Pile.",
+      "multiplayer": true
+    },
+    {
+      "name": "Outrage+",
+      "type": "atk",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 13 damage. Add a copy of this card into EVERYONE'S Discard Pile.",
+      "multiplayer": true,
+      "isUpgraded": true,
+      "baseCard": "Outrage"
     },
     {
       "name": "Rampage",
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "9 dmg. Increases this card's damage by 5 each combat. Scaling attack.",
-      "description": "Deal 9 damage. Increase this card's damage by 5 this combat."
+      "description": "Deal 10 damage. Increase this card's damage by 5 this combat."
+    },
+    {
+      "name": "Rampage+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 10 damage. Increase this card's damage by 10 this combat.",
+      "isUpgraded": true,
+      "baseCard": "Rampage"
     },
     {
       "name": "Rupture",
       "type": "skl",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
       "note": "Gain 1 Strength whenever you lose HP. Core Bloodletting.",
-      "description": "Whenever you lose HP on your turn, gain 1 StS2 Icon Strength.png Strength."
+      "description": "Whenever you lose HP on your turn, gain 1 Strength."
+    },
+    {
+      "name": "Rupture+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "Whenever you lose HP on your turn, gain 2 Strength.",
+      "isUpgraded": true,
+      "baseCard": "Rupture"
     },
     {
       "name": "Second Wind",
       "type": "def_vel",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Skill",
       "note": "Exhaust all non-Attacks in hand. Gain 5 Block per card Exhausted. Great Exhaust/Block.",
       "description": "Exhaust all non-Attack cards in your Hand. Gain 5 StS2 Intent Defend.png Block for each card Exhausted."
+    },
+    {
+      "name": "Second Wind+",
+      "type": "def_vel",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Exhaust all non-Attack cards in your Hand. Gain 7 StS2 Intent Defend.png Block for each card Exhausted.",
+      "isUpgraded": true,
+      "baseCard": "Second Wind"
     },
     {
       "name": "Spite",
       "type": "atk",
       "cost": 0,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "Reworked in v0.103. Check in-game for current effect.",
       "description": "Deal 5 damage. If you lost HP this turn, hits 2 times."
+    },
+    {
+      "name": "Spite+",
+      "type": "atk",
+      "cost": 0,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 5 damage. If you lost HP this turn, hits 3 times.",
+      "isUpgraded": true,
+      "baseCard": "Spite"
     },
     {
       "name": "Stampede",
       "type": "skl",
       "cost": 2,
       "rarity": "uncommon",
+      "cardType": "Power",
       "note": "At end of turn, play a random Attack from hand vs random enemy. Wild scaling.",
       "description": "At the end of your turn, 1 random Attack in your Hand is played against a random enemy."
     },
     {
-      "name": "Stomp",
-      "type": "atk",
+      "name": "Stampede+",
+      "type": "skl",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "At the end of your turn, 1 random Attack in your Hand is played against a random enemy.",
+      "isUpgraded": true,
+      "baseCard": "Stampede"
+    },
+    {
+      "name": "Stomp",
+      "type": "atk",
+      "cost": 3,
+      "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "12 AoE. Costs 1 less per Attack played this turn. Combo finisher.",
       "description": "Deal 12 damage to ALL enemies. Costs 1 less StS2 EnergyIronclad.png for each Attack played this turn."
+    },
+    {
+      "name": "Stomp+",
+      "type": "atk",
+      "cost": 3,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 15 damage to ALL enemies. Costs 1 less StS2 EnergyIronclad.png for each Attack played this turn.",
+      "isUpgraded": true,
+      "baseCard": "Stomp"
     },
     {
       "name": "Stone Armor",
       "type": "atk",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
       "note": "Gain 4 Plating. Passive damage reduction scaling.",
-      "description": "Gain 4 StS2 Icon Plating.png Plating."
+      "description": "Gain 4 Plating."
+    },
+    {
+      "name": "Stone Armor+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "Gain 6 Plating.",
+      "isUpgraded": true,
+      "baseCard": "Stone Armor"
     },
     {
       "name": "Taunt",
       "type": "atk_def",
-      "cost": 0,
-      "rarity": "uncommon",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Skill",
       "note": "7 Block + 1 Vulnerable. Upgraded: 2 Vulnerable. Setup card.",
-      "description": "Gain 7 StS2 Intent Defend.png Block. Apply 1 StS2 Icon Vulnerable.png Vulnerable."
+      "description": "Gain 6 StS2 Intent Defend.png Block. Apply 1 Vulnerable."
+    },
+    {
+      "name": "Taunt+",
+      "type": "atk_def",
+      "cost": 1,
+      "rarity": "common",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 7 StS2 Intent Defend.png Block. Apply 2 Vulnerable.",
+      "isUpgraded": true,
+      "baseCard": "Taunt"
     },
     {
       "name": "Unrelenting",
       "type": "atk",
-      "cost": 1,
+      "cost": 2,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "14 dmg. Next Attack costs 0. Combo enabler.",
       "description": "Deal 14 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png."
+    },
+    {
+      "name": "Unrelenting+",
+      "type": "atk",
+      "cost": 2,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 20 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png.",
+      "isUpgraded": true,
+      "baseCard": "Unrelenting"
     },
     {
       "name": "Uppercut",
       "type": "atk_def",
       "cost": 2,
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "13 dmg + Weak + Vulnerable. High utility debuff attack.",
-      "description": "Deal 13 damage. Apply 1 StS2 Icon Weak.png Weak. Apply 1 StS2 Icon Vulnerable.png Vulnerable."
+      "description": "Deal 13 damage. Apply 1 Weak. Apply 1 Vulnerable."
+    },
+    {
+      "name": "Uppercut+",
+      "type": "atk_def",
+      "cost": 2,
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 13 damage. Apply 2 Weak. Apply 2 Vulnerable.",
+      "isUpgraded": true,
+      "baseCard": "Uppercut"
     },
     {
       "name": "Vicious",
       "type": "atk_vel",
       "cost": 1,
       "rarity": "uncommon",
+      "cardType": "Power",
       "note": "Draw 1 whenever you apply Vulnerable. Strong with Vulnerable setup.",
-      "description": "Whenever you apply StS2 Icon Vulnerable.png Vulnerable, draw 1 card."
+      "description": "Whenever you apply Vulnerable, draw 1 card."
+    },
+    {
+      "name": "Vicious+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "Whenever you apply Vulnerable, draw 2 cards.",
+      "isUpgraded": true,
+      "baseCard": "Vicious"
     },
     {
       "name": "Whirlwind",
       "type": "atk",
       "cost": "X",
       "rarity": "uncommon",
+      "cardType": "Attack",
       "note": "5 AoE dmg X times. Best multi-hit AoE. Scales hard with Strength.",
       "description": "Deal 5 damage to ALL enemies X times."
     },
     {
+      "name": "Whirlwind+",
+      "type": "atk",
+      "cost": "X",
+      "rarity": "uncommon",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 8 damage to ALL enemies X times.",
+      "isUpgraded": true,
+      "baseCard": "Whirlwind"
+    },
+    {
       "name": "Aggression",
       "type": "skl",
-      "cost": 2,
+      "cost": 1,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "At turn start, pull a random Upgraded Attack from discard to hand.",
       "description": "At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it."
+    },
+    {
+      "name": "Aggression+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "Innate. At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it.",
+      "isUpgraded": true,
+      "baseCard": "Aggression"
     },
     {
       "name": "Barricade",
       "type": "def",
       "cost": 3,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "Block no longer expires. Core Block build.",
-      "description": ""
+      "description": "StS2 Intent Defend.png Block is not removed at the start of your turn."
+    },
+    {
+      "name": "Barricade+",
+      "type": "def",
+      "cost": 2,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "StS2 Intent Defend.png Block is not removed at the start of your turn.",
+      "isUpgraded": true,
+      "baseCard": "Barricade"
     },
     {
       "name": "Brand",
       "type": "skl_vel",
-      "cost": 1,
+      "cost": 0,
       "rarity": "rare",
+      "cardType": "Skill",
       "note": "Lose 1 HP. Exhaust 1 card. Gain 1 Strength. Bloodletting + Exhaust.",
-      "description": "Lose 1 HP. Exhaust 1 card. Gain 1 StS2 Icon Strength.png Strength."
+      "description": "Lose 1 HP. Exhaust 1 card. Gain 1 Strength."
+    },
+    {
+      "name": "Brand+",
+      "type": "skl_vel",
+      "cost": 0,
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Lose 1 HP. Exhaust 1 card. Gain 2 Strength.",
+      "isUpgraded": true,
+      "baseCard": "Brand"
     },
     {
       "name": "Cascade",
       "type": "vel",
-      "cost": 1,
+      "cost": "X",
       "rarity": "rare",
+      "cardType": "Skill",
       "note": "Play top X cards of draw pile. Explosive combo card.",
       "description": "Play the top X cards of your Draw Pile."
     },
     {
-      "name": "Colossus",
-      "type": "atk_def",
-      "cost": 2,
-      "rarity": "uncommon",
-      "note": "5 Block + take 50% less damage from Vulnerable enemies this turn.",
-      "description": "Gain 5 StS2 Intent Defend.png Block. You receive 50% less damage from StS2 Icon Vulnerable.png Vulnerable enemies this turn."
+      "name": "Cascade+",
+      "type": "vel",
+      "cost": "X",
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Play the top X+1 cards of your Draw Pile.",
+      "isUpgraded": true,
+      "baseCard": "Cascade"
     },
     {
       "name": "Conflagration",
       "type": "atk",
-      "cost": 2,
+      "cost": 1,
       "rarity": "rare",
+      "cardType": "Attack",
       "note": "2 dmg × 4 hits to ALL enemies. Reworked v0.104 — no longer scales with Attacks played.",
       "description": "Deal 2 damage to ALL enemies 4 times."
     },
     {
-      "name": "Corruption",
-      "type": "vel",
-      "cost": 3,
-      "rarity": "ancient",
-      "note": "Skills cost 0 but Exhaust. Core Exhaust build.",
-      "description": "Skills cost 0 StS2 EnergyIronclad.png. Whenever you play a Skill, Exhaust it."
+      "name": "Conflagration+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 2 damage to ALL enemies 5 times.",
+      "isUpgraded": true,
+      "baseCard": "Conflagration"
     },
     {
       "name": "Crimson Mantle",
       "type": "def",
       "cost": 1,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "Lose 1 HP per turn, gain 8 Block. Bloodletting + Block hybrid.",
-      "description": "At the start of your turn, lose 1 HP and gain 8 StS2 Intent Defend.png Block."
+      "description": "At the start of your turn, lose 1 HP and gain 7 StS2 Intent Defend.png Block."
+    },
+    {
+      "name": "Crimson Mantle+",
+      "type": "def",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "At the start of your turn, lose 1 HP and gain 10 StS2 Intent Defend.png Block.",
+      "isUpgraded": true,
+      "baseCard": "Crimson Mantle"
     },
     {
       "name": "Cruelty",
       "type": "atk",
       "cost": 1,
-      "rarity": "rare",
+      "rarity": "uncommon",
+      "cardType": "Power",
       "note": "Vulnerable enemies take 25% extra damage. Pairs with Uppercut, Taunt, Tremble, Molten Fist — any Vulnerable applicator turns this into a 25% damage multiplier for the rest of the fight.",
-      "description": ""
+      "description": "Vulnerable enemies take an additional 25% damage."
+    },
+    {
+      "name": "Cruelty+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "uncommon",
+      "cardType": "Power",
+      "note": "",
+      "description": "Vulnerable enemies take an additional 50% damage.",
+      "isUpgraded": true,
+      "baseCard": "Cruelty"
     },
     {
       "name": "Dark Embrace",
       "type": "vel",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "Draw 1 whenever a card Exhausts. Core Exhaust.",
       "description": "Whenever a card is Exhausted, draw 1 card."
+    },
+    {
+      "name": "Dark Embrace+",
+      "type": "vel",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "Whenever a card is Exhausted, draw 1 card.",
+      "isUpgraded": true,
+      "baseCard": "Dark Embrace"
     },
     {
       "name": "Demon Form",
       "type": "skl",
       "cost": 3,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "Gain 2 Strength at turn start. Best passive Strength scaling.",
-      "description": "At the start of your turn, gain 2 StS2 Icon Strength.png Strength."
+      "description": "At the start of your turn, gain 3 Strength."
+    },
+    {
+      "name": "Demon Form+",
+      "type": "skl",
+      "cost": 3,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "At the start of your turn, gain 4 Strength.",
+      "isUpgraded": true,
+      "baseCard": "Demon Form"
     },
     {
       "name": "Feed",
       "type": "atk_vel",
       "cost": 1,
       "rarity": "rare",
+      "cardType": "Attack",
       "note": "10 dmg. If fatal, raise Max HP by 3. Exhaust. Bloodletting sustain.",
       "description": "Deal 10 damage. If Fatal, raise your Max HP by 3. Exhaust."
+    },
+    {
+      "name": "Feed+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 12 damage. If Fatal, raise your Max HP by 4. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Feed"
     },
     {
       "name": "Fiend Fire",
       "type": "atk_vel",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Attack",
       "note": "Exhaust hand. 7 dmg per card Exhausted. Exhaust. Nuke finisher.",
       "description": "Exhaust your Hand. Deal 7 damage for each card Exhausted. Exhaust."
+    },
+    {
+      "name": "Fiend Fire+",
+      "type": "atk_vel",
+      "cost": 2,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Exhaust your Hand. Deal 10 damage for each card Exhausted. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Fiend Fire"
     },
     {
       "name": "Hellraiser",
       "type": "vel",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "Auto-plays drawn Strikes. Core infinite with Pommel Strike — Pommel draws a Strike, which draws another. Never take Battle Trance in this build — it blocks further draw and breaks the loop.",
       "description": "Whenever you draw a card containing “Strike”, it is played against a random enemy."
+    },
+    {
+      "name": "Hellraiser+",
+      "type": "vel",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "Whenever you draw a card containing “Strike”, it is played against a random enemy.",
+      "isUpgraded": true,
+      "baseCard": "Hellraiser"
     },
     {
       "name": "Impervious",
       "type": "def_vel",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Skill",
       "note": "30 Block. Exhaust. Massive panic button.",
       "description": "Gain 30 StS2 Intent Defend.png Block. Exhaust."
+    },
+    {
+      "name": "Impervious+",
+      "type": "def_vel",
+      "cost": 2,
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Gain 40 StS2 Intent Defend.png Block. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Impervious"
     },
     {
       "name": "Juggernaut",
       "type": "skl",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "Whenever you gain Block, deal 6 to random enemy. Pairs with Impervious (30 Block = 30 damage in one card) and Barricade (persistent Block keeps triggering).",
-      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 6 damage to a random enemy."
+      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 5 damage to a random enemy."
+    },
+    {
+      "name": "Juggernaut+",
+      "type": "skl",
+      "cost": 2,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 7 damage to a random enemy.",
+      "isUpgraded": true,
+      "baseCard": "Juggernaut"
     },
     {
       "name": "Mangle",
       "type": "atk_skl",
-      "cost": 2,
+      "cost": 3,
       "rarity": "rare",
+      "cardType": "Attack",
       "note": "15 dmg. Enemy loses 10 Strength this turn. Debuff attack.",
-      "description": "Deal 15 damage. Enemy loses 10 StS2 Icon Strength.png Strength this turn."
+      "description": "Deal 20 damage. Enemy loses 10 Strength this turn."
+    },
+    {
+      "name": "Mangle+",
+      "type": "atk_skl",
+      "cost": 3,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 26 damage. Enemy loses 15 Strength this turn.",
+      "isUpgraded": true,
+      "baseCard": "Mangle"
+    },
+    {
+      "name": "Midnight",
+      "type": "atk",
+      "cost": 12,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 60 damage. Costs StS2 EnergyIronclad.png less for each card Exhausted this combat by ANYONE.",
+      "multiplayer": true
+    },
+    {
+      "name": "Midnight+",
+      "type": "atk",
+      "cost": 12,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 72 damage. Costs StS2 EnergyIronclad.png less for each card Exhausted this combat by ANYONE.",
+      "multiplayer": true,
+      "isUpgraded": true,
+      "baseCard": "Midnight"
     },
     {
       "name": "Not Yet",
       "type": "vel",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Skill",
       "note": "Heal 10 HP. Exhaust. Rare. Gives Ironclad survivability — strong when low on HP.",
       "description": "Heal 10 HP. Exhaust."
+    },
+    {
+      "name": "Not Yet+",
+      "type": "vel",
+      "cost": 2,
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Heal 13 HP. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Not Yet"
     },
     {
       "name": "Offering",
       "type": "vel",
       "cost": 0,
       "rarity": "rare",
+      "cardType": "Skill",
       "note": "Lose 6 HP, gain 2 Energy, draw 3. Exhaust. High-value trade.",
       "description": "Lose 6 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Draw 3 cards. Exhaust."
+    },
+    {
+      "name": "Offering+",
+      "type": "vel",
+      "cost": 0,
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Lose 6 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Draw 5 cards. Exhaust.",
+      "isUpgraded": true,
+      "baseCard": "Offering"
     },
     {
       "name": "One-Two Punch",
       "type": "skl",
       "cost": 1,
       "rarity": "rare",
+      "cardType": "Skill",
       "note": "Next Attack is played an extra time this turn. Combo enabler.",
       "description": "This turn, your next Attack is played an extra time."
+    },
+    {
+      "name": "One-Two Punch+",
+      "type": "skl",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "This turn, your next 2 Attacks are played an extra time.",
+      "isUpgraded": true,
+      "baseCard": "One-Two Punch"
     },
     {
       "name": "Pact's End",
       "type": "atk_vel",
       "cost": 0,
       "rarity": "rare",
+      "cardType": "Attack",
       "note": "17 AoE dmg. Needs 3+ Exhaust pile. 0-cost Exhaust finisher.",
-      "description": "Can only be played if you have 3 or more cards in your Exhaust Pile. Deal 17 damage to ALL enemies."
+      "description": "If you have 3 or more cards in your Exhaust Pile, deal 18 damage to ALL enemies."
+    },
+    {
+      "name": "Pact's End+",
+      "type": "atk_vel",
+      "cost": 0,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "If you have 3 or more cards in your Exhaust Pile, deal 24 damage to ALL enemies.",
+      "isUpgraded": true,
+      "baseCard": "Pact's End"
     },
     {
       "name": "Primal Force",
       "type": "skl",
-      "cost": 2,
+      "cost": 0,
       "rarity": "rare",
+      "cardType": "Skill",
       "note": "Transform all Attacks in hand into Giant Rocks. Situational nuke.",
-      "description": "Transform all Attacks in your Hand into StS2 CardIcon Colorless Attack Token.png Giant Rock."
+      "description": "Transform all Attacks in your Hand into Giant Rock."
+    },
+    {
+      "name": "Primal Force+",
+      "type": "skl",
+      "cost": 0,
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Transform all Attacks in your Hand into Giant Rock+.",
+      "isUpgraded": true,
+      "baseCard": "Primal Force"
     },
     {
       "name": "Pyre",
       "type": "skl",
-      "cost": 1,
+      "cost": 2,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "Gain 1 Energy at start of each turn. Reliable energy engine.",
       "description": "Gain StS2 EnergyIronclad.png at the start of each turn."
     },
     {
-      "name": "Stoke",
-      "type": "vel",
+      "name": "Pyre+",
+      "type": "skl",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png at the start of each turn.",
+      "isUpgraded": true,
+      "baseCard": "Pyre"
+    },
+    {
+      "name": "Stoke",
+      "type": "vel",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Skill",
       "note": "Reworked in v0.103. Check in-game for current effect.",
       "description": "Exhaust your Hand. Add 1 random card into your Hand for each card Exhausted."
+    },
+    {
+      "name": "Stoke+",
+      "type": "vel",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Skill",
+      "note": "",
+      "description": "Exhaust your Hand. Add 1 random Upgraded card into your Hand for each card Exhausted.",
+      "isUpgraded": true,
+      "baseCard": "Stoke"
+    },
+    {
+      "name": "Tank",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "Take double damage; allies take half. Coop/solo specific.",
+      "description": "Take 50% additional damage from enemies. Allies take 50% less damage from enemies.",
+      "multiplayer": true
+    },
+    {
+      "name": "Tank+",
+      "type": "atk",
+      "cost": 0,
+      "rarity": "rare",
+      "cardType": "Power",
+      "note": "",
+      "description": "Take 50% additional damage from enemies. Allies take 50% less damage from enemies.",
+      "multiplayer": true,
+      "isUpgraded": true,
+      "baseCard": "Tank"
     },
     {
       "name": "Tear Asunder",
       "type": "atk",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Attack",
       "note": "5 dmg + 1 more per HP lost this combat. Bloodletting finisher.",
       "description": "Deal 5 damage. Hits an additional time for each time you lost HP this combat."
     },
     {
+      "name": "Tear Asunder+",
+      "type": "atk",
+      "cost": 2,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 7 damage. Hits an additional time for each time you lost HP this combat.",
+      "isUpgraded": true,
+      "baseCard": "Tear Asunder"
+    },
+    {
       "name": "Thrash",
       "type": "atk_vel",
-      "cost": 0,
+      "cost": 1,
       "rarity": "rare",
+      "cardType": "Attack",
       "note": "4 dmg twice. Exhaust a random Attack and add its damage. Exhaust synergy.",
       "description": "Deal 4 damage twice. Exhaust a random Attack in your Hand and add its damage to this card."
+    },
+    {
+      "name": "Thrash+",
+      "type": "atk_vel",
+      "cost": 1,
+      "rarity": "rare",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 6 damage twice. Exhaust a random Attack in your Hand and add its damage to this card.",
+      "isUpgraded": true,
+      "baseCard": "Thrash"
     },
     {
       "name": "Unmovable",
       "type": "def",
       "cost": 2,
       "rarity": "rare",
+      "cardType": "Power",
       "note": "First Block gained per turn is doubled. Block scaling.",
       "description": "The first time you gain StS2 Intent Defend.png Block from a card each turn, double the amount gained."
     },
     {
-      "name": "Tank",
-      "type": "atk",
-      "cost": 2,
+      "name": "Unmovable+",
+      "type": "def",
+      "cost": 1,
       "rarity": "rare",
-      "note": "Take double damage; allies take half. Coop/solo specific.",
-      "description": "Take double damage from enemies. Allies take half damage from enemies."
+      "cardType": "Power",
+      "note": "",
+      "description": "The first time you gain StS2 Intent Defend.png Block from a card each turn, double the amount gained.",
+      "isUpgraded": true,
+      "baseCard": "Unmovable"
     },
     {
       "name": "Break",
       "type": "atk",
       "cost": 1,
       "rarity": "ancient",
+      "cardType": "Attack",
       "note": "20 dmg + 5 Vulnerable. Ancient card.",
-      "description": "Deal 20 damage. Apply 5 StS2 Icon Vulnerable.png Vulnerable."
+      "description": "Deal 20 damage. Apply 5 Vulnerable."
+    },
+    {
+      "name": "Break+",
+      "type": "atk",
+      "cost": 1,
+      "rarity": "ancient",
+      "cardType": "Attack",
+      "note": "",
+      "description": "Deal 30 damage. Apply 7 Vulnerable.",
+      "isUpgraded": true,
+      "baseCard": "Break"
+    },
+    {
+      "name": "Corruption",
+      "type": "vel",
+      "cost": 3,
+      "rarity": "ancient",
+      "cardType": "Power",
+      "note": "Skills cost 0 but Exhaust. Core Exhaust build.",
+      "description": "Skills cost 0 StS2 EnergyIronclad.png. Whenever you play a Skill, Exhaust it."
+    },
+    {
+      "name": "Corruption+",
+      "type": "vel",
+      "cost": 2,
+      "rarity": "ancient",
+      "cardType": "Power",
+      "note": "",
+      "description": "Skills cost 0 StS2 EnergyIronclad.png. Whenever you play a Skill, Exhaust it.",
+      "isUpgraded": true,
+      "baseCard": "Corruption"
     },
     {
       "name": "Clash",
@@ -761,865 +1866,5 @@ const IRONCLAD_CARDS = [
       "description": "Double your StS2 Intent Defend.png Block.",
       "isUpgraded": true,
       "baseCard": "Entrench"
-    },
-    {
-      "name": "Defend+",
-      "type": "def",
-      "cost": 1,
-      "rarity": "basic",
-      "note": "Upgraded version of Defend. Gain 8 StS2 Intent Defend.png Block.",
-      "description": "Gain 8 StS2 Intent Defend.png Block.",
-      "isUpgraded": true,
-      "baseCard": "Defend"
-    },
-    {
-      "name": "Strike+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "basic",
-      "note": "Upgraded version of Strike. Deal 9 damage.",
-      "description": "Deal 9 damage.",
-      "isUpgraded": true,
-      "baseCard": "Strike"
-    },
-    {
-      "name": "Anger+",
-      "type": "atk",
-      "cost": 0,
-      "rarity": "common",
-      "note": "Upgraded version of Anger. Deal 8 damage. Add a copy of this card into your Discard Pile.",
-      "description": "Deal 8 damage. Add a copy of this card into your Discard Pile.",
-      "isUpgraded": true,
-      "baseCard": "Anger"
-    },
-    {
-      "name": "Armaments+",
-      "type": "def",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Armaments. Gain 5 StS2 Intent Defend.png Block. Upgrade ALL cards in your Hand.",
-      "description": "Gain 5 StS2 Intent Defend.png Block. Upgrade ALL cards in your Hand.",
-      "isUpgraded": true,
-      "baseCard": "Armaments"
-    },
-    {
-      "name": "Blood Wall+",
-      "type": "def",
-      "cost": 2,
-      "rarity": "common",
-      "note": "Upgraded version of Blood Wall. Lose 2 HP. Gain 20 StS2 Intent Defend.png Block.",
-      "description": "Lose 2 HP. Gain 20 StS2 Intent Defend.png Block.",
-      "isUpgraded": true,
-      "baseCard": "Blood Wall"
-    },
-    {
-      "name": "Bloodletting+",
-      "type": "skl",
-      "cost": 0,
-      "rarity": "common",
-      "note": "Upgraded version of Bloodletting. Lose 3 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png.",
-      "description": "Lose 3 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png.",
-      "isUpgraded": true,
-      "baseCard": "Bloodletting"
-    },
-    {
-      "name": "Body Slam+",
-      "type": "skl",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Body Slam. Deal damage equal to your StS2 Intent Defend.png Block.",
-      "description": "Deal damage equal to your StS2 Intent Defend.png Block.",
-      "isUpgraded": true,
-      "baseCard": "Body Slam"
-    },
-    {
-      "name": "Breakthrough+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Breakthrough. Lose 1 HP. Deal 13 damage to ALL enemies.",
-      "description": "Lose 1 HP. Deal 13 damage to ALL enemies.",
-      "isUpgraded": true,
-      "baseCard": "Breakthrough"
-    },
-    {
-      "name": "Cinder+",
-      "type": "atk_vel",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Cinder. Deal 24 damage. Exhaust a random card in your Hand.",
-      "description": "Deal 24 damage. Exhaust a random card in your Hand.",
-      "isUpgraded": true,
-      "baseCard": "Cinder"
-    },
-    {
-      "name": "Havoc+",
-      "type": "vel",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Havoc. Play the top card of your Draw Pile and Exhaust it.",
-      "description": "Play the top card of your Draw Pile and Exhaust it.",
-      "isUpgraded": true,
-      "baseCard": "Havoc"
-    },
-    {
-      "name": "Headbutt+",
-      "type": "atk_vel",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Headbutt. Deal 12 damage. Put a card from your Discard Pile on top of your Draw Pile.",
-      "description": "Deal 12 damage. Put a card from your Discard Pile on top of your Draw Pile.",
-      "isUpgraded": true,
-      "baseCard": "Headbutt"
-    },
-    {
-      "name": "Iron Wave+",
-      "type": "atk_def",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Iron Wave. Gain 7 StS2 Intent Defend.png Block. Deal 7 damage.",
-      "description": "Gain 7 StS2 Intent Defend.png Block. Deal 7 damage.",
-      "isUpgraded": true,
-      "baseCard": "Iron Wave"
-    },
-    {
-      "name": "Molten Fist+",
-      "type": "atk_vel",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Molten Fist. Deal 14 damage. Double the enemy's StS2 Icon Vulnerable.png Vulnerable. Exhaust.",
-      "description": "Deal 14 damage. Double the enemy's StS2 Icon Vulnerable.png Vulnerable. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Molten Fist"
-    },
-    {
-      "name": "Perfected Strike+",
-      "type": "atk",
-      "cost": 2,
-      "rarity": "common",
-      "note": "Upgraded version of Perfected Strike. Deal 6 damage. Deals 3 additional damage for ALL your cards containing “Strike”.",
-      "description": "Deal 6 damage. Deals 3 additional damage for ALL your cards containing “Strike”.",
-      "isUpgraded": true,
-      "baseCard": "Perfected Strike"
-    },
-    {
-      "name": "Pommel Strike+",
-      "type": "atk_vel",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Pommel Strike. Deal 10 damage. Draw 2 cards.",
-      "description": "Deal 10 damage. Draw 2 cards.",
-      "isUpgraded": true,
-      "baseCard": "Pommel Strike"
-    },
-    {
-      "name": "Setup Strike+",
-      "type": "atk_skl",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Setup Strike. Deal 9 damage. Gain 3 StS2 Icon Strength.png Strength this turn.",
-      "description": "Deal 9 damage. Gain 3 StS2 Icon Strength.png Strength this turn.",
-      "isUpgraded": true,
-      "baseCard": "Setup Strike"
-    },
-    {
-      "name": "Shrug It Off+",
-      "type": "def_vel",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Shrug It Off. Gain 11 StS2 Intent Defend.png Block. Draw 1 card.",
-      "description": "Gain 11 StS2 Intent Defend.png Block. Draw 1 card.",
-      "isUpgraded": true,
-      "baseCard": "Shrug It Off"
-    },
-    {
-      "name": "Sword Boomerang+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Sword Boomerang. Deal 3 damage to a random enemy 4 times.",
-      "description": "Deal 3 damage to a random enemy 4 times.",
-      "isUpgraded": true,
-      "baseCard": "Sword Boomerang"
-    },
-    {
-      "name": "Thunderclap+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Thunderclap. Deal 7 damage and apply 1 StS2 Icon Vulnerable.png Vulnerable to ALL enemies.",
-      "description": "Deal 7 damage and apply 1 StS2 Icon Vulnerable.png Vulnerable to ALL enemies.",
-      "isUpgraded": true,
-      "baseCard": "Thunderclap"
-    },
-    {
-      "name": "Tremble+",
-      "type": "atk_vel",
-      "cost": 0,
-      "rarity": "common",
-      "note": "Upgraded version of Tremble. Apply 4 StS2 Icon Vulnerable.png Vulnerable. Exhaust",
-      "description": "Apply 4 StS2 Icon Vulnerable.png Vulnerable. Exhaust",
-      "isUpgraded": true,
-      "baseCard": "Tremble"
-    },
-    {
-      "name": "True Grit+",
-      "type": "def_vel",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of True Grit. Gain 9 StS2 Intent Defend.png Block. Exhaust 1 card .",
-      "description": "Gain 9 StS2 Intent Defend.png Block. Exhaust 1 card .",
-      "isUpgraded": true,
-      "baseCard": "True Grit"
-    },
-    {
-      "name": "Twin Strike+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "common",
-      "note": "Upgraded version of Twin Strike. Deal 7 damage twice.",
-      "description": "Deal 7 damage twice.",
-      "isUpgraded": true,
-      "baseCard": "Twin Strike"
-    },
-    {
-      "name": "Ashen Strike+",
-      "type": "atk_vel",
-      "cost": 2,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Ashen Strike. Deal 6 damage. Deals 4 additional damage for each card in your Exhaust Pile.",
-      "description": "Deal 6 damage. Deals 4 additional damage for each card in your Exhaust Pile.",
-      "isUpgraded": true,
-      "baseCard": "Ashen Strike"
-    },
-    {
-      "name": "Battle Trance+",
-      "type": "vel",
-      "cost": 0,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Battle Trance. Draw 4 cards. You cannot draw additional cards this turn.",
-      "description": "Draw 4 cards. You cannot draw additional cards this turn.",
-      "isUpgraded": true,
-      "baseCard": "Battle Trance"
-    },
-    {
-      "name": "Bludgeon+",
-      "type": "atk",
-      "cost": 3,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Bludgeon. Deal 42 damage.",
-      "description": "Deal 42 damage.",
-      "isUpgraded": true,
-      "baseCard": "Bludgeon"
-    },
-    {
-      "name": "Bully+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Bully. Deal 4 damage. Deals 3 additional damage for each StS2 Icon Vulnerable.png Vulnerable on the enemy.",
-      "description": "Deal 4 damage. Deals 3 additional damage for each StS2 Icon Vulnerable.png Vulnerable on the enemy.",
-      "isUpgraded": true,
-      "baseCard": "Bully"
-    },
-    {
-      "name": "Burning Pact+",
-      "type": "vel",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Burning Pact. Exhaust 1 card. Draw 3 cards.",
-      "description": "Exhaust 1 card. Draw 3 cards.",
-      "isUpgraded": true,
-      "baseCard": "Burning Pact"
-    },
-    {
-      "name": "Colossus+",
-      "type": "atk_def",
-      "cost": 2,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Colossus. Gain 8 StS2 Intent Defend.png Block. You receive 50% less damage from StS2 Icon Vulnerable.png Vulnerable enemies this turn.",
-      "description": "Gain 8 StS2 Intent Defend.png Block. You receive 50% less damage from StS2 Icon Vulnerable.png Vulnerable enemies this turn.",
-      "isUpgraded": true,
-      "baseCard": "Colossus"
-    },
-    {
-      "name": "Demonic Shield+",
-      "type": "def",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Demonic Shield. Lose 1 HP. Give another player StS2 Intent Defend.png Block equal to your StS2 Intent Defend.png Block.",
-      "description": "Lose 1 HP. Give another player StS2 Intent Defend.png Block equal to your StS2 Intent Defend.png Block.",
-      "isUpgraded": true,
-      "baseCard": "Demonic Shield"
-    },
-    {
-      "name": "Dismantle+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Dismantle. Deal 10 damage. If the enemy is StS2 Icon Vulnerable.png Vulnerable, hits twice.",
-      "description": "Deal 10 damage. If the enemy is StS2 Icon Vulnerable.png Vulnerable, hits twice.",
-      "isUpgraded": true,
-      "baseCard": "Dismantle"
-    },
-    {
-      "name": "Dominate+",
-      "type": "atk_skl_vel",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Dominate. Apply 2 StS2 Icon Vulnerable.png Vulnerable. Gain 1 StS2 Icon Strength.png Strength for each StS2 Icon Vulnerable.png Vulnerable on the enemy. Exhaust.",
-      "description": "Apply 2 StS2 Icon Vulnerable.png Vulnerable. Gain 1 StS2 Icon Strength.png Strength for each StS2 Icon Vulnerable.png Vulnerable on the enemy. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Dominate"
-    },
-    {
-      "name": "Drum of Battle+",
-      "type": "skl",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Draw 2. When Exhausted, gain 3 Energy.",
-      "description": "Draw 2 cards. When this card is Exhausted, gain 3 Energy.",
-      "isUpgraded": true,
-      "baseCard": "Drum of Battle"
-    },
-    {
-      "name": "Evil Eye+",
-      "type": "def_vel",
-      "cost": 2,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Evil Eye. Gain 11 StS2 Intent Defend.png Block. Gain another 11 StS2 Intent Defend.png Block if you have Exhausted a card this turn.",
-      "description": "Gain 11 StS2 Intent Defend.png Block. Gain another 11 StS2 Intent Defend.png Block if you have Exhausted a card this turn.",
-      "isUpgraded": true,
-      "baseCard": "Evil Eye"
-    },
-    {
-      "name": "Expect a Fight+",
-      "type": "skl",
-      "cost": 0,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Expect a Fight. Gain StS2 EnergyIronclad.png for each Attack in your Hand. You cannot gain additional StS2 EnergyIronclad.png this turn.",
-      "description": "Gain StS2 EnergyIronclad.png for each Attack in your Hand. You cannot gain additional StS2 EnergyIronclad.png this turn.",
-      "isUpgraded": true,
-      "baseCard": "Expect a Fight"
-    },
-    {
-      "name": "Feel No Pain+",
-      "type": "def_vel",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Feel No Pain. Whenever a card is Exhausted, gain 4 StS2 Intent Defend.png Block.",
-      "description": "Whenever a card is Exhausted, gain 4 StS2 Intent Defend.png Block.",
-      "isUpgraded": true,
-      "baseCard": "Feel No Pain"
-    },
-    {
-      "name": "Fight Me!+",
-      "type": "atk_skl",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Fight Me!. Deal 6 damage twice. Gain 4 StS2 Icon Strength.png Strength. The enemy gains 1 StS2 Icon Strength.png Strength.",
-      "description": "Deal 6 damage twice. Gain 4 StS2 Icon Strength.png Strength. The enemy gains 1 StS2 Icon Strength.png Strength.",
-      "isUpgraded": true,
-      "baseCard": "Fight Me!"
-    },
-    {
-      "name": "Flame Barrier+",
-      "type": "def_skl",
-      "cost": 2,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Flame Barrier. Gain 16 StS2 Intent Defend.png Block. Whenever you are attacked this turn, deal 6 damage back.",
-      "description": "Gain 16 StS2 Intent Defend.png Block. Whenever you are attacked this turn, deal 6 damage back.",
-      "isUpgraded": true,
-      "baseCard": "Flame Barrier"
-    },
-    {
-      "name": "Forgotten Ritual+",
-      "type": "vel",
-      "cost": 0,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Forgotten Ritual. If you Exhausted a card this turn, gain 4StS2 EnergyIronclad.png. Exhaust.",
-      "description": "If you Exhausted a card this turn, gain 4StS2 EnergyIronclad.png. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Forgotten Ritual"
-    },
-    {
-      "name": "Hemokinesis+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Hemokinesis. Lose 2 HP. Deal 20 damage.",
-      "description": "Lose 2 HP. Deal 20 damage.",
-      "isUpgraded": true,
-      "baseCard": "Hemokinesis"
-    },
-    {
-      "name": "Howl from Beyond+",
-      "type": "atk_vel",
-      "cost": 2,
-      "rarity": "uncommon",
-      "note": "21 AoE. Plays from Exhaust at turn end.",
-      "description": "Deal 21 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.",
-      "isUpgraded": true,
-      "baseCard": "Howl from Beyond"
-    },
-    {
-      "name": "Infernal Blade+",
-      "type": "vel",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Infernal Blade. Add a random Attack into your Hand. It's free to play this turn. Exhaust.",
-      "description": "Add a random Attack into your Hand. It's free to play this turn. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Infernal Blade"
-    },
-    {
-      "name": "Inferno+",
-      "type": "skl",
-      "cost": 3,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Inferno. At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 9 damage to ALL enemies.",
-      "description": "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 9 damage to ALL enemies.",
-      "isUpgraded": true,
-      "baseCard": "Inferno"
-    },
-    {
-      "name": "Inflame+",
-      "type": "skl",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Inflame. Gain 3 StS2 Icon Strength.png Strength.",
-      "description": "Gain 3 StS2 Icon Strength.png Strength.",
-      "isUpgraded": true,
-      "baseCard": "Inflame"
-    },
-    {
-      "name": "Juggling+",
-      "type": "vel",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Juggling. Innate. Add a copy of the third Attack you play each turn into your Hand.",
-      "description": "Innate. Add a copy of the third Attack you play each turn into your Hand.",
-      "isUpgraded": true,
-      "baseCard": "Juggling"
-    },
-    {
-      "name": "Pillage+",
-      "type": "atk_vel",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Pillage. Deal 9 damage. Draw cards until you draw a non-Attack card.",
-      "description": "Deal 9 damage. Draw cards until you draw a non-Attack card.",
-      "isUpgraded": true,
-      "baseCard": "Pillage"
-    },
-    {
-      "name": "Rage+",
-      "type": "skl",
-      "cost": 0,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Rage. Whenever you play an Attack this turn, gain 5 StS2 Intent Defend.png Block.",
-      "description": "Whenever you play an Attack this turn, gain 5 StS2 Intent Defend.png Block.",
-      "isUpgraded": true,
-      "baseCard": "Rage"
-    },
-    {
-      "name": "Rampage+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Rampage. Deal 9 damage. Increase this card's damage by 9 this combat.",
-      "description": "Deal 9 damage. Increase this card's damage by 9 this combat.",
-      "isUpgraded": true,
-      "baseCard": "Rampage"
-    },
-    {
-      "name": "Rupture+",
-      "type": "skl",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Rupture. Whenever you lose HP on your turn, gain 2 StS2 Icon Strength.png Strength.",
-      "description": "Whenever you lose HP on your turn, gain 2 StS2 Icon Strength.png Strength.",
-      "isUpgraded": true,
-      "baseCard": "Rupture"
-    },
-    {
-      "name": "Second Wind+",
-      "type": "def_vel",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Second Wind. Exhaust all non-Attack cards in your Hand. Gain 7 StS2 Intent Defend.png Block for each card Exhausted.",
-      "description": "Exhaust all non-Attack cards in your Hand. Gain 7 StS2 Intent Defend.png Block for each card Exhausted.",
-      "isUpgraded": true,
-      "baseCard": "Second Wind"
-    },
-    {
-      "name": "Spite+",
-      "type": "atk",
-      "cost": 0,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Spite. Deal 5 damage. If you lost HP this turn, hits 3 times.",
-      "description": "Deal 5 damage. If you lost HP this turn, hits 3 times.",
-      "isUpgraded": true,
-      "baseCard": "Spite"
-    },
-    {
-      "name": "Stampede+",
-      "type": "skl",
-      "cost": 2,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Stampede. At the end of your turn, 1 random Attack in your Hand is played against a random enemy.",
-      "description": "At the end of your turn, 1 random Attack in your Hand is played against a random enemy.",
-      "isUpgraded": true,
-      "baseCard": "Stampede"
-    },
-    {
-      "name": "Stomp+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Stomp. Deal 15 damage to ALL enemies. Costs 1 less StS2 EnergyIronclad.png for each Attack played this turn.",
-      "description": "Deal 15 damage to ALL enemies. Costs 1 less StS2 EnergyIronclad.png for each Attack played this turn.",
-      "isUpgraded": true,
-      "baseCard": "Stomp"
-    },
-    {
-      "name": "Stone Armor+",
-      "type": "skl",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Stone Armor. Gain 6 StS2 Icon Plating.png Plating.",
-      "description": "Gain 6 StS2 Icon Plating.png Plating.",
-      "isUpgraded": true,
-      "baseCard": "Stone Armor"
-    },
-    {
-      "name": "Taunt+",
-      "type": "atk_def",
-      "cost": 0,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Taunt. Gain 8 StS2 Intent Defend.png Block. Apply 2 StS2 Icon Vulnerable.png Vulnerable.",
-      "description": "Gain 8 StS2 Intent Defend.png Block. Apply 2 StS2 Icon Vulnerable.png Vulnerable.",
-      "isUpgraded": true,
-      "baseCard": "Taunt"
-    },
-    {
-      "name": "Unrelenting+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "20 dmg. Next Attack costs 0.",
-      "description": "Deal 20 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png.",
-      "isUpgraded": true,
-      "baseCard": "Unrelenting"
-    },
-    {
-      "name": "Uppercut+",
-      "type": "atk_def",
-      "cost": 2,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Uppercut. Deal 13 damage. Apply 2 StS2 Icon Weak.png Weak. Apply 2 StS2 Icon Vulnerable.png Vulnerable.",
-      "description": "Deal 13 damage. Apply 2 StS2 Icon Weak.png Weak. Apply 2 StS2 Icon Vulnerable.png Vulnerable.",
-      "isUpgraded": true,
-      "baseCard": "Uppercut"
-    },
-    {
-      "name": "Vicious+",
-      "type": "atk_vel",
-      "cost": 1,
-      "rarity": "uncommon",
-      "note": "Upgraded version of Vicious. Whenever you apply StS2 Icon Vulnerable.png Vulnerable, draw 2 cards.",
-      "description": "Whenever you apply StS2 Icon Vulnerable.png Vulnerable, draw 2 cards.",
-      "isUpgraded": true,
-      "baseCard": "Vicious"
-    },
-    {
-      "name": "Whirlwind+",
-      "type": "atk",
-      "cost": "X",
-      "rarity": "uncommon",
-      "note": "Upgraded version of Whirlwind. Deal 8 damage to ALL enemies X times.",
-      "description": "Deal 8 damage to ALL enemies X times.",
-      "isUpgraded": true,
-      "baseCard": "Whirlwind"
-    },
-    {
-      "name": "Aggression+",
-      "type": "vel",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Aggression. Innate. At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it.",
-      "description": "Innate. At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it.",
-      "isUpgraded": true,
-      "baseCard": "Aggression"
-    },
-    {
-      "name": "Barricade+",
-      "type": "skl",
-      "cost": 3,
-      "rarity": "rare",
-      "note": "Upgraded version of Barricade. ",
-      "description": "",
-      "isUpgraded": true,
-      "baseCard": "Barricade"
-    },
-    {
-      "name": "Brand+",
-      "type": "skl_vel",
-      "cost": 1,
-      "rarity": "rare",
-      "note": "Upgraded version of Brand. Lose 1 HP. Exhaust 1 card. Gain 2 StS2 Icon Strength.png Strength.",
-      "description": "Lose 1 HP. Exhaust 1 card. Gain 2 StS2 Icon Strength.png Strength.",
-      "isUpgraded": true,
-      "baseCard": "Brand"
-    },
-    {
-      "name": "Cascade+",
-      "type": "vel",
-      "cost": 1,
-      "rarity": "rare",
-      "note": "Upgraded version of Cascade. Play the top X+1 cards of your Draw Pile.",
-      "description": "Play the top X+1 cards of your Draw Pile.",
-      "isUpgraded": true,
-      "baseCard": "Cascade"
-    },
-    {
-      "name": "Conflagration+",
-      "type": "atk",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "2 dmg × 5 hits to ALL enemies.",
-      "description": "Deal 2 damage to ALL enemies 5 times.",
-      "isUpgraded": true,
-      "baseCard": "Conflagration"
-    },
-    {
-      "name": "Crimson Mantle+",
-      "type": "def",
-      "cost": 1,
-      "rarity": "rare",
-      "note": "Upgraded version of Crimson Mantle. At the start of your turn, lose 1 HP and gain 10 StS2 Intent Defend.png Block.",
-      "description": "At the start of your turn, lose 1 HP and gain 10 StS2 Intent Defend.png Block.",
-      "isUpgraded": true,
-      "baseCard": "Crimson Mantle"
-    },
-    {
-      "name": "Cruelty+",
-      "type": "skl",
-      "cost": 1,
-      "rarity": "rare",
-      "note": "Upgraded version of Cruelty. ",
-      "description": "",
-      "isUpgraded": true,
-      "baseCard": "Cruelty"
-    },
-    {
-      "name": "Dark Embrace+",
-      "type": "vel",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Dark Embrace. Whenever a card is Exhausted, draw 1 card.",
-      "description": "Whenever a card is Exhausted, draw 1 card.",
-      "isUpgraded": true,
-      "baseCard": "Dark Embrace"
-    },
-    {
-      "name": "Demon Form+",
-      "type": "skl",
-      "cost": 3,
-      "rarity": "rare",
-      "note": "Upgraded version of Demon Form. At the start of your turn, gain 3 StS2 Icon Strength.png Strength.",
-      "description": "At the start of your turn, gain 3 StS2 Icon Strength.png Strength.",
-      "isUpgraded": true,
-      "baseCard": "Demon Form"
-    },
-    {
-      "name": "Feed+",
-      "type": "atk_vel",
-      "cost": 1,
-      "rarity": "rare",
-      "note": "Upgraded version of Feed. Deal 12 damage. If Fatal, raise your Max HP by 4. Exhaust.",
-      "description": "Deal 12 damage. If Fatal, raise your Max HP by 4. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Feed"
-    },
-    {
-      "name": "Fiend Fire+",
-      "type": "atk_vel",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Fiend Fire. Exhaust your Hand. Deal 10 damage for each card Exhausted. Exhaust.",
-      "description": "Exhaust your Hand. Deal 10 damage for each card Exhausted. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Fiend Fire"
-    },
-    {
-      "name": "Hellraiser+",
-      "type": "vel",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Hellraiser. Whenever you draw a card containing “Strike”, it is played against a random enemy.",
-      "description": "Whenever you draw a card containing “Strike”, it is played against a random enemy.",
-      "isUpgraded": true,
-      "baseCard": "Hellraiser"
-    },
-    {
-      "name": "Impervious+",
-      "type": "def_vel",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Impervious. Gain 40 StS2 Intent Defend.png Block. Exhaust.",
-      "description": "Gain 40 StS2 Intent Defend.png Block. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Impervious"
-    },
-    {
-      "name": "Juggernaut+",
-      "type": "skl",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Whenever you gain Block, deal 8 to random enemy.",
-      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 8 damage to a random enemy.",
-      "isUpgraded": true,
-      "baseCard": "Juggernaut"
-    },
-    {
-      "name": "Mangle+",
-      "type": "atk_skl",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Mangle. Deal 20 damage. Enemy loses 15 StS2 Icon Strength.png Strength this turn.",
-      "description": "Deal 20 damage. Enemy loses 15 StS2 Icon Strength.png Strength this turn.",
-      "isUpgraded": true,
-      "baseCard": "Mangle"
-    },
-    {
-      "name": "Not Yet+",
-      "type": "vel",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Not Yet. Heal 13 HP. Exhaust.",
-      "description": "Heal 13 HP. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Not Yet"
-    },
-    {
-      "name": "Offering+",
-      "type": "vel",
-      "cost": 0,
-      "rarity": "rare",
-      "note": "Upgraded version of Offering. Lose 6 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Draw 5 cards. Exhaust.",
-      "description": "Lose 6 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Draw 5 cards. Exhaust.",
-      "isUpgraded": true,
-      "baseCard": "Offering"
-    },
-    {
-      "name": "One-Two Punch+",
-      "type": "skl",
-      "cost": 1,
-      "rarity": "rare",
-      "note": "Upgraded version of One-Two Punch. This turn, your next 2 Attacks are played an extra time.",
-      "description": "This turn, your next 2 Attacks are played an extra time.",
-      "isUpgraded": true,
-      "baseCard": "One-Two Punch"
-    },
-    {
-      "name": "Pact's End+",
-      "type": "atk_vel",
-      "cost": 0,
-      "rarity": "rare",
-      "note": "Upgraded version of Pact's End. Can only be played if you have 3 or more cards in your Exhaust Pile. Deal 23 damage to ALL enemies.",
-      "description": "Can only be played if you have 3 or more cards in your Exhaust Pile. Deal 23 damage to ALL enemies.",
-      "isUpgraded": true,
-      "baseCard": "Pact's End"
-    },
-    {
-      "name": "Primal Force+",
-      "type": "skl",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Primal Force. Transform all Attacks in your Hand into StS2 CardIcon Colorless Attack Token.png Giant Rock+.",
-      "description": "Transform all Attacks in your Hand into StS2 CardIcon Colorless Attack Token.png Giant Rock+.",
-      "isUpgraded": true,
-      "baseCard": "Primal Force"
-    },
-    {
-      "name": "Pyre+",
-      "type": "skl",
-      "cost": 1,
-      "rarity": "rare",
-      "note": "Upgraded version of Pyre. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png at the start of each turn.",
-      "description": "Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png at the start of each turn.",
-      "isUpgraded": true,
-      "baseCard": "Pyre"
-    },
-    {
-      "name": "Stoke+",
-      "type": "vel",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Stoke. Exhaust your Hand. Add 1 random Upgraded card into your Hand for each card Exhausted.",
-      "description": "Exhaust your Hand. Add 1 random Upgraded card into your Hand for each card Exhausted.",
-      "isUpgraded": true,
-      "baseCard": "Stoke"
-    },
-    {
-      "name": "Tank+",
-      "type": "atk",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Tank. Take double damage from enemies. Allies take half damage from enemies.",
-      "description": "Take double damage from enemies. Allies take half damage from enemies.",
-      "isUpgraded": true,
-      "baseCard": "Tank"
-    },
-    {
-      "name": "Tear Asunder+",
-      "type": "atk",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Tear Asunder. Deal 7 damage. Hits an additional time for each time you lost HP this combat.",
-      "description": "Deal 7 damage. Hits an additional time for each time you lost HP this combat.",
-      "isUpgraded": true,
-      "baseCard": "Tear Asunder"
-    },
-    {
-      "name": "Thrash+",
-      "type": "atk_vel",
-      "cost": 0,
-      "rarity": "rare",
-      "note": "Upgraded version of Thrash. Deal 6 damage twice. Exhaust a random Attack in your Hand and add its damage to this card.",
-      "description": "Deal 6 damage twice. Exhaust a random Attack in your Hand and add its damage to this card.",
-      "isUpgraded": true,
-      "baseCard": "Thrash"
-    },
-    {
-      "name": "Unmovable+",
-      "type": "def",
-      "cost": 2,
-      "rarity": "rare",
-      "note": "Upgraded version of Unmovable. The first time you gain StS2 Intent Defend.png Block from a card each turn, double the amount gained.",
-      "description": "The first time you gain StS2 Intent Defend.png Block from a card each turn, double the amount gained.",
-      "isUpgraded": true,
-      "baseCard": "Unmovable"
-    },
-    {
-      "name": "Break+",
-      "type": "atk",
-      "cost": 1,
-      "rarity": "ancient",
-      "note": "Upgraded version of Break. Deal 30 damage. Apply 7 StS2 Icon Vulnerable.png Vulnerable.",
-      "description": "Deal 30 damage. Apply 7 StS2 Icon Vulnerable.png Vulnerable.",
-      "isUpgraded": true,
-      "baseCard": "Break"
-    },
-    {
-      "name": "Corruption+",
-      "type": "vel",
-      "cost": 3,
-      "rarity": "ancient",
-      "note": "Upgraded version of Corruption. Skills cost 0 StS2 EnergyIronclad.png. Whenever you play a Skill, Exhaust it.",
-      "description": "Skills cost 0 StS2 EnergyIronclad.png. Whenever you play a Skill, Exhaust it.",
-      "isUpgraded": true,
-      "baseCard": "Corruption"
     }
   ];

@@ -406,21 +406,21 @@ const TIPS_CARDS = {
     claw:     ['All for One','Claw','Panache','Scrape'],
     orb:      ['Barrage','Defragment','Echo Form','Loop','Multi-Cast'],
     frost:    ['Chill','Glacier','Hailstorm','Loop'],
-    toolbox:  ['Double Energy','Echo Form','Hologram','Meteor Strike','Skim','Turbo'],
-    darkness: ['Darkness','Defragment','Dual Cast','Multi-Cast','Shadow Shield']
+    toolbox:  ['Double Energy','Echo Form','Hologram','Meteor Strike','Skim','TURBO'],
+    darkness: ['Darkness','Defragment','Dualcast','Multi-Cast','Shadow Shield']
   },
   necrobinder: {
     doom:     ['Borrowed Time',"Death's Door",'End of Days','Neurosurge','Reap',"Time's Up"],
     osty:     ['Flatten','Necro Mastery','Pull Aggro','Rattle',"Sic 'Em"],
-    soul:     ['Borrowed Time','Captured Spirit','Devour Life','Durge','Haunt','Neurosurge','Severance','Soul Storm','Undeath'],
-    ethereal: ["Banshee's Cry",'Borrowed Time','Eradicate','Grave Blast','Page Storm','Seance']
+    soul:     ['Borrowed Time','Captured Spirit','Devour Life','Dirge','Haunt','Neurosurge','Severance','Soul Storm','Undeath'],
+    ethereal: ["Banshee's Cry",'Borrowed Time','Eradicate','Graveblast','Pagestorm','Seance']
   },
   regent: {
-    blade:    ['Beat into Shape','Conqueror','Falling Star','Gamma Blast','Sword Stage'],
+    blade:    ['Beat into Shape','Conqueror','Falling Star','Gamma Blast'],
     star:     ['Alignment','Child of the Stars','Cloak of Stars','Genesis','Royal Gamble'],
-    starfall: ['Alignment','Powder','Radiate','Royal Gamble','Stardust','Terraforming','Vigor'],
+    starfall: ['Alignment','Radiate','Royal Gamble','Stardust','Terraforming'],
     midrange: ['Child of the Stars','Comet','Convergence','Genesis','Reflect'],
-    infinite: ['Alignment','Convergence','Decisions Decisions','Glow','GUARDS!!!']
+    infinite: ['Alignment','Convergence','Decisions, Decisions','Glow','GUARDS!!!']
   }
 };
 
@@ -437,15 +437,15 @@ const DRAW_CARDS = {
   ironclad:    ['Battle Trance','Burning Pact','Dark Embrace','Pommel Strike','Headbutt','Scrape'],
   silent:      ['Acrobatics','Backflip','Prepared','Reflex','Dagger Throw','Adrenaline','Expertise'],
   defect:      ['Skim','Scrape','FTL','Compile Driver','Flash of Steel','Machine Learning'],
-  necrobinder: ['Fetch','Grave Blast','Parse','Dredge','Reave','Wisp','Neurosurge'],
-  regent:      ['Prophesize','Glimmer','Photon Cut','Decisions Decisions','Glow']
+  necrobinder: ['Fetch','Graveblast','Parse','Dredge','Reave','Wisp','Neurosurge'],
+  regent:      ['Prophesize','Glimmer','Photon Cut','Decisions, Decisions','Glow']
 };
 
 // Energy cards — generate extra energy or reduce card costs
 const ENERGY_CARDS = {
   ironclad:    ['Offering','Bloodletting','Expect a Fight','Spite','Pyre','Hellraiser'],
   silent:      ['Tactician','Adrenaline','Calculated Gamble','Tools of the Trade'],
-  defect:      ['Turbo','Double Energy','Rip the Ether','Meteor Strike','Hologram'],
+  defect:      ['TURBO','Double Energy','Rip the Ether','Meteor Strike','Hologram'],
   necrobinder: ['Borrowed Time','Wisp','Friendship','Neurosurge','Demesne','Scourge','Grave Warden'],
   regent:      ['Convergence','Alignment','Bulwark']
 };
@@ -495,8 +495,7 @@ const VEL_STAR_GEN_BONUS = {
   'Big Bang': 1,
   'Manifest Authority': 3, 'Manifest Authority+': 3,
   'Wrought in War': 2, 'Wrought in War+': 1,
-  'Falling Star': 2, 'Falling Star+': 1,
-  'Powder': 1, 'Powder+': 2
+  'Falling Star': 2, 'Falling Star+': 1
 };
 
 const BASE_STARS_PER_TURN = 0; // Stars don't auto-replenish each turn
@@ -935,7 +934,7 @@ const ENGINES = {
     {name:'Orb/Focus engine',cards:['Defragment','Loop','Multi-Cast'],note:'Stack Focus ASAP. Remove Strikes — passive orbs outscale them by Act 2.'},
     {name:'Claw engine',cards:['Claw','All for One','Scrape'],note:'Every Claw buffs all Claws. Keep deck small. Feral returns 0-cost attacks.'},
     {name:'Hologram/TURBO loop',cards:['Hologram','TURBO','Claw'],note:'TURBO generates energy, Hologram retrieves Claw. Infinite-like turns with enough draw.'},
-    {name:'Frost engine',cards:['Glacier','Biased Cog','Coolheaded'],note:'Passive block via Frost orbs. Biased Cog spikes Focus making each Frost orb block more. Glacier channels 2 at once.'},
+    {name:'Frost engine',cards:['Glacier','Biased Cognition','Coolheaded'],note:'Passive block via Frost orbs. Biased Cog spikes Focus making each Frost orb block more. Glacier channels 2 at once.'},
     {name:'Dark Orb engine',cards:['Darkness','Dark Orb','Multi-Cast'],note:'Dark orbs store damage (ignores Focus). Let them grow then Multi-Cast for huge burst.'},
     {name:'Creative AI engine',cards:['Creative AI','Hologram','White Noise'],note:'Random Power each turn. Hologram retrieves key powers from discard. White Noise adds free Power.'}
   ],

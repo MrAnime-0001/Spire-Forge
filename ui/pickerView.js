@@ -60,7 +60,7 @@ function renderRewardUnified(el) {
       const c = allCards.find(function(x){return x.name===n;});
       const t = c ? c.type : 'skl';
       const safeNR = n.replace(/'/g,"\\'");
-      html += '<span onclick="rewardRemoveOffered(\''+safeNR+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--border-bright);border-radius:3px;background:var(--surface2);font-size:12px;cursor:pointer;color:var(--text)">';
+      html += '<span data-card="'+n+'" onclick="rewardRemoveOffered(\''+safeNR+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--border-bright);border-radius:3px;background:var(--surface2);font-size:12px;cursor:pointer;color:var(--text)">';
       html += '<span class="deck-item-tag '+typeCls(t)+'" style="font-size:8px;padding:1px 4px">'+t.replace(/_/g,'·').toUpperCase()+'</span>';
       html += ' '+n+' <span style="color:var(--text-muted);font-size:10px">\u2715</span></span>';
     });
@@ -94,8 +94,8 @@ function renderRewardUnified(el) {
         const noteHtml = c.note ? '<div style="font-size:10px;color:var(--text-muted);font-style:italic;line-height:1.4;margin-top:1px">'+c.note+'</div>' : '';
         const isUpgraded = c.name.endsWith('+');
         const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:'+nameCol;
-        html += '<div onclick="'+clickFn+'" style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:7px;padding:6px 8px;border:1px solid '+borderCol+';border-radius:3px;margin-bottom:3px;background:'+bgCol+';cursor:pointer;overflow:hidden">';
-        html += '<div style="min-width:0"><div style="font-size:13px;'+nameStyle+';overflow:hidden;text-overflow:ellipsis">'+c.name+crossLabel+'</div>'+detailHtml+noteHtml+'</div>';
+        html += '<div data-card="'+c.name+'" onclick="'+clickFn+'" style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:7px;padding:6px 8px;border:1px solid '+borderCol+';border-radius:3px;margin-bottom:3px;background:'+bgCol+';cursor:pointer;overflow:hidden">';
+        html += '<div style="min-width:0"><div style="font-size:13px;'+nameStyle+';overflow:hidden;text-overflow:ellipsis"><span class="cf-row-orb">'+cardOrbHtml(c, true)+'</span>'+c.name+crossLabel+'</div>'+detailHtml+noteHtml+'</div>';
         html += '<span class="deck-item-tag '+typeCls(c.type)+'" style="font-size:9px;padding:1px 5px">'+(c.type||'skl').replace(/_/g,'·').toUpperCase()+'</span>';
         html += rarityBadgeHtml(getRarity(c));
         // Build tier badge
@@ -218,7 +218,7 @@ function renderRewardVerdictHtml() {
 
     var sRarity = getRarity(s.card);
     html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap">';
-    html += '<span style="font-size:14px;'+nameStyle+'">'+s.name+'</span>';
+    html += '<span data-card="'+s.name+'" style="font-size:14px;'+nameStyle+'"><span class="cf-row-orb">'+cardOrbHtml(s.card, true)+'</span>'+s.name+'</span>';
     html += '<span class="deck-item-tag '+typeCls(s.card.type)+'" style="font-size:9px;padding:1px 5px">'+typeTag+'</span>';
     html += rarityBadgeHtml(sRarity);
     if (deck[s.name]) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×'+deck[s.name]+'</span>';
@@ -616,9 +616,9 @@ function pickerRowHtmlAdd(c, typeCls, vs) {
   const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
   const descHtml = formatCardDescription(c.description || '');
   const cardDetail = descHtml ? `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">${typeLabel}${finalCostStr?' · '+finalCostStr:''} — ${descHtml}</div>` : '';
-  return `<div class="picker-card-row${rowCls}" onclick="pickerAddCard('${safeN}')" style="grid-template-columns:1fr auto auto auto;gap:5px">
+  return `<div class="picker-card-row${rowCls}" data-card="${c.name}" onclick="pickerAddCard('${safeN}')" style="grid-template-columns:1fr auto auto auto;gap:5px">
     <div style="min-width:0">
-      <div class="picker-card-name" style="${nameStyle}">${c.name}${inDeck}${crossTag}</div>
+      <div class="picker-card-name" style="${nameStyle}"><span class="cf-row-orb">${cardOrbHtml(c, true)}</span>${c.name}${inDeck}${crossTag}</div>
       ${cardDetail}
       ${noteText ? `<div class="picker-card-note">${noteText}</div>` : ''}
     </div>

@@ -16,6 +16,58 @@ function getAllCardsForPicker() {
   return own.concat(others).concat(colorless);
 }
 
+// ── Game-style card visuals ──────────────────────────────────
+var CHAR_COLORS = {ironclad:'#b8342c', silent:'#4f8a3c', defect:'#3d7bbd', regent:'#d08a2a', necrobinder:'#b05a9a', colorless:'#8a8a80'};
+var _cardIndex = null;
+
+// name -> {card, pool}, preferring the current character's pool (Strike, Defend exist in several).
+// ALL_CARDS never changes after load, so the index is built once.
+function findCard(name) {
+  if (!_cardIndex) {
+    _cardIndex = {};
+    Object.keys(ALL_CARDS).forEach(function(pool) {
+      ALL_CARDS[pool].forEach(function(c) {
+        (_cardIndex[c.name] = _cardIndex[c.name] || []).push({card: c, pool: pool});
+      });
+    });
+  }
+  var hits = _cardIndex[name];
+  if (!hits) return null;
+  return hits.find(function(h) { return h.pool === currentChar; }) || hits[0];
+}
+
+function isUnplayable(card) {
+  return /cur|status/.test(card.type || '') || ['Status', 'Curse'].indexOf(card.cardType) >= 0;
+}
+
+// Energy orb (+ Regent star orb). Small variant for list rows.
+function cardOrbHtml(card, small) {
+  if (!card || card.cost === undefined || isUnplayable(card)) return small ? '<span class="cf-orb sm cf-none"></span>' : '';
+  var found = findCard(card.name);
+  var col = CHAR_COLORS[found ? found.pool : currentChar] || CHAR_COLORS.colorless;
+  var sm = small ? ' sm' : '';
+  var html = '<span class="cf-orb' + sm + '" style="--char:' + col + '">' + card.cost + '</span>';
+  if (card.starCost !== undefined) html += '<span class="cf-orb cf-star' + sm + '">' + card.starCost + '</span>';
+  return html;
+}
+
+function cardFaceHtml(card) {
+  var found = findCard(card.name);
+  var col = CHAR_COLORS[found ? found.pool : currentChar] || CHAR_COLORS.colorless;
+  var type = card.cardType || (/atk/.test(card.type) ? 'Attack' : /pow/.test(card.type) ? 'Power' : isUnplayable(card) ? 'Curse' : 'Skill');
+  var rar = card.rarity || 'common';
+  return '<div class="cf cf-' + type.toLowerCase() + '" style="--char:' + col + '">' +
+      '<div class="cf-orbs">' + cardOrbHtml(card) + '</div>' +
+      (card.multiplayer ? '<span class="cf-coop">CO-OP</span>' : '') +
+      '<div class="cf-banner cf-rar-' + rar + '"><span class="cf-name' + (card.isUpgraded ? ' up' : '') + '">' + card.name + '</span></div>' +
+      '<div class="cf-art"></div>' +
+      '<div class="cf-type">' + type + '</div>' +
+      '<div class="cf-body">' + formatCardDescription(card.description) + '</div>' +
+      '<div class="cf-rarity">' + rar + '</div>' +
+    '</div>' +
+    (card.note ? '<div class="cf-note">' + card.note + '</div>' : '');
+}
+
 function getRarity(card) {
   return (card && card.rarity) ? card.rarity : 'common';
 }

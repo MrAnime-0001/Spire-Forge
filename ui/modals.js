@@ -69,9 +69,9 @@ function renderModalCards() {
       const descHtml = formatCardDescription(c.description || '');
       const cardDetail = `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:2px">${typeLabel}${finalCostStr?' · '+finalCostStr:''}${descHtml?' — '+descHtml:''}</div>`;
 
-      html += `<div class="card-option${recommended}" onclick="addCard('${c.name.replace(/'/g,"\\'")}')">
+      html += `<div class="card-option${recommended}" data-card="${c.name}" onclick="addCard('${c.name.replace(/'/g,"\\'")}')">
         <div style="min-width:0">
-          <div class="card-opt-name" style="${nameStyle}">${c.name}${inDeck}</div>
+          <div class="card-opt-name" style="${nameStyle}"><span class="cf-row-orb">${cardOrbHtml(c, true)}</span>${c.name}${inDeck}</div>
           <div class="card-opt-reason">${c.cat.reason}. ${c.note||''}</div>
           ${cardDetail}
         </div>

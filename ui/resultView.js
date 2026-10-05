@@ -27,14 +27,14 @@ function updatePriorityPanel() {
       // cards won't appear in normal card rewards
       const charPool = ALL_CARDS[currentChar] || [];
       const bestCards = charPool
-        .filter(c => c.type && c.type.includes(typeFilter) && !c.name.endsWith('+'))
+        .filter(c => c.type && c.type.includes(typeFilter) && !c.name.endsWith('+') && !c.multiplayer)
         .map(c => { const r = scoreCard(c.name); return { card: c, score: r ? r.score : 0 }; })
         .sort((a, b) => b.score - a.score)
         .slice(0, 3);
 
       bestCards.forEach(({card, score}) => {
         const safeN = card.name.replace(/'/g,"\\'");
-        html += `<div onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid ${color}60;border-radius:3px;background:${color}12;cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='${color}';this.style.background='${color}25'" onmouseout="this.style.borderColor='${color}60';this.style.background='${color}12'">
+        html += `<div data-card="${card.name}" onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid ${color}60;border-radius:3px;background:${color}12;cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='${color}';this.style.background='${color}25'" onmouseout="this.style.borderColor='${color}60';this.style.background='${color}12'">
           <div style="flex:1;min-width:0">
             <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:${color};text-transform:uppercase;margin-bottom:2px">${label}</div>
             <div style="font-size:13px;color:var(--text)">${card.name}</div>
