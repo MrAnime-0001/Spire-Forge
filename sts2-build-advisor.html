@@ -65,10 +65,10 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 /* ── Character Seals ── */
 .char-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:2rem;}
 @media(max-width:600px){.char-grid{grid-template-columns:repeat(3,1fr);}}
-.char-btn{padding:.9rem .4rem;background:rgba(0,0,0,.45);border:1px solid rgba(100,90,70,.15);border-radius:3px;
+.char-btn{padding:.5rem .4rem;background:rgba(0,0,0,.45);border:1px solid rgba(100,90,70,.15);border-radius:3px;
   color:var(--text-dim);font-family:var(--font-display);font-weight:400;font-size:13px;
   letter-spacing:.03em;cursor:pointer;transition:all .2s;text-align:center;position:relative;
-  overflow:hidden;min-width:0;height:85px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;min-width:0;height:96px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
   box-shadow:inset 0 1px 0 rgba(200,146,42,0.05),0 2px 8px rgba(0,0,0,0.3);}
 .char-btn::before{content:'';position:absolute;inset:0;
   background:linear-gradient(180deg,transparent 60%,rgba(200,146,42,0.04));
@@ -79,6 +79,13 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 .char-btn:hover::after{opacity:1;left:10%;right:10%;}
 .char-btn.active{border-color:var(--gold);color:var(--gold-bright);background:rgba(40,30,10,.5);box-shadow:inset 0 1px 0 rgba(200,146,42,0.1),0 0 20px rgba(200,146,42,0.08);}
 .char-btn.active::after{opacity:1;left:5%;right:5%;height:2px;background:var(--gold-bright);}
+/* Game portrait tiles: grey until selected, like the in-game character select row */
+.char-portrait{width:48px;height:48px;margin-bottom:6px;padding:2px;border:2px solid rgba(100,90,70,.35);border-radius:3px;
+  background:radial-gradient(circle at 50% 40%,rgba(80,60,40,.5),rgba(0,0,0,.6));
+  filter:grayscale(.85) brightness(.55);transition:filter .2s,border-color .2s,box-shadow .2s;flex-shrink:0;}
+.char-btn > span{line-height:1.4;}
+.char-btn:hover .char-portrait{filter:grayscale(.3) brightness(.85);border-color:rgba(180,140,60,.5);}
+.char-btn.active .char-portrait{filter:none;border-color:#e8742c;box-shadow:0 0 12px rgba(232,116,44,.45);}
 
 /* ── Act & Ascension Controls ── */
 .act-row{display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;}
@@ -738,7 +745,6 @@ function updateHpBar() {
 function init() {
   const grid = document.getElementById('charGrid');
   if (!grid) return;
-  const icons = {ironclad:'\u2694\uFE0F',silent:'\uD83D\uDDE1\uFE0F',defect:'\u2699\uFE0F',necrobinder:'\uD83D\uDC80',regent:'\u2605'};
   const chars = ['ironclad','silent','defect','necrobinder','regent'];
   
   chars.forEach(key => {
@@ -746,8 +752,7 @@ function init() {
     btn.className = 'char-btn';
     btn.id = 'char-' + key;
     const label = key.charAt(0).toUpperCase() + key.slice(1);
-    const icon = icons[key] || '\u2694\uFE0F';
-    btn.innerHTML = `<span style="display:block;font-size:18px;margin-bottom:5px;width:24px;text-align:center;overflow:hidden;flex-shrink:0">${icon}</span><span style="display:block;width:100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${label}</span>`;
+    btn.innerHTML = `<img class="char-portrait" src="assets/icons/char-${key}.png" alt="" onerror="this.remove()"><span style="display:block;width:100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${label}</span>`;
     btn.onclick = () => selectChar(key);
     grid.appendChild(btn);
   });
