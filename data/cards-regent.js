@@ -93,6 +93,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "Deal 6 damage to ALL enemies twice.",
       "description": "Deal 6 damage to ALL enemies twice.",
+      "tier": "B",
       "starCost": 3
     },
     {
@@ -103,6 +104,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 8 damage to ALL enemies twice.",
+      "tier": "B",
       "starCost": 3,
       "isUpgraded": true,
       "baseCard": "Astral Pulse"
@@ -114,7 +116,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Choose a card in your Hand to Transform into Minion Strike.",
-      "description": "Choose a card in your Hand to Transform into Minion Strike."
+      "description": "Choose a card in your Hand to Transform into Minion Strike.",
+      "tier": "C"
     },
     {
       "name": "BEGONE!+",
@@ -124,6 +127,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Choose a card in your Hand to Transform into Minion Strike+.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "BEGONE!"
     },
@@ -134,7 +138,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Deal 6 damage 3 times.",
-      "description": "Deal 6 damage 3 times."
+      "description": "Deal 6 damage 3 times.",
+      "tier": "D"
     },
     {
       "name": "Celestial Might+",
@@ -144,6 +149,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 6 damage 4 times.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Celestial Might"
     },
@@ -155,6 +161,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Gain 7 🛡.",
       "description": "Gain 7 StS2 Intent Defend.png Block.",
+      "tier": "B",
       "starCost": 1
     },
     {
@@ -165,6 +172,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 10 StS2 Intent Defend.png Block.",
+      "tier": "B",
       "starCost": 1,
       "isUpgraded": true,
       "baseCard": "Cloak of Stars"
@@ -176,7 +184,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Deal 11 damage. Add 1 Debris into your Hand.",
-      "description": "Deal 10 damage. Add a Debris into your Hand."
+      "description": "Deal 10 damage. Add a Debris into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Collision Course+",
@@ -186,6 +195,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 14 damage. Add a Debris into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Collision Course"
     },
@@ -196,7 +206,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Gain 6 🛡. Put a card from your Discard Pile on top of your Draw Pile.",
-      "description": "Gain 6 StS2 Intent Defend.png Block. Put a card from your Discard Pile on top of your Draw Pile."
+      "description": "Gain 6 StS2 Intent Defend.png Block. Put a card from your Discard Pile on top of your Draw Pile.",
+      "tier": "B"
     },
     {
       "name": "Cosmic Indifference+",
@@ -206,6 +217,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 9 StS2 Intent Defend.png Block. Put a card from your Discard Pile on top of your Draw Pile.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Cosmic Indifference"
     },
@@ -217,6 +229,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "Deal 8 damage. Deals 2 additional damage for ALL your cards that have a Star cost.",
       "description": "Deal 8 damage. Deals 2 additional damage for ALL your cards that have a StS2 StarRegent.png cost.",
+      "tier": "C",
       "starCost": 1
     },
     {
@@ -227,6 +240,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 8 damage. Deals 3 additional damage for ALL your cards that have a StS2 StarRegent.png cost.",
+      "tier": "C",
       "starCost": 1,
       "isUpgraded": true,
       "baseCard": "Crescent Spear"
@@ -258,7 +272,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Gain 8 🛡. Gain ★.",
-      "description": "Gain 8 StS2 Intent Defend.png Block. Gain StS2 StarRegent.png."
+      "description": "Gain 8 StS2 Intent Defend.png Block. Gain StS2 StarRegent.png.",
+      "tier": "B"
     },
     {
       "name": "Gather Light+",
@@ -268,6 +283,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 11 StS2 Intent Defend.png Block. Gain StS2 StarRegent.png.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Gather Light"
     },
@@ -278,7 +294,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Deal 4 damage 4 times.",
-      "description": "Gain 11 StS2 Intent Defend.png Block. Next turn, gain 5 StS2 Intent Defend.png Block."
+      "description": "Gain 11 StS2 Intent Defend.png Block. Next turn, gain 5 StS2 Intent Defend.png Block.",
+      "tier": "B"
     },
     {
       "name": "Glitterstream+",
@@ -288,6 +305,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 13 StS2 Intent Defend.png Block. Next turn, gain 7 StS2 Intent Defend.png Block.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Glitterstream"
     },
@@ -298,7 +316,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Gain ★. Draw 1 card. Next turn, draw 1 card.",
-      "description": "Gain StS2 StarRegent.png. Draw 1 card. Next turn, draw 1 card"
+      "description": "Gain StS2 StarRegent.png. Draw 1 card. Next turn, draw 1 card",
+      "tier": "S"
     },
     {
       "name": "Glow+",
@@ -308,6 +327,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain StS2 StarRegent.pngStS2 StarRegent.png. Draw 1 card. Next turn, draw 1 card",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Glow"
     },
@@ -319,6 +339,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "12 dmg now, draw 2 next turn (v0.111). Cheap Star-cost attack.",
       "description": "Deal 12 damage. Next turn, draw 2 cards.",
+      "tier": "B",
       "starCost": 1
     },
     {
@@ -329,6 +350,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 13 damage. Next turn, draw 3 cards.",
+      "tier": "B",
       "starCost": 1,
       "isUpgraded": true,
       "baseCard": "Guiding Star"
@@ -340,7 +362,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Gain ★. Gain ⚡.",
-      "description": "Gain StS2 StarRegent.png. Next turn, gain StS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.png."
+      "description": "Gain StS2 StarRegent.png. Next turn, gain StS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.png.",
+      "tier": "B"
     },
     {
       "name": "Hidden Cache+",
@@ -350,6 +373,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain StS2 StarRegent.png. Next turn, gain StS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.png.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Hidden Cache"
     },
@@ -360,7 +384,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Apply 1 Weak. Apply 1 Vulnerable.",
-      "description": "Apply 1 Weak. Apply 1 Vulnerable. Exhaust."
+      "description": "Apply 1 Weak. Apply 1 Vulnerable. Exhaust.",
+      "tier": "D"
     },
     {
       "name": "Know Thy Place+",
@@ -370,6 +395,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Apply 1 Weak. Apply 1 Vulnerable.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Know Thy Place"
     },
@@ -380,7 +406,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Gain 5 🛡. Next turn, gain ⚡.",
-      "description": "Gain 8 StS2 Intent Defend.png Block. Gain 2 Vigor."
+      "description": "Gain 8 StS2 Intent Defend.png Block. Gain 2 Vigor.",
+      "tier": "C"
     },
     {
       "name": "Patter+",
@@ -390,6 +417,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 10 StS2 Intent Defend.png Block. Gain 3 Vigor.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Patter"
     },
@@ -400,7 +428,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Deal 10 damage. Draw 1 card. Put 1 card from your Hand on top of your Draw Pile.",
-      "description": "Deal 10 damage. Draw 1 card. Put 1 card from your Hand on top of your Draw Pile."
+      "description": "Deal 10 damage. Draw 1 card. Put 1 card from your Hand on top of your Draw Pile.",
+      "tier": "B"
     },
     {
       "name": "Photon Cut+",
@@ -410,6 +439,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 13 damage. Draw 2 cards. Put 1 card from your Hand on top of your Draw Pile.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Photon Cut"
     },
@@ -420,7 +450,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Forge 5.",
-      "description": "Forge 8. Next turn, gain StS2 EnergyRegent.png."
+      "description": "Forge 8. Next turn, gain StS2 EnergyRegent.png.",
+      "tier": "D"
     },
     {
       "name": "Refine Blade+",
@@ -430,6 +461,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Forge 12. Next turn, gain StS2 EnergyRegent.png.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Refine Blade"
     },
@@ -440,7 +472,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Deal 9 damage. Forge 3.",
-      "description": "Deal 9 damage. Gain StS2 StarRegent.png."
+      "description": "Deal 9 damage. Gain StS2 StarRegent.png.",
+      "tier": "B"
     },
     {
       "name": "Solar Strike+",
@@ -450,6 +483,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Gain StS2 StarRegent.pngStS2 StarRegent.png.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Solar Strike"
     },
@@ -460,7 +494,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Forge 5. Draw 2 cards.",
-      "description": "Forge 6. Draw 2 cards."
+      "description": "Forge 6. Draw 2 cards.",
+      "tier": "D"
     },
     {
       "name": "Spoils of Battle+",
@@ -470,6 +505,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Forge 9. Draw 2 cards.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Spoils of Battle"
     },
@@ -480,7 +516,8 @@ const REGENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Deal 8 damage. Gain ★★. Put this card on top of your Draw Pile.",
-      "description": "Deal 7 damage. Forge 7."
+      "description": "Deal 7 damage. Forge 7.",
+      "tier": "C"
     },
     {
       "name": "Wrought in War+",
@@ -490,6 +527,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 9 damage. Forge 9.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Wrought in War"
     },
@@ -501,6 +539,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Gain ⚡⚡.",
       "description": "Gain StS2 EnergyRegent.pngStS2 EnergyRegent.png.",
+      "tier": "C",
       "starCost": 2
     },
     {
@@ -511,6 +550,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain StS2 EnergyRegent.pngStS2 EnergyRegent.pngStS2 EnergyRegent.png.",
+      "tier": "C",
       "starCost": 2,
       "isUpgraded": true,
       "baseCard": "Alignment"
@@ -522,7 +562,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Whenever you spend or gain ★, deal 3 damage to ALL enemies.",
-      "description": "Whenever you spend or gain StS2 StarRegent.png, deal 3 damage to ALL enemies."
+      "description": "Whenever you spend or gain StS2 StarRegent.png, deal 3 damage to ALL enemies.",
+      "tier": "C"
     },
     {
       "name": "Black Hole+",
@@ -532,6 +573,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you spend or gain StS2 StarRegent.png, deal 4 damage to ALL enemies.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Black Hole"
     },
@@ -542,7 +584,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Forge 10. Gain ⚡. Exhaust.",
-      "description": "Gain 12 StS2 Intent Defend.png Block. Forge 10."
+      "description": "Gain 12 StS2 Intent Defend.png Block. Forge 10.",
+      "tier": "B"
     },
     {
       "name": "Bulwark+",
@@ -552,6 +595,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 15 StS2 Intent Defend.png Block. Forge 13.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Bulwark"
     },
@@ -562,7 +606,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Choose 2 cards in your Draw Pile to Transform into Minion Dive Bombs.",
-      "description": "Choose 2 cards in your Draw Pile to Transform into Minion Dive Bomb."
+      "description": "Choose 2 cards in your Draw Pile to Transform into Minion Dive Bomb.",
+      "tier": "A"
     },
     {
       "name": "CHARGE!!+",
@@ -572,6 +617,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Choose 2 cards in your Draw Pile to Transform into Minion Dive Bomb+.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "CHARGE!!"
     },
@@ -582,7 +628,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Whenever you spend or gain ★, gain 2 🛡.",
-      "description": "Whenever you spend StS2 StarRegent.png , gain 2 StS2 Intent Defend.png Block for each StS2 StarRegent.png spent."
+      "description": "Whenever you spend StS2 StarRegent.png , gain 2 StS2 Intent Defend.png Block for each StS2 StarRegent.png spent.",
+      "tier": "S"
     },
     {
       "name": "Child of the Stars+",
@@ -592,6 +639,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you spend StS2 StarRegent.png , gain 3 StS2 Intent Defend.png Block for each StS2 StarRegent.png spent.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Child of the Stars"
     },
@@ -602,7 +650,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Forge 3. Sovereign Blade deals double damage to the enemy this turn.",
-      "description": "Forge 3. Sovereign Blade deals double damage to the enemy this turn."
+      "description": "Forge 3. Sovereign Blade deals double damage to the enemy this turn.",
+      "tier": "C"
     },
     {
       "name": "Conqueror+",
@@ -612,6 +661,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Forge 5. Sovereign Blade deals double damage to the enemy this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Conqueror"
     },
@@ -646,7 +696,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Next turn, gain ⚡ and ★. Retain your Hand this turn.",
-      "description": "Next turn, gain StS2 EnergyRegent.png and StS2 StarRegent.png. Retain your Hand this turn."
+      "description": "Next turn, gain StS2 EnergyRegent.png and StS2 StarRegent.png. Retain your Hand this turn.",
+      "tier": "S"
     },
     {
       "name": "Convergence+",
@@ -656,6 +707,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Next turn, gain StS2 EnergyRegent.png and StS2 StarRegent.pngStS2 StarRegent.png. Retain your Hand this turn.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Convergence"
     },
@@ -667,6 +719,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "Deal 14 damage.",
       "description": "Deal 35 damage.",
+      "tier": "C",
       "starCost": 4
     },
     {
@@ -677,6 +730,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 45 damage.",
+      "tier": "C",
       "starCost": 4,
       "isUpgraded": true,
       "baseCard": "Devastate"
@@ -688,7 +742,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Whenever you create a card, gain 1 Strength.",
-      "description": "At the start of your turn, Forge 5."
+      "description": "At the start of your turn, Forge 5.",
+      "tier": "C"
     },
     {
       "name": "Furnace+",
@@ -698,6 +753,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, Forge 7.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Furnace"
     },
@@ -709,6 +765,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "Deal 14 damage. Apply 2 Weak. Apply 2 Vulnerable.",
       "description": "Deal 13 damage. Apply 2 Weak. Apply 2 Vulnerable.",
+      "tier": "A",
       "starCost": 3
     },
     {
@@ -719,6 +776,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 18 damage. Apply 2 Weak. Apply 2 Vulnerable.",
+      "tier": "A",
       "starCost": 3,
       "isUpgraded": true,
       "baseCard": "Gamma Blast"
@@ -730,7 +788,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Gain ★. Draw 1 card. Next turn, draw 1 card.",
-      "description": "Draw 3 cards. Put 1 card from your Hand on top of your Draw Pile."
+      "description": "Draw 3 cards. Put 1 card from your Hand on top of your Draw Pile.",
+      "tier": "A"
     },
     {
       "name": "Glimmer+",
@@ -740,6 +799,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 4 cards. Put 1 card from your Hand on top of your Draw Pile.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Glimmer"
     },
@@ -750,7 +810,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Deal 8 damage. Gain ★★. Put this card on top of your Draw Pile.",
-      "description": "Deal 15 damage. Next turn, gain StS2 EnergyRegent.pngStS2 EnergyRegent.png."
+      "description": "Deal 15 damage. Next turn, gain StS2 EnergyRegent.pngStS2 EnergyRegent.png.",
+      "tier": "C"
     },
     {
       "name": "Hegemony+",
@@ -760,6 +821,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 18 damage. Next turn, gain StS2 EnergyRegent.pngStS2 EnergyRegent.pngStS2 EnergyRegent.png.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Hegemony"
     },
@@ -770,7 +832,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Deal 27 damage. Whenever you draw this card, reduce its cost by 1.",
-      "description": "Deal 27 damage. Whenever you draw this card, reduce its cost by 1."
+      "description": "Deal 27 damage. Whenever you draw this card, reduce its cost by 1.",
+      "tier": "D"
     },
     {
       "name": "Kingly Kick+",
@@ -780,6 +843,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 35 damage. Whenever you draw this card, reduce its cost by 1.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Kingly Kick"
     },
@@ -790,7 +854,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Deal 12 damage. If you have at least 5 Block, deal 17 instead.",
-      "description": "Deal 8 damage. Whenever you draw this card, increase its damage by 4 this combat."
+      "description": "Deal 8 damage. Whenever you draw this card, increase its damage by 4 this combat.",
+      "tier": "D"
     },
     {
       "name": "Kingly Punch+",
@@ -800,6 +865,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Whenever you draw this card, increase its damage by 6 this combat.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Kingly Punch"
     },
@@ -810,7 +876,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Deal 20 damage.",
-      "description": "Deal 30 damage. If this kills an enemy, gain StS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.png."
+      "description": "Deal 30 damage. If this kills an enemy, gain StS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.png.",
+      "tier": "C"
     },
     {
       "name": "Knockout Blow+",
@@ -820,6 +887,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 38 damage. If this kills an enemy, gain StS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.png.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Knockout Blow"
     },
@@ -852,7 +920,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Deal 6 damage to ALL enemies.",
-      "description": "Deal 4 damage for each Skill already played this turn."
+      "description": "Deal 4 damage for each Skill already played this turn.",
+      "tier": "C"
     },
     {
       "name": "Lunar Blast+",
@@ -862,6 +931,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 5 damage for each Skill already played this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Lunar Blast"
     },
@@ -872,7 +942,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Gain ★★★.",
-      "description": "Gain 7 StS2 Intent Defend.png Block. Add 1 random Colorless card into your Hand."
+      "description": "Gain 7 StS2 Intent Defend.png Block. Add 1 random Colorless card into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Manifest Authority+",
@@ -882,6 +953,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 8 StS2 Intent Defend.png Block. Add 1 random Upgraded Colorless card into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Manifest Authority"
     },
@@ -892,7 +964,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Draw 2 cards. Gain ★.",
-      "description": "Whenever you play a card this turn, gain 1 Strength this turn."
+      "description": "Whenever you play a card this turn, gain 1 Strength this turn.",
+      "tier": "D"
     },
     {
       "name": "Monologue+",
@@ -902,6 +975,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Retain. Whenever you play a card this turn, gain 1 Strength this turn.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Monologue"
     },
@@ -912,7 +986,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "At the start of your turn, deal 3 damage to ALL enemies for each card you created this combat.",
-      "description": "Every 4 StS2 EnergyRegent.png you spend, gain StS2 EnergyRegent.png."
+      "description": "Every 4 StS2 EnergyRegent.png you spend, gain StS2 EnergyRegent.png.",
+      "tier": "C"
     },
     {
       "name": "Orbit+",
@@ -922,6 +997,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Every 4 StS2 EnergyRegent.png you spend, gain StS2 EnergyRegent.png.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Orbit"
     },
@@ -932,7 +1008,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "If you play 5 or more cards in a turn, draw 1 card at the start of your next turn.",
-      "description": "If you play 5 or more cards in a turn, draw 1 card at the start of your next turn."
+      "description": "If you play 5 or more cards in a turn, draw 1 card at the start of your next turn.",
+      "tier": "C"
     },
     {
       "name": "Pale Blue Dot+",
@@ -942,6 +1019,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "If you play 5 or more cards in a turn, draw 2 cards at the start of your next turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Pale Blue Dot"
     },
@@ -952,7 +1030,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Whenever you are attacked, deal 10 damage to the attacker.",
-      "description": "Sovereign Blade now gains 10 StS2 Intent Defend.png Block."
+      "description": "Sovereign Blade now gains 10 StS2 Intent Defend.png Block.",
+      "tier": "D"
     },
     {
       "name": "Parry+",
@@ -962,6 +1041,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Sovereign Blade now gains 14 StS2 Intent Defend.png Block.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Parry"
     },
@@ -973,6 +1053,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Gain 7 🛡.",
       "description": "Gain 9 StS2 Intent Defend.png Block. Return this card to your Hand.",
+      "tier": "S",
       "starCost": 2
     },
     {
@@ -983,6 +1064,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 12 StS2 Intent Defend.png Block. Return this card to your Hand.",
+      "tier": "S",
       "starCost": 2,
       "isUpgraded": true,
       "baseCard": "Particle Wall"
@@ -1016,7 +1098,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "At the start of your turn, gain ★ and draw 1 card and give 1 Strength to ALL allies.",
-      "description": "Whenever you create a card, gain 2 StS2 Intent Defend.png Block."
+      "description": "Whenever you create a card, gain 2 StS2 Intent Defend.png Block.",
+      "tier": "C"
     },
     {
       "name": "Pillar of Creation+",
@@ -1026,6 +1109,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you create a card, gain 3 StS2 Intent Defend.png Block.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Pillar of Creation"
     },
@@ -1036,7 +1120,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Look at the top 5 cards. Put 1 into your Hand.",
-      "description": "Draw 6 cards."
+      "description": "Draw 6 cards.",
+      "tier": "D"
     },
     {
       "name": "Prophesize+",
@@ -1046,6 +1131,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 9 cards.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Prophesize"
     },
@@ -1057,6 +1143,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Gain ★★. Next turn, gain ★★★★.",
       "description": "Choose 1 of 3 random Colorless cards to add into your Hand.",
+      "tier": "D",
       "starCost": 2
     },
     {
@@ -1067,6 +1154,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Choose 1 of 3 random Upgraded Colorless cards to add into your Hand.",
+      "tier": "D",
       "starCost": 2,
       "isUpgraded": true,
       "baseCard": "Quasar"
@@ -1078,7 +1166,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Deal 3 damage to ALL enemies for each ★ gained this turn.",
-      "description": "Deal 3 damage to ALL enemies for each StS2 StarRegent.png gained this turn."
+      "description": "Deal 3 damage to ALL enemies for each StS2 StarRegent.png gained this turn.",
+      "tier": "C"
     },
     {
       "name": "Radiate+",
@@ -1088,6 +1177,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 4 damage to ALL enemies for each StS2 StarRegent.png gained this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Radiate"
     },
@@ -1099,6 +1189,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Gain 10 🛡. Blocked attack damage is reflected to your attacker this turn.",
       "description": "Gain 15 StS2 Intent Defend.png Block. Blocked attack damage is reflected to your attacker this turn.",
+      "tier": "S",
       "starCost": 3
     },
     {
@@ -1109,6 +1200,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 20 StS2 Intent Defend.png Block. Blocked attack damage is reflected to your attacker this turn.",
+      "tier": "S",
       "starCost": 3,
       "isUpgraded": true,
       "baseCard": "Reflect"
@@ -1121,6 +1213,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Deal 3 damage. Deal 3 additional damage for each ★ gained this turn.",
       "description": "Gain 1 Strength. ALL enemies lose 1 Strength.",
+      "tier": "C",
       "starCost": 2
     },
     {
@@ -1131,6 +1224,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 2 Strength. ALL enemies lose 1 Strength.",
+      "tier": "C",
       "starCost": 2,
       "isUpgraded": true,
       "baseCard": "Resonance"
@@ -1143,6 +1237,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Gain ★★★★★★★★★. Exhaust.",
       "description": "Gain 9 StS2 StarRegent.png. Exhaust.",
+      "tier": "C",
       "starCost": 5
     },
     {
@@ -1153,6 +1248,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Retain. Gain 9 StS2 StarRegent.png. Exhaust.",
+      "tier": "C",
       "starCost": 5,
       "isUpgraded": true,
       "baseCard": "Royal Gamble"
@@ -1164,7 +1260,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Deal 9 damage. Gain ★.",
-      "description": "Deal 8 damage. Gain StS2 StarRegent.pngStS2 StarRegent.png. Put this card on top of your Draw Pile."
+      "description": "Deal 8 damage. Gain StS2 StarRegent.pngStS2 StarRegent.png. Put this card on top of your Draw Pile.",
+      "tier": "A"
     },
     {
       "name": "Shining Strike+",
@@ -1174,6 +1271,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 11 damage. Gain StS2 StarRegent.pngStS2 StarRegent.png. Put this card on top of your Draw Pile.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Shining Strike"
     },
@@ -1184,7 +1282,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "At the start of your turn, add 1 random Colorless card into your Hand.",
-      "description": "At the start of your turn, add 1 random Colorless card into your Hand."
+      "description": "At the start of your turn, add 1 random Colorless card into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Spectrum Shift+",
@@ -1194,6 +1293,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, add 1 random Colorless card into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Spectrum Shift"
     },
@@ -1205,6 +1305,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "Deal 5 damage to a random enemy X times.",
       "description": "Deal 5 damage to a random enemy X times.",
+      "tier": "D",
       "starCost": -1
     },
     {
@@ -1215,6 +1316,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 7 damage to a random enemy X times.",
+      "tier": "D",
       "starCost": -1,
       "isUpgraded": true,
       "baseCard": "Stardust"
@@ -1226,7 +1328,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Put a card from your Exhaust Pile into your Hand.",
-      "description": "Forge 8. Put Sovereign Blade into your Hand from anywhere."
+      "description": "Forge 8. Put Sovereign Blade into your Hand from anywhere.",
+      "tier": "B"
     },
     {
       "name": "Summon Forth+",
@@ -1236,6 +1339,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Forge 11. Put Sovereign Blade into your Hand from anywhere.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Summon Forth"
     },
@@ -1246,7 +1350,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Deal 5 damage. Deals 3 additional damage for each card you created this combat.",
-      "description": "Deal 5 damage. Deals 3 additional damage for each card you created this combat."
+      "description": "Deal 5 damage. Deals 3 additional damage for each card you created this combat.",
+      "tier": "C"
     },
     {
       "name": "Supermassive+",
@@ -1256,6 +1361,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 5 damage. Deals 4 additional damage for each card you created this combat.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Supermassive"
     },
@@ -1266,7 +1372,8 @@ const REGENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Gain ★. Next turn, gain ★★★★.",
-      "description": "Gain 7 Vigor."
+      "description": "Gain 7 Vigor.",
+      "tier": "D"
     },
     {
       "name": "Terraforming+",
@@ -1276,6 +1383,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 10 Vigor.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Terraforming"
     },
@@ -1286,7 +1394,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Whenever you create a card, gain 1 Strength.",
-      "description": "Whenever you create a card, gain 1 Strength."
+      "description": "Whenever you create a card, gain 1 Strength.",
+      "tier": "D"
     },
     {
       "name": "Arsenal+",
@@ -1296,6 +1405,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Innate. Whenever you create a card, gain 1 Strength.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Arsenal"
     },
@@ -1306,7 +1416,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Deal 5 damage. Forge 5. Forges an additional 5 for every other time you have hit the enemy this turn.",
-      "description": "Deal 5 damage. Forge 5. Forges an additional 5 for every other time you've hit the enemy this turn."
+      "description": "Deal 5 damage. Forge 5. Forges an additional 5 for every other time you've hit the enemy this turn.",
+      "tier": "C"
     },
     {
       "name": "Beat into Shape+",
@@ -1316,6 +1427,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 7 damage. Forge 7. Forges an additional 7 for every other time you've hit the enemy this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Beat into Shape"
     },
@@ -1326,7 +1438,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Draw 1 card. Gain ⚡. Gain ★. Forge 5. Exhaust.",
-      "description": "Draw 1 card. Gain StS2 EnergyRegent.png. Gain StS2 StarRegent.png. Forge 5. Exhaust."
+      "description": "Draw 1 card. Gain StS2 EnergyRegent.png. Gain StS2 StarRegent.png. Forge 5. Exhaust.",
+      "tier": "S"
     },
     {
       "name": "Big Bang+",
@@ -1336,6 +1449,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Innate. Draw 1 card. Gain StS2 EnergyRegent.png. Gain StS2 StarRegent.png. Forge 5. Exhaust.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Big Bang"
     },
@@ -1346,7 +1460,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Deal 18 damage. At the start of your turn, if this is in your Exhaust Pile, play it. Exhaust.",
-      "description": "Deal 18 damage. At the start of your turn, if this is in your Exhaust Pile, play it. Exhaust."
+      "description": "Deal 18 damage. At the start of your turn, if this is in your Exhaust Pile, play it. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Bombardment+",
@@ -1356,6 +1471,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 24 damage. At the start of your turn, if this is in your Exhaust Pile, play it. Exhaust.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Bombardment"
     },
@@ -1366,7 +1482,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Add 3 random Colorless cards into your Hand. Exhaust.",
-      "description": "Add 3 random Colorless cards into your Hand. Exhaust."
+      "description": "Add 3 random Colorless cards into your Hand. Exhaust.",
+      "tier": "D"
     },
     {
       "name": "Bundle of Joy+",
@@ -1376,6 +1493,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Add 4 random Colorless cards into your Hand. Exhaust.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Bundle of Joy"
     },
@@ -1387,6 +1505,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "Deal 33 damage. Apply 3 Weak. Apply 3 Vulnerable.",
       "description": "Deal 33 damage. Apply 3 Weak. Apply 3 Vulnerable.",
+      "tier": "A",
       "starCost": 5
     },
     {
@@ -1397,6 +1516,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 44 damage. Apply 3 Weak. Apply 3 Vulnerable.",
+      "tier": "A",
       "starCost": 5,
       "isUpgraded": true,
       "baseCard": "Comet"
@@ -1408,7 +1528,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Deal 21 damage to ALL enemies. Fill your Hand with Debris.",
-      "description": "Deal 21 damage to ALL enemies. Fill your Hand with Debris."
+      "description": "Deal 21 damage to ALL enemies. Fill your Hand with Debris.",
+      "tier": "D"
     },
     {
       "name": "Crash Landing+",
@@ -1418,6 +1539,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 26 damage to ALL enemies. Fill your Hand with Debris.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Crash Landing"
     },
@@ -1429,6 +1551,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Draw 3 cards. Choose a Skill in your Hand and play it 3 times. Exhaust.",
       "description": "Draw 3 cards. Choose a Skill in your Hand and play it 3 times. Exhaust.",
+      "tier": "C",
       "starCost": 6
     },
     {
@@ -1439,6 +1562,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 5 cards. Choose a Skill in your Hand and play it 3 times. Exhaust.",
+      "tier": "C",
       "starCost": 6,
       "isUpgraded": true,
       "baseCard": "Decisions, Decisions"
@@ -1451,6 +1575,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "Deal 8 damage. Deals 3 additional damage for each empty slot in your energy bar.",
       "description": "Ethereal. Deal 9 damage to ALL enemies. ALL enemies lose 9 Strength this turn.",
+      "tier": "A",
       "starCost": 3
     },
     {
@@ -1461,6 +1586,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Ethereal. Deal 11 damage to ALL enemies. ALL enemies lose 11 Strength this turn.",
+      "tier": "A",
       "starCost": 3,
       "isUpgraded": true,
       "baseCard": "Dying Star"
@@ -1472,7 +1598,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Next turn, put 2 cards from your Draw Pile into your Hand.",
-      "description": "Next turn, put 2 cards from your Draw Pile into your Hand."
+      "description": "Next turn, put 2 cards from your Draw Pile into your Hand.",
+      "tier": "S"
     },
     {
       "name": "Foregone Conclusion+",
@@ -1482,6 +1609,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Next turn, put 3 cards from your Draw Pile into your Hand.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Foregone Conclusion"
     },
@@ -1492,7 +1620,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Summon 3 Guards. Exhaust.",
-      "description": "Transform any number of cards in your Hand into Minion Sacrifice. Exhaust."
+      "description": "Transform any number of cards in your Hand into Minion Sacrifice. Exhaust.",
+      "tier": "S"
     },
     {
       "name": "GUARDS!!!+",
@@ -1502,6 +1631,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Transform any number of cards in your Hand into Minion Sacrifice+. Exhaust.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "GUARDS!!!"
     },
@@ -1512,7 +1642,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "At the start of your turn, gain ★★.",
-      "description": "At the start of your turn, gain StS2 StarRegent.pngStS2 StarRegent.png."
+      "description": "At the start of your turn, gain StS2 StarRegent.pngStS2 StarRegent.png.",
+      "tier": "S"
     },
     {
       "name": "Genesis+",
@@ -1522,6 +1653,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, gain StS2 StarRegent.pngStS2 StarRegent.pngStS2 StarRegent.png.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Genesis"
     },
@@ -1554,7 +1686,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Deal 6 damage X times. Gain X 🛡.",
-      "description": "Deal 8 damage X times. Double X if it's 4 or more."
+      "description": "Deal 8 damage X times. Double X if it's 4 or more.",
+      "tier": "D"
     },
     {
       "name": "Heavenly Drill+",
@@ -1564,6 +1697,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage X times. Double X if it's 4 or more.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Heavenly Drill"
     },
@@ -1574,7 +1708,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Deal 20 damage. Choose a Colorless card in your Hand. Add a copy of that card into your Hand.",
-      "description": "Deal 20 damage. Choose a Colorless card in your Hand. Add a copy of that card into your Hand."
+      "description": "Deal 20 damage. Choose a Colorless card in your Hand. Add a copy of that card into your Hand.",
+      "tier": "D"
     },
     {
       "name": "Heirloom Hammer+",
@@ -1584,6 +1719,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 25 damage. Choose a Colorless card in your Hand. Add a copy of that card into your Hand.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Heirloom Hammer"
     },
@@ -1594,7 +1730,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Gain 1 Intangible. Exhaust.",
-      "description": "Gain 10 StS2 Intent Defend.png Block. At the end of your turn, if this is on top of your Draw Pile, play it."
+      "description": "Gain 10 StS2 Intent Defend.png Block. At the end of your turn, if this is on top of your Draw Pile, play it.",
+      "tier": "C"
     },
     {
       "name": "I Am Invincible+",
@@ -1604,6 +1741,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 13 StS2 Intent Defend.png Block. At the end of your turn, if this is on top of your Draw Pile, play it.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "I Am Invincible"
     },
@@ -1614,7 +1752,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Deal 12 damage. Draw 2 cards.",
-      "description": "Deal 6 damage. Every 3 Skills you play in a turn, put this into your Hand."
+      "description": "Deal 6 damage. Every 3 Skills you play in a turn, put this into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Make It So+",
@@ -1624,6 +1763,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 9 damage. Every 3 Skills you play in a turn, put this into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Make It So"
     },
@@ -1634,7 +1774,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Whenever you attack an enemy, it loses 1 Strength this turn.",
-      "description": "Whenever you attack an enemy, it loses 1 Strength this turn."
+      "description": "Whenever you attack an enemy, it loses 1 Strength this turn.",
+      "tier": "D"
     },
     {
       "name": "Monarch's Gaze+",
@@ -1644,6 +1785,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you attack an enemy, it loses 1 Strength this turn.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Monarch's Gaze"
     },
@@ -1655,6 +1797,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "Gain ★. Next turn, gain ★ and 17 🛡.",
       "description": "Gain 8 Plating.",
+      "tier": "A",
       "starCost": 5
     },
     {
@@ -1665,6 +1808,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Gain 11 Plating.",
+      "tier": "A",
       "starCost": 5,
       "isUpgraded": true,
       "baseCard": "Neutron Aegis"
@@ -1676,7 +1820,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Whenever you play a card, gain ★.",
-      "description": "At the end of combat, gain 30 StS2 Gold.png."
+      "description": "At the end of combat, gain 30 StS2 Gold.png.",
+      "tier": "A"
     },
     {
       "name": "Royalties+",
@@ -1686,6 +1831,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the end of combat, gain 40 StS2 Gold.png.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Royalties"
     },
@@ -1696,7 +1842,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Forge 7. Sovereign Blade now deals damage to ALL enemies.",
-      "description": "Forge 7. Sovereign Blade now deals damage to ALL enemies."
+      "description": "Forge 7. Sovereign Blade now deals damage to ALL enemies.",
+      "tier": "C"
     },
     {
       "name": "Seeking Edge+",
@@ -1706,6 +1853,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Forge 11. Sovereign Blade now deals damage to ALL enemies.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Seeking Edge"
     },
@@ -1717,6 +1865,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "Deal 7 damage 7 times.",
       "description": "Deal 7 damage to ALL enemies 7 times.",
+      "tier": "A",
       "starCost": 7
     },
     {
@@ -1727,6 +1876,7 @@ const REGENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 7 damage to ALL enemies 7 times.",
+      "tier": "A",
       "starCost": 7,
       "isUpgraded": true,
       "baseCard": "Seven Stars"
@@ -1738,7 +1888,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Sovereign Blade now deals 15 additional damage.",
-      "description": "Sovereign Blade gains Replay 1."
+      "description": "Sovereign Blade gains Replay 1.",
+      "tier": "D"
     },
     {
       "name": "Sword Sage+",
@@ -1748,6 +1899,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Sovereign Blade gains Replay 1.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Sword Sage"
     },
@@ -1759,6 +1911,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "Forge 7. Put Sovereign Blade into your Hand from anywhere.",
       "description": "Forge 30.",
+      "tier": "C",
       "starCost": 4
     },
     {
@@ -1769,6 +1922,7 @@ const REGENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Forge 40.",
+      "tier": "C",
       "starCost": 4,
       "isUpgraded": true,
       "baseCard": "The Smith"
@@ -1802,7 +1956,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Gain 1 Strength. ALL enemies lose 1 Strength.",
-      "description": "At the start of your turn, draw 1 card and Exhaust 1 card from your Hand."
+      "description": "At the start of your turn, draw 1 card and Exhaust 1 card from your Hand.",
+      "tier": "C"
     },
     {
       "name": "Tyranny+",
@@ -1812,6 +1967,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Innate. At the start of your turn, draw 1 card and Exhaust 1 card from your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Tyranny"
     },
@@ -1822,7 +1978,8 @@ const REGENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "At the start of your turn, draw 1 card and Exhaust 1 card from your Hand.",
-      "description": "Ethereal. End your turn. The first 2 cards you play each turn are free to play."
+      "description": "Ethereal. End your turn. The first 2 cards you play each turn are free to play.",
+      "tier": "S"
     },
     {
       "name": "Void Form+",
@@ -1832,6 +1989,7 @@ const REGENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "End your turn. The first 2 cards you play each turn are free to play.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Void Form"
     },

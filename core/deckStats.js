@@ -2,12 +2,19 @@
 
 // ── estimateCardValue ──────────────────────────────────────────
 // Extract estimated damage/block from card description text.
-// Returns {dmg, blk, strengthGain, summonHP, poisonApplied, orbsDmg, orbsBlk}
+// Returns {dmg (total over all hits), blk, strengthGain, summonHP, poisonApplied, orbsDmg, orbsBlk,
+//          hits, aoe, draw, energy, vuln, weak, strDown, exhaustOther}
 function estimateCardValue(card) {
-  if (!card || !card.description) return {dmg:0,blk:0,strengthGain:0,summonHP:0,poisonApplied:0,orbsDmg:0,orbsBlk:0};
+  if (!card || !card.description) return {dmg:0,blk:0,strengthGain:0,summonHP:0,poisonApplied:0,orbsDmg:0,orbsBlk:0,
+    hits:0,aoe:false,draw:0,energy:0,vuln:0,weak:0,strDown:0,exhaustOther:false};
   var desc = card.description;
+  // Energy is drawn as icons ("Gain StS2 EnergyIronclad.png..."), so count them before stripping
+  var energy = 0;
+  desc.split(/\.\s/).forEach(function(s) {
+    if (/\bGain\b/.test(s)) energy += (s.match(/StS2 Energy\w+\.png/g) || []).length;
+  });
   // Strip inline PNG icon markup (e.g. "StS2 Intent Defend.png") so regexes match correctly
-  var cleanDesc = desc.replace(/StS2\s+\S+\.png\s*/gi, '');
+  var cleanDesc = desc.replace(/StS2 [^.]*?\.png\s*/g, '');
 
   var dmg = 0;
   var blk = 0;
@@ -17,13 +24,16 @@ function estimateCardValue(card) {
   var orbsDmg = 0;
   var orbsBlk = 0;
 
-  // Multi-hit: "Deal X damage Y times" — captures X×Y total
-  var multiHit = cleanDesc.match(/Deal (\d+) damage (\d+) times/i);
+  // Multi-hit: "Deal X damage [to ...] Y times" / "twice" / "X times" (X-cost, assume 3 energy)
+  var hits = 1;
+  var multiHit = cleanDesc.match(/Deal (\d+) damage[^.]*? (\d+|X) times/i) || cleanDesc.match(/Deal (\d+) damage[^.]*? (twice)/i);
   if (multiHit) {
-    dmg = parseInt(multiHit[1], 10) * parseInt(multiHit[2], 10);
+    hits = multiHit[2] === 'twice' ? 2 : multiHit[2] === 'X' ? 3 : parseInt(multiHit[2], 10);
+    dmg = parseInt(multiHit[1], 10) * hits;
   } else {
     var dmgMatch = cleanDesc.match(/Deal (\d+) damage/i);
     if (dmgMatch) dmg = parseInt(dmgMatch[1], 10);
+    else hits = 0;
   }
 
   // Block
@@ -72,7 +82,46 @@ function estimateCardValue(card) {
     if (ov.blk > blk) blk = ov.blk;
   }
 
-  return {dmg, blk, strengthGain, summonHP, poisonApplied, orbsDmg, orbsBlk};
+  var num = function(re) { var m = cleanDesc.match(re); return m ? parseInt(m[1], 10) : 0; };
+  return {dmg, blk, strengthGain, summonHP, poisonApplied, orbsDmg, orbsBlk,
+    hits: hits,
+    aoe: /ALL enemies/i.test(cleanDesc),
+    draw: num(/Draw (\d+) cards?/i),
+    energy: energy,
+    vuln: num(/apply (\d+) Vulnerable/i),
+    weak: num(/apply (\d+) Weak/i),
+    strDown: num(/loses? (\d+) Strength/i),
+    exhaustOther: /Exhaust (a|\d|all|up to)\b[^.]*card/i.test(cleanDesc)};
+}
+
+// ── cardRoles ──────────────────────────────────────────────────
+// What a card contributes, each 0-1. Shared by the reward scorer, the boss
+// matchup and the priority panel. Values are rough per-energy efficiencies:
+// ~12 damage or ~10 block per energy counts as a full 1.
+function cardRoles(card) {
+  var none = {dmg:0, blk:0, aoe:0, multihit:0, draw:0, energy:0, scaling:0, debuff:0, strDown:0, statusClear:0};
+  if (!card || isUnplayable(card)) return none;
+  var v = estimateCardValue(card);
+  var desc = (card.description || '').replace(/StS2 [^.]*?\.png\s*/g, '');
+  var cost = card.cost === 'X' ? 3 : (Number(card.cost) || 0.6); // 0-cost counts as 0.6 energy
+  var clamp = function(x) { return Math.max(0, Math.min(1, x)); };
+  var dmg = (v.dmg + v.orbsDmg + v.poisonApplied * 1.5) * (v.aoe ? 1.5 : 1);
+  var scaling = card.cardType === 'Power' ? 1
+    : /Gain \d+ (Strength|Dexterity|Focus)(?! this turn)/i.test(desc) ? 0.7
+    : /\bForge \d|Summon \d/.test(desc) ? 0.5
+    : v.poisonApplied ? 0.4 : 0;
+  return {
+    dmg: clamp(dmg / cost / 12),
+    blk: clamp((v.blk + v.orbsBlk + v.summonHP / 2) / cost / 10),
+    aoe: v.aoe && v.dmg > 0 ? 1 : 0,
+    multihit: v.hits >= 3 ? 1 : v.hits === 2 ? 0.5 : 0,
+    draw: clamp(v.draw / 2),
+    energy: clamp(v.energy / 2),
+    scaling: scaling,
+    debuff: clamp((v.vuln + v.weak) / 2),
+    strDown: clamp(v.strDown / 3),
+    statusClear: v.exhaustOther ? 1 : 0
+  };
 }
 
 // ── calcDeckProfile ────────────────────────────────────────────
@@ -265,8 +314,8 @@ function getDeckSizeProfile() {
 }
 
 // Build commitment: how much the deck commits to each BUILD_DATA build.
-// Returns {buildKey: 0-1} where 1 = all essential cards present.
-// Used for Synergy axis calculation.
+// Returns {buildKey: 0-1}: share of the build's key cards (mustPick + essential + highPriority) owned.
+// Used for the Synergy axis and the reward scorer.
 function getArchetypeCommitment() {
   var result = {};
   if (typeof BUILD_DATA === 'undefined' || !BUILD_DATA[currentChar]) return result;
@@ -274,11 +323,11 @@ function getArchetypeCommitment() {
   if (!builds) return result;
   Object.keys(builds).forEach(function(bk) {
     var b = builds[bk];
-    var essential = b.essential || [];
-    if (essential.length === 0) { result[bk] = 0; return; }
-    var have = 0;
-    essential.forEach(function(c) { if (deck[c] || deck[c+'+']) have++; });
-    result[bk] = have / essential.length;
+    var key = (b.mustPick || []).concat(b.essential || [], b.highPriority || [])
+      .filter(function(c, i, arr) { return arr.indexOf(c) === i; });
+    if (key.length === 0) { result[bk] = 0; return; }
+    var have = key.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
+    result[bk] = have / key.length;
   });
   return result;
 }
@@ -564,15 +613,9 @@ function getUpgradeCandidates() {
     if ((deck[name] || 0) > (deck[upgraded] || 0)) {
       var card = allCards.find(function(c){return c.name===name;});
       if (!card) return;
-      // Score upgrade value based on card description delta
-      var baseValue = 0;
-      var desc = card.description || '';
-      if (desc.match(/Deal (\d+) damage/)) baseValue += parseInt(desc.match(/Deal (\d+) damage/)[1], 10);
-      if (desc.match(/Gain (\d+).*Block/i)) baseValue += parseInt(desc.match(/Gain (\d+).*Block/i)[1], 10);
-      // Check existing scoring for upgrade value
+      // Upgrade the cards the scorer values most (power, fit, build) — they're played most.
       var scoreResult = scoreCard(name);
-      var upgradeBonus = scoreResult && scoreResult.score ? Math.min(30, Math.max(0, scoreResult.score)) : 10;
-      candidates.push({name:name, score:upgradeBonus, hasEssential:false});
+      candidates.push({name:name, score:scoreResult ? scoreResult.score : 0, hasEssential:false});
     }
   });
   // Check if any are build-essential
@@ -590,44 +633,6 @@ function getUpgradeCandidates() {
   }
   candidates.sort(function(a,b){return b.score-a.score;});
   return candidates.slice(0, 5);
-}
-
-// ── getRemoveCandidates ──────────────────────────────────────
-// Returns cards to remove at campfire: starters > low-value > off-build.
-function getRemoveCandidates() {
-  var result = [];
-  var starters = ['Strike','Defend','Strike+','Defend+'];
-  var count = {'Strike':0,'Defend':0};
-  Object.keys(deck).forEach(function(n) {
-    if (n === 'Strike' || n === 'Strike+') count.Strike += deck[n];
-    if (n === 'Defend' || n === 'Defend+') count.Defend += deck[n];
-  });
-  // Tier 1: starters if 3+ remaining
-  if (count.Strike >= 3) result.push({name:'Strike', reason:'starter — remove first', tier:1});
-  if (count.Defend >= 3) result.push({name:'Defend', reason:'starter — remove second', tier:1});
-  // Tier 2: cards not in any build and low axis contribution
-  var scored = [];
-  Object.keys(deck).forEach(function(name) {
-    if (name.endsWith('+')) return;
-    if (starters.indexOf(name) >= 0) return;
-    var isEssential = false;
-    if (typeof BUILD_DATA !== 'undefined' && BUILD_DATA[currentChar]) {
-      var builds = BUILD_DATA[currentChar].builds;
-      if (builds) {
-        Object.keys(builds).forEach(function(bk) {
-          if ((builds[bk].essential||[]).indexOf(name) >= 0 || (builds[bk].mustPick||[]).indexOf(name) >= 0) isEssential = true;
-        });
-      }
-    }
-    if (isEssential) return;
-    var res = scoreCard(name);
-    if (res && res.score < 20) {
-      scored.push({name:name, score:res.score||0, reason:'low value (score:'+(res.score||0)+')', tier:2});
-    }
-  });
-  scored.sort(function(a,b){return a.score-b.score;});
-  result = result.concat(scored.slice(0, 3));
-  return result.slice(0, 5);
 }
 
 // ── getCrisisStates ──────────────────────────────────────────

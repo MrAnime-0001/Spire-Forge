@@ -70,7 +70,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "0-cost. Adds a copy to discard. Good with Exhaust.",
-      "description": "Deal 6 damage. Add a copy of this card into your Discard Pile."
+      "description": "Deal 6 damage. Add a copy of this card into your Discard Pile.",
+      "tier": "C"
     },
     {
       "name": "Anger+",
@@ -80,6 +81,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 8 damage. Add a copy of this card into your Discard Pile.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Anger"
     },
@@ -90,7 +92,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Block + upgrade a card in hand. Good early utility.",
-      "description": "Gain 5 StS2 Intent Defend.png Block. Upgrade a card in your Hand."
+      "description": "Gain 5 StS2 Intent Defend.png Block. Upgrade a card in your Hand.",
+      "tier": "C"
     },
     {
       "name": "Armaments+",
@@ -100,6 +103,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 5 StS2 Intent Defend.png Block. Upgrade ALL cards in your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Armaments"
     },
@@ -110,7 +114,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Lose 2 HP. Gain 16 Block. Efficient panic button.",
-      "description": "Lose 2 HP. Gain 16 StS2 Intent Defend.png Block."
+      "description": "Lose 2 HP. Gain 16 StS2 Intent Defend.png Block.",
+      "tier": "B"
     },
     {
       "name": "Blood Wall+",
@@ -120,6 +125,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Lose 2 HP. Gain 20 StS2 Intent Defend.png Block.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Blood Wall"
     },
@@ -130,7 +136,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Lose 3 HP, gain 2 Energy. Strong with draw.",
-      "description": "Lose 3 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png."
+      "description": "Lose 3 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png.",
+      "tier": "S"
     },
     {
       "name": "Bloodletting+",
@@ -140,6 +147,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Lose 3 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Bloodletting"
     },
@@ -150,7 +158,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Deals damage equal to your current Block. Core Block build.",
-      "description": "Deal damage equal to your StS2 Intent Defend.png Block."
+      "description": "Deal damage equal to your StS2 Intent Defend.png Block.",
+      "tier": "C"
     },
     {
       "name": "Body Slam+",
@@ -160,6 +169,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal damage equal to your StS2 Intent Defend.png Block.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Body Slam"
     },
@@ -170,7 +180,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "AoE. Costs only 1 HP. Core Bloodletting card.",
-      "description": "Lose 1 HP. Deal 9 damage to ALL enemies."
+      "description": "Lose 1 HP. Deal 9 damage to ALL enemies.",
+      "tier": "B"
     },
     {
       "name": "Breakthrough+",
@@ -180,6 +191,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Lose 1 HP. Deal 13 damage to ALL enemies.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Breakthrough"
     },
@@ -190,7 +202,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "17 dmg. Exhausts top card. Good deck thinner.",
-      "description": "Deal 18 damage. Exhaust a random card in your Hand."
+      "description": "Deal 18 damage. Exhaust a random card in your Hand.",
+      "tier": "C"
     },
     {
       "name": "Cinder+",
@@ -200,6 +213,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 24 damage. Exhaust a random card in your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Cinder"
     },
@@ -210,7 +224,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Play and Exhaust top card. Useful in Exhaust decks.",
-      "description": "Play the top card of your Draw Pile and Exhaust it."
+      "description": "Play the top card of your Draw Pile and Exhaust it.",
+      "tier": "D"
     },
     {
       "name": "Havoc+",
@@ -220,6 +235,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Play the top card of your Draw Pile and Exhaust it.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Havoc"
     },
@@ -230,7 +246,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "9 dmg. Return a card from discard to top of draw.",
-      "description": "Deal 9 damage. Put a card from your Discard Pile on top of your Draw Pile."
+      "description": "Deal 9 damage. Put a card from your Discard Pile on top of your Draw Pile.",
+      "tier": "S"
     },
     {
       "name": "Headbutt+",
@@ -240,6 +257,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 12 damage. Put a card from your Discard Pile on top of your Draw Pile.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Headbutt"
     },
@@ -250,7 +268,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "5 Block + 5 dmg. Balanced dual-use card.",
-      "description": "Gain 5 StS2 Intent Defend.png Block. Deal 5 damage."
+      "description": "Gain 5 StS2 Intent Defend.png Block. Deal 5 damage.",
+      "tier": "D"
     },
     {
       "name": "Iron Wave+",
@@ -260,6 +279,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Gain 7 StS2 Intent Defend.png Block. Deal 7 damage.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Iron Wave"
     },
@@ -270,7 +290,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "10 dmg. Doubles enemy Vulnerable. Exhaust. Great with Vulnerable synergy.",
-      "description": "Deal 10 damage. Double the enemy's Vulnerable. Exhaust."
+      "description": "Deal 10 damage. Double the enemy's Vulnerable. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Molten Fist+",
@@ -280,6 +301,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 14 damage. Double the enemy's Vulnerable. Exhaust.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Molten Fist"
     },
@@ -290,7 +312,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Core of Strike build. +2 per Strike card in deck.",
-      "description": "Deal 6 damage. Deals 2 additional damage for ALL your cards containing “Strike”."
+      "description": "Deal 6 damage. Deals 2 additional damage for ALL your cards containing “Strike”.",
+      "tier": "B"
     },
     {
       "name": "Perfected Strike+",
@@ -300,6 +323,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 6 damage. Deals 3 additional damage for ALL your cards containing “Strike”.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Perfected Strike"
     },
@@ -310,7 +334,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "9 dmg. Draw 1. Good in Strike decks.",
-      "description": "Deal 9 damage. Draw 1 card."
+      "description": "Deal 9 damage. Draw 1 card.",
+      "tier": "B"
     },
     {
       "name": "Pommel Strike+",
@@ -320,6 +345,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Draw 2 cards.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Pommel Strike"
     },
@@ -330,7 +356,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "7 dmg. Gain 2 Strength this turn. Early Strength enabler.",
-      "description": "Deal 7 damage. Gain 3 Strength this turn."
+      "description": "Deal 7 damage. Gain 3 Strength this turn.",
+      "tier": "C"
     },
     {
       "name": "Setup Strike+",
@@ -340,6 +367,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 9 damage. Gain 4 Strength this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Setup Strike"
     },
@@ -350,7 +378,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "8 Block + draw. Great all-rounder.",
-      "description": "Gain 8 StS2 Intent Defend.png Block. Draw 1 card."
+      "description": "Gain 8 StS2 Intent Defend.png Block. Draw 1 card.",
+      "tier": "B"
     },
     {
       "name": "Shrug It Off+",
@@ -360,6 +389,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 11 StS2 Intent Defend.png Block. Draw 1 card.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Shrug It Off"
     },
@@ -370,7 +400,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "3 dmg x3 random. Decent Strength multiplier.",
-      "description": "Deal 3 damage to a random enemy 3 times."
+      "description": "Deal 3 damage to a random enemy 3 times.",
+      "tier": "C"
     },
     {
       "name": "Sword Boomerang+",
@@ -380,6 +411,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 3 damage to a random enemy 4 times.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Sword Boomerang"
     },
@@ -390,7 +422,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "4 AoE dmg + Vulnerable to all. Good Act 1 pickup.",
-      "description": "Deal 4 damage and apply 1 Vulnerable to ALL enemies."
+      "description": "Deal 4 damage and apply 1 Vulnerable to ALL enemies.",
+      "tier": "C"
     },
     {
       "name": "Thunderclap+",
@@ -400,6 +433,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 7 damage and apply 1 Vulnerable to ALL enemies.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Thunderclap"
     },
@@ -410,7 +444,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "0-cost. Apply 2 Vulnerable. Good with big nukes.",
-      "description": "Apply 3 Vulnerable. Exhaust."
+      "description": "Apply 3 Vulnerable. Exhaust.",
+      "tier": "D"
     },
     {
       "name": "Tremble+",
@@ -420,6 +455,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Apply 4 Vulnerable. Exhaust.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Tremble"
     },
@@ -430,7 +466,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "7 Block + Exhaust a random card. Good deck thinner.",
-      "description": "Gain 7 StS2 Intent Defend.png Block. Exhaust 1 card at random."
+      "description": "Gain 7 StS2 Intent Defend.png Block. Exhaust 1 card at random.",
+      "tier": "B"
     },
     {
       "name": "True Grit+",
@@ -440,6 +477,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 9 StS2 Intent Defend.png Block. Exhaust 1 card.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "True Grit"
     },
@@ -450,7 +488,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "5 dmg twice. Best with Strength.",
-      "description": "Deal 5 damage twice."
+      "description": "Deal 5 damage twice.",
+      "tier": "C"
     },
     {
       "name": "Twin Strike+",
@@ -460,6 +499,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 7 damage twice.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Twin Strike"
     },
@@ -470,7 +510,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "6 dmg + 3 extra per Exhaust pile card. Exhaust finisher.",
-      "description": "Deal 6 damage. Deals 3 additional damage for each card in your Exhaust Pile."
+      "description": "Deal 6 damage. Deals 3 additional damage for each card in your Exhaust Pile.",
+      "tier": "C"
     },
     {
       "name": "Ashen Strike+",
@@ -480,6 +521,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 6 damage. Deals 4 additional damage for each card in your Exhaust Pile.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Ashen Strike"
     },
@@ -490,7 +532,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Draw 3. Cannot draw more this turn. Great burst draw.",
-      "description": "Draw 3 cards. You cannot draw additional cards this turn."
+      "description": "Draw 3 cards. You cannot draw additional cards this turn.",
+      "tier": "S"
     },
     {
       "name": "Battle Trance+",
@@ -500,6 +543,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 4 cards. You cannot draw additional cards this turn.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Battle Trance"
     },
@@ -532,7 +576,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "32 dmg. Big single hit. Slow but powerful.",
-      "description": "Deal 32 damage."
+      "description": "Deal 32 damage.",
+      "tier": "B"
     },
     {
       "name": "Bludgeon+",
@@ -542,6 +587,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 42 damage.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Bludgeon"
     },
@@ -552,7 +598,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "4 dmg + 2 extra per Vulnerable on enemy. Pairs with Vulnerable setup.",
-      "description": "Deal 4 damage. Deals 2 additional damage for each Vulnerable on the enemy."
+      "description": "Deal 4 damage. Deals 2 additional damage for each Vulnerable on the enemy.",
+      "tier": "C"
     },
     {
       "name": "Bully+",
@@ -562,6 +609,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 4 damage. Deals 3 additional damage for each Vulnerable on the enemy.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Bully"
     },
@@ -572,7 +620,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Exhaust a card, draw 2. Good in Exhaust decks.",
-      "description": "Exhaust 1 card. Draw 2 cards."
+      "description": "Exhaust 1 card. Draw 2 cards.",
+      "tier": "A"
     },
     {
       "name": "Burning Pact+",
@@ -582,6 +631,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Exhaust 1 card. Draw 3 cards.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Burning Pact"
     },
@@ -592,7 +642,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "5 Block + take 50% less damage from Vulnerable enemies this turn.",
-      "description": "Gain 4 StS2 Intent Defend.png Block. You receive 50% less damage from Vulnerable enemies this turn."
+      "description": "Gain 4 StS2 Intent Defend.png Block. You receive 50% less damage from Vulnerable enemies this turn.",
+      "tier": "S"
     },
     {
       "name": "Colossus+",
@@ -602,6 +653,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 7 StS2 Intent Defend.png Block. You receive 50% less damage from Vulnerable enemies this turn.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Colossus"
     },
@@ -634,7 +686,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "8 dmg, hits twice if enemy Vulnerable. Great Vulnerable payoff.",
-      "description": "Deal 8 damage. If the enemy is Vulnerable, hits twice."
+      "description": "Deal 8 damage. If the enemy is Vulnerable, hits twice.",
+      "tier": "B"
     },
     {
       "name": "Dismantle+",
@@ -644,6 +697,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. If the enemy is Vulnerable, hits twice.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Dismantle"
     },
@@ -654,7 +708,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Reworked in v0.103. Check in-game for current effect.",
-      "description": "Apply 1 Vulnerable. Gain 1 Strength for each Vulnerable on the enemy. Exhaust."
+      "description": "Apply 1 Vulnerable. Gain 1 Strength for each Vulnerable on the enemy. Exhaust.",
+      "tier": "C"
     },
     {
       "name": "Dominate+",
@@ -664,6 +719,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Apply 2 Vulnerable. Gain 1 Strength for each Vulnerable on the enemy. Exhaust.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Dominate"
     },
@@ -674,7 +730,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Draw 2. When Exhausted, gain 2 Energy. Reworked v0.104 — Exhaust payoff, not cost.",
-      "description": "Draw 2 cards. When this card is Exhausted, gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png"
+      "description": "Draw 2 cards. When this card is Exhausted, gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png",
+      "tier": "C"
     },
     {
       "name": "Drum of Battle+",
@@ -684,6 +741,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 2 cards. When this card is Exhausted, gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Drum of Battle"
     },
@@ -694,7 +752,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "8 Block + 8 more if Exhausted this turn. Weak all enemies. Exhaust synergy.",
-      "description": "Gain 8 StS2 Intent Defend.png Block. Gain another 8 StS2 Intent Defend.png Block if you have Exhausted a card this turn."
+      "description": "Gain 8 StS2 Intent Defend.png Block. Gain another 8 StS2 Intent Defend.png Block if you have Exhausted a card this turn.",
+      "tier": "A"
     },
     {
       "name": "Evil Eye+",
@@ -704,6 +763,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 11 StS2 Intent Defend.png Block. Gain another 11 StS2 Intent Defend.png Block if you have Exhausted a card this turn.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Evil Eye"
     },
@@ -734,7 +794,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Gain 3 Block whenever a card Exhausts. Core Exhaust.",
-      "description": "Whenever a card is Exhausted, gain 3 StS2 Intent Defend.png Block."
+      "description": "Whenever a card is Exhausted, gain 3 StS2 Intent Defend.png Block.",
+      "tier": "A"
     },
     {
       "name": "Feel No Pain+",
@@ -744,6 +805,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever a card is Exhausted, gain 4 StS2 Intent Defend.png Block.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Feel No Pain"
     },
@@ -754,7 +816,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "5 dmg twice + 2 Strength. Enemy gains 1 Strength. Great Strength generator.",
-      "description": "Deal 5 damage twice. Gain 3 Strength. The enemy gains 1 Strength."
+      "description": "Deal 5 damage twice. Gain 3 Strength. The enemy gains 1 Strength.",
+      "tier": "C"
     },
     {
       "name": "Fight Me!+",
@@ -764,6 +827,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 6 damage twice. Gain 4 Strength. The enemy gains 1 Strength.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Fight Me!"
     },
@@ -774,7 +838,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "12 Block + deal 4 back whenever attacked. Expensive but strong.",
-      "description": "Gain 12 StS2 Intent Defend.png Block. Whenever you are attacked this turn, deal 4 damage back."
+      "description": "Gain 12 StS2 Intent Defend.png Block. Whenever you are attacked this turn, deal 4 damage back.",
+      "tier": "A"
     },
     {
       "name": "Flame Barrier+",
@@ -784,6 +849,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 16 StS2 Intent Defend.png Block. Whenever you are attacked this turn, deal 6 damage back.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Flame Barrier"
     },
@@ -794,7 +860,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Gain 3 Energy if you Exhausted a card this turn. Core Exhaust engine.",
-      "description": "Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Exhaust."
+      "description": "Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Exhaust.",
+      "tier": "C"
     },
     {
       "name": "Forgotten Ritual+",
@@ -804,6 +871,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 4 StS2 EnergyIronclad.png. Exhaust.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Forgotten Ritual"
     },
@@ -814,7 +882,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Lose 2 HP, deal 14 dmg. Strong single target. Core Bloodletting.",
-      "description": "Lose 2 HP. Deal 15 damage."
+      "description": "Lose 2 HP. Deal 15 damage.",
+      "tier": "B"
     },
     {
       "name": "Hemokinesis+",
@@ -824,6 +893,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Lose 2 HP. Deal 20 damage.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Hemokinesis"
     },
@@ -834,7 +904,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "16 AoE. Plays from Exhaust at turn end. Great Exhaust payoff.",
-      "description": "Deal 18 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it."
+      "description": "Deal 18 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.",
+      "tier": "C"
     },
     {
       "name": "Howl from Beyond+",
@@ -844,6 +915,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 24 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Howl from Beyond"
     },
@@ -854,7 +926,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Add a random free Attack to hand. Exhaust. Flexible.",
-      "description": "Add a random Attack into your Hand. It's free to play this turn. Exhaust."
+      "description": "Add a random Attack into your Hand. It's free to play this turn. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Infernal Blade+",
@@ -864,6 +937,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Add a random Attack into your Hand. It's free to play this turn. Exhaust.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Infernal Blade"
     },
@@ -874,7 +948,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Lose 1 HP per turn. Deal 6 AoE whenever you lose HP. Bloodletting engine.",
-      "description": "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 6 damage to ALL enemies."
+      "description": "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 6 damage to ALL enemies.",
+      "tier": "A"
     },
     {
       "name": "Inferno+",
@@ -884,6 +959,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 9 damage to ALL enemies.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Inferno"
     },
@@ -894,7 +970,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Gain 2 Strength. Cheap Strength generator.",
-      "description": "Gain 2 Strength."
+      "description": "Gain 2 Strength.",
+      "tier": "C"
     },
     {
       "name": "Inflame+",
@@ -904,6 +981,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Gain 3 Strength.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Inflame"
     },
@@ -914,7 +992,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Add copy of 3rd Attack played each turn to hand. Combo enabler.",
-      "description": "Add a copy of the third Attack you play each turn into your Hand."
+      "description": "Add a copy of the third Attack you play each turn into your Hand.",
+      "tier": "B"
     },
     {
       "name": "Juggling+",
@@ -924,6 +1003,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Innate. Add a copy of the third Attack you play each turn into your Hand.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Juggling"
     },
@@ -934,7 +1014,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "6 dmg. Draw until you draw a non-Attack. Great with attack-heavy decks.",
-      "description": "Deal 6 damage. Draw cards until you draw a non-Attack card."
+      "description": "Deal 6 damage. Draw cards until you draw a non-Attack card.",
+      "tier": "A"
     },
     {
       "name": "Pillage+",
@@ -944,6 +1025,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 9 damage. Draw cards until you draw a non-Attack card.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Pillage"
     },
@@ -954,7 +1036,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Gain 3 Block per Attack played this turn. Hybrid offense/defense.",
-      "description": "Whenever you play an Attack this turn, gain 3 StS2 Intent Defend.png Block."
+      "description": "Whenever you play an Attack this turn, gain 3 StS2 Intent Defend.png Block.",
+      "tier": "D"
     },
     {
       "name": "Rage+",
@@ -964,6 +1047,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Whenever you play an Attack this turn, gain 5 StS2 Intent Defend.png Block.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Rage"
     },
@@ -996,7 +1080,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "9 dmg. Increases this card's damage by 5 each combat. Scaling attack.",
-      "description": "Deal 10 damage. Increase this card's damage by 5 this combat."
+      "description": "Deal 10 damage. Increase this card's damage by 5 this combat.",
+      "tier": "C"
     },
     {
       "name": "Rampage+",
@@ -1006,6 +1091,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Increase this card's damage by 10 this combat.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Rampage"
     },
@@ -1016,7 +1102,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Gain 1 Strength whenever you lose HP. Core Bloodletting.",
-      "description": "Whenever you lose HP on your turn, gain 1 Strength."
+      "description": "Whenever you lose HP on your turn, gain 1 Strength.",
+      "tier": "A"
     },
     {
       "name": "Rupture+",
@@ -1026,6 +1113,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you lose HP on your turn, gain 2 Strength.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Rupture"
     },
@@ -1036,7 +1124,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Exhaust all non-Attacks in hand. Gain 5 Block per card Exhausted. Great Exhaust/Block.",
-      "description": "Exhaust all non-Attack cards in your Hand. Gain 5 StS2 Intent Defend.png Block for each card Exhausted."
+      "description": "Exhaust all non-Attack cards in your Hand. Gain 5 StS2 Intent Defend.png Block for each card Exhausted.",
+      "tier": "A"
     },
     {
       "name": "Second Wind+",
@@ -1046,6 +1135,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Exhaust all non-Attack cards in your Hand. Gain 7 StS2 Intent Defend.png Block for each card Exhausted.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Second Wind"
     },
@@ -1056,7 +1146,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Reworked in v0.103. Check in-game for current effect.",
-      "description": "Deal 5 damage. If you lost HP this turn, hits 2 times."
+      "description": "Deal 5 damage. If you lost HP this turn, hits 2 times.",
+      "tier": "A"
     },
     {
       "name": "Spite+",
@@ -1066,6 +1157,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 5 damage. If you lost HP this turn, hits 3 times.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Spite"
     },
@@ -1076,7 +1168,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "At end of turn, play a random Attack from hand vs random enemy. Wild scaling.",
-      "description": "At the end of your turn, 1 random Attack in your Hand is played against a random enemy."
+      "description": "At the end of your turn, 1 random Attack in your Hand is played against a random enemy.",
+      "tier": "C"
     },
     {
       "name": "Stampede+",
@@ -1086,6 +1179,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the end of your turn, 1 random Attack in your Hand is played against a random enemy.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Stampede"
     },
@@ -1096,7 +1190,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "12 AoE. Costs 1 less per Attack played this turn. Combo finisher.",
-      "description": "Deal 12 damage to ALL enemies. Costs 1 less StS2 EnergyIronclad.png for each Attack played this turn."
+      "description": "Deal 12 damage to ALL enemies. Costs 1 less StS2 EnergyIronclad.png for each Attack played this turn.",
+      "tier": "B"
     },
     {
       "name": "Stomp+",
@@ -1106,6 +1201,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 15 damage to ALL enemies. Costs 1 less StS2 EnergyIronclad.png for each Attack played this turn.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Stomp"
     },
@@ -1116,7 +1212,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Gain 4 Plating. Passive damage reduction scaling.",
-      "description": "Gain 4 Plating."
+      "description": "Gain 4 Plating.",
+      "tier": "D"
     },
     {
       "name": "Stone Armor+",
@@ -1126,6 +1223,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Gain 6 Plating.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Stone Armor"
     },
@@ -1136,7 +1234,8 @@ const IRONCLAD_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "7 Block + 1 Vulnerable. Upgraded: 2 Vulnerable. Setup card.",
-      "description": "Gain 6 StS2 Intent Defend.png Block. Apply 1 Vulnerable."
+      "description": "Gain 6 StS2 Intent Defend.png Block. Apply 1 Vulnerable.",
+      "tier": "A"
     },
     {
       "name": "Taunt+",
@@ -1146,6 +1245,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 7 StS2 Intent Defend.png Block. Apply 2 Vulnerable.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Taunt"
     },
@@ -1156,7 +1256,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "14 dmg. Next Attack costs 0. Combo enabler.",
-      "description": "Deal 14 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png."
+      "description": "Deal 14 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png.",
+      "tier": "C"
     },
     {
       "name": "Unrelenting+",
@@ -1166,6 +1267,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 20 damage. The next Attack you play costs 0 StS2 EnergyIronclad.png.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Unrelenting"
     },
@@ -1176,7 +1278,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "13 dmg + Weak + Vulnerable. High utility debuff attack.",
-      "description": "Deal 13 damage. Apply 1 Weak. Apply 1 Vulnerable."
+      "description": "Deal 13 damage. Apply 1 Weak. Apply 1 Vulnerable.",
+      "tier": "C"
     },
     {
       "name": "Uppercut+",
@@ -1186,6 +1289,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 13 damage. Apply 2 Weak. Apply 2 Vulnerable.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Uppercut"
     },
@@ -1196,7 +1300,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Draw 1 whenever you apply Vulnerable. Strong with Vulnerable setup.",
-      "description": "Whenever you apply Vulnerable, draw 1 card."
+      "description": "Whenever you apply Vulnerable, draw 1 card.",
+      "tier": "A"
     },
     {
       "name": "Vicious+",
@@ -1206,6 +1311,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you apply Vulnerable, draw 2 cards.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Vicious"
     },
@@ -1216,7 +1322,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "5 AoE dmg X times. Best multi-hit AoE. Scales hard with Strength.",
-      "description": "Deal 5 damage to ALL enemies X times."
+      "description": "Deal 5 damage to ALL enemies X times.",
+      "tier": "B"
     },
     {
       "name": "Whirlwind+",
@@ -1226,6 +1333,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 8 damage to ALL enemies X times.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Whirlwind"
     },
@@ -1236,7 +1344,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "At turn start, pull a random Upgraded Attack from discard to hand.",
-      "description": "At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it."
+      "description": "At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it.",
+      "tier": "A"
     },
     {
       "name": "Aggression+",
@@ -1246,6 +1355,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Innate. At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Aggression"
     },
@@ -1256,7 +1366,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Block no longer expires. Core Block build.",
-      "description": "StS2 Intent Defend.png Block is not removed at the start of your turn."
+      "description": "StS2 Intent Defend.png Block is not removed at the start of your turn.",
+      "tier": "A"
     },
     {
       "name": "Barricade+",
@@ -1266,6 +1377,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "StS2 Intent Defend.png Block is not removed at the start of your turn.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Barricade"
     },
@@ -1276,7 +1388,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Lose 1 HP. Exhaust 1 card. Gain 1 Strength. Bloodletting + Exhaust.",
-      "description": "Lose 1 HP. Exhaust 1 card. Gain 1 Strength."
+      "description": "Lose 1 HP. Exhaust 1 card. Gain 1 Strength.",
+      "tier": "A"
     },
     {
       "name": "Brand+",
@@ -1286,6 +1399,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Lose 1 HP. Exhaust 1 card. Gain 2 Strength.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Brand"
     },
@@ -1296,7 +1410,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Play top X cards of draw pile. Explosive combo card.",
-      "description": "Play the top X cards of your Draw Pile."
+      "description": "Play the top X cards of your Draw Pile.",
+      "tier": "D"
     },
     {
       "name": "Cascade+",
@@ -1306,6 +1421,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Play the top X+1 cards of your Draw Pile.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Cascade"
     },
@@ -1316,7 +1432,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "2 dmg × 4 hits to ALL enemies. Reworked v0.104 — no longer scales with Attacks played.",
-      "description": "Deal 2 damage to ALL enemies 4 times."
+      "description": "Deal 2 damage to ALL enemies 4 times.",
+      "tier": "C"
     },
     {
       "name": "Conflagration+",
@@ -1326,6 +1443,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 2 damage to ALL enemies 5 times.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Conflagration"
     },
@@ -1336,7 +1454,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Lose 1 HP per turn, gain 8 Block. Bloodletting + Block hybrid.",
-      "description": "At the start of your turn, lose 1 HP and gain 7 StS2 Intent Defend.png Block."
+      "description": "At the start of your turn, lose 1 HP and gain 7 StS2 Intent Defend.png Block.",
+      "tier": "A"
     },
     {
       "name": "Crimson Mantle+",
@@ -1346,6 +1465,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, lose 1 HP and gain 10 StS2 Intent Defend.png Block.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Crimson Mantle"
     },
@@ -1356,7 +1476,8 @@ const IRONCLAD_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Vulnerable enemies take 25% extra damage. Pairs with Uppercut, Taunt, Tremble, Molten Fist — any Vulnerable applicator turns this into a 25% damage multiplier for the rest of the fight.",
-      "description": "Vulnerable enemies take an additional 25% damage."
+      "description": "Vulnerable enemies take an additional 25% damage.",
+      "tier": "C"
     },
     {
       "name": "Cruelty+",
@@ -1366,6 +1487,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Vulnerable enemies take an additional 50% damage.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Cruelty"
     },
@@ -1376,7 +1498,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Draw 1 whenever a card Exhausts. Core Exhaust.",
-      "description": "Whenever a card is Exhausted, draw 1 card."
+      "description": "Whenever a card is Exhausted, draw 1 card.",
+      "tier": "A"
     },
     {
       "name": "Dark Embrace+",
@@ -1386,6 +1509,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever a card is Exhausted, draw 1 card.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Dark Embrace"
     },
@@ -1396,7 +1520,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Gain 2 Strength at turn start. Best passive Strength scaling.",
-      "description": "At the start of your turn, gain 3 Strength."
+      "description": "At the start of your turn, gain 3 Strength.",
+      "tier": "C"
     },
     {
       "name": "Demon Form+",
@@ -1406,6 +1531,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, gain 4 Strength.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Demon Form"
     },
@@ -1416,7 +1542,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "10 dmg. If fatal, raise Max HP by 3. Exhaust. Bloodletting sustain.",
-      "description": "Deal 10 damage. If Fatal, raise your Max HP by 3. Exhaust."
+      "description": "Deal 10 damage. If Fatal, raise your Max HP by 3. Exhaust.",
+      "tier": "S"
     },
     {
       "name": "Feed+",
@@ -1426,6 +1553,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 12 damage. If Fatal, raise your Max HP by 4. Exhaust.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Feed"
     },
@@ -1436,7 +1564,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Exhaust hand. 7 dmg per card Exhausted. Exhaust. Nuke finisher.",
-      "description": "Exhaust your Hand. Deal 7 damage for each card Exhausted. Exhaust."
+      "description": "Exhaust your Hand. Deal 7 damage for each card Exhausted. Exhaust.",
+      "tier": "C"
     },
     {
       "name": "Fiend Fire+",
@@ -1446,6 +1575,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Exhaust your Hand. Deal 10 damage for each card Exhausted. Exhaust.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Fiend Fire"
     },
@@ -1456,7 +1586,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Auto-plays drawn Strikes. Core infinite with Pommel Strike — Pommel draws a Strike, which draws another. Never take Battle Trance in this build — it blocks further draw and breaks the loop.",
-      "description": "Whenever you draw a card containing “Strike”, it is played against a random enemy."
+      "description": "Whenever you draw a card containing “Strike”, it is played against a random enemy.",
+      "tier": "C"
     },
     {
       "name": "Hellraiser+",
@@ -1466,6 +1597,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you draw a card containing “Strike”, it is played against a random enemy.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Hellraiser"
     },
@@ -1476,7 +1608,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "30 Block. Exhaust. Massive panic button.",
-      "description": "Gain 30 StS2 Intent Defend.png Block. Exhaust."
+      "description": "Gain 30 StS2 Intent Defend.png Block. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Impervious+",
@@ -1486,6 +1619,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 40 StS2 Intent Defend.png Block. Exhaust.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Impervious"
     },
@@ -1496,7 +1630,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Whenever you gain Block, deal 6 to random enemy. Pairs with Impervious (30 Block = 30 damage in one card) and Barricade (persistent Block keeps triggering).",
-      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 5 damage to a random enemy."
+      "description": "Whenever you gain StS2 Intent Defend.png Block, deal 5 damage to a random enemy.",
+      "tier": "C"
     },
     {
       "name": "Juggernaut+",
@@ -1506,6 +1641,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you gain StS2 Intent Defend.png Block, deal 7 damage to a random enemy.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Juggernaut"
     },
@@ -1516,7 +1652,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "15 dmg. Enemy loses 10 Strength this turn. Debuff attack.",
-      "description": "Deal 20 damage. Enemy loses 10 Strength this turn."
+      "description": "Deal 20 damage. Enemy loses 10 Strength this turn.",
+      "tier": "D"
     },
     {
       "name": "Mangle+",
@@ -1526,6 +1663,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 26 damage. Enemy loses 15 Strength this turn.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Mangle"
     },
@@ -1578,7 +1716,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Lose 6 HP, gain 2 Energy, draw 3. Exhaust. High-value trade.",
-      "description": "Lose 6 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Draw 3 cards. Exhaust."
+      "description": "Lose 6 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Draw 3 cards. Exhaust.",
+      "tier": "S"
     },
     {
       "name": "Offering+",
@@ -1588,6 +1727,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Lose 6 HP. Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png. Draw 5 cards. Exhaust.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Offering"
     },
@@ -1598,7 +1738,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Next Attack is played an extra time this turn. Combo enabler.",
-      "description": "This turn, your next Attack is played an extra time."
+      "description": "This turn, your next Attack is played an extra time.",
+      "tier": "C"
     },
     {
       "name": "One-Two Punch+",
@@ -1608,6 +1749,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "This turn, your next 2 Attacks are played an extra time.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "One-Two Punch"
     },
@@ -1618,7 +1760,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "17 AoE dmg. Needs 3+ Exhaust pile. 0-cost Exhaust finisher.",
-      "description": "If you have 3 or more cards in your Exhaust Pile, deal 18 damage to ALL enemies."
+      "description": "If you have 3 or more cards in your Exhaust Pile, deal 18 damage to ALL enemies.",
+      "tier": "C"
     },
     {
       "name": "Pact's End+",
@@ -1628,6 +1771,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "If you have 3 or more cards in your Exhaust Pile, deal 24 damage to ALL enemies.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Pact's End"
     },
@@ -1638,7 +1782,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Transform all Attacks in hand into Giant Rocks. Situational nuke.",
-      "description": "Transform all Attacks in your Hand into Giant Rock."
+      "description": "Transform all Attacks in your Hand into Giant Rock.",
+      "tier": "A"
     },
     {
       "name": "Primal Force+",
@@ -1648,6 +1793,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Transform all Attacks in your Hand into Giant Rock+.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Primal Force"
     },
@@ -1658,7 +1804,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Gain 1 Energy at start of each turn. Reliable energy engine.",
-      "description": "Gain StS2 EnergyIronclad.png at the start of each turn."
+      "description": "Gain StS2 EnergyIronclad.png at the start of each turn.",
+      "tier": "A"
     },
     {
       "name": "Pyre+",
@@ -1668,6 +1815,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png at the start of each turn.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Pyre"
     },
@@ -1678,7 +1826,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Reworked in v0.103. Check in-game for current effect.",
-      "description": "Exhaust your Hand. Add 1 random card into your Hand for each card Exhausted."
+      "description": "Exhaust your Hand. Add 1 random card into your Hand for each card Exhausted.",
+      "tier": "A"
     },
     {
       "name": "Stoke+",
@@ -1688,6 +1837,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Exhaust your Hand. Add 1 random Upgraded card into your Hand for each card Exhausted.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Stoke"
     },
@@ -1720,7 +1870,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "5 dmg + 1 more per HP lost this combat. Bloodletting finisher.",
-      "description": "Deal 5 damage. Hits an additional time for each time you lost HP this combat."
+      "description": "Deal 5 damage. Hits an additional time for each time you lost HP this combat.",
+      "tier": "C"
     },
     {
       "name": "Tear Asunder+",
@@ -1730,6 +1881,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 7 damage. Hits an additional time for each time you lost HP this combat.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Tear Asunder"
     },
@@ -1740,7 +1892,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "4 dmg twice. Exhaust a random Attack and add its damage. Exhaust synergy.",
-      "description": "Deal 4 damage twice. Exhaust a random Attack in your Hand and add its damage to this card."
+      "description": "Deal 4 damage twice. Exhaust a random Attack in your Hand and add its damage to this card.",
+      "tier": "A"
     },
     {
       "name": "Thrash+",
@@ -1750,6 +1903,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 6 damage twice. Exhaust a random Attack in your Hand and add its damage to this card.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Thrash"
     },
@@ -1760,7 +1914,8 @@ const IRONCLAD_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "First Block gained per turn is doubled. Block scaling.",
-      "description": "The first time you gain StS2 Intent Defend.png Block from a card each turn, double the amount gained."
+      "description": "The first time you gain StS2 Intent Defend.png Block from a card each turn, double the amount gained.",
+      "tier": "S"
     },
     {
       "name": "Unmovable+",
@@ -1770,6 +1925,7 @@ const IRONCLAD_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "The first time you gain StS2 Intent Defend.png Block from a card each turn, double the amount gained.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Unmovable"
     },

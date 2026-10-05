@@ -36,8 +36,10 @@ function findCard(name) {
   return hits.find(function(h) { return h.pool === currentChar; }) || hits[0];
 }
 
+// Curses and statuses. Older entries only mark this in the note ("Curse. Unplayable.").
 function isUnplayable(card) {
-  return /cur|status/.test(card.type || '') || ['Status', 'Curse'].indexOf(card.cardType) >= 0;
+  return /cur|status/.test(card.type || '') || ['Status', 'Curse'].indexOf(card.cardType) >= 0 ||
+    /^(Curse|Status)\./.test(card.note || '');
 }
 
 // Energy orb (+ Regent star orb). Small variant for list rows.

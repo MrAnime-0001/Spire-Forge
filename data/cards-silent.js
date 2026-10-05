@@ -90,7 +90,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Gain 3 Dexterity this turn. 0-cost defensive boost.",
-      "description": "Gain 2 Dexterity this turn."
+      "description": "Gain 2 Dexterity this turn.",
+      "tier": "D"
     },
     {
       "name": "Anticipate+",
@@ -100,6 +101,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 4 Dexterity this turn.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Anticipate"
     },
@@ -110,7 +112,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "5 Block + draw 2. Efficient early defense.",
-      "description": "Gain 5 StS2 Intent Defend.png Block. Draw 2 cards."
+      "description": "Gain 5 StS2 Intent Defend.png Block. Draw 2 cards.",
+      "tier": "B"
     },
     {
       "name": "Backflip+",
@@ -120,6 +123,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 8 StS2 Intent Defend.png Block. Draw 2 cards.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Backflip"
     },
@@ -130,7 +134,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Add 3 Shivs to hand. Exhaust. Core Shiv card.",
-      "description": "Add 3 Shivs into your Hand. Exhaust."
+      "description": "Add 3 Shivs into your Hand. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Blade Dance+",
@@ -140,6 +145,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Add 4 Shivs into your Hand. Exhaust.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Blade Dance"
     },
@@ -150,7 +156,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "6 Block + add 1 Shiv. Defend with Shiv upside.",
-      "description": "Gain 6 StS2 Intent Defend.png Block. Add 1 Shiv into your Hand."
+      "description": "Gain 6 StS2 Intent Defend.png Block. Add 1 Shiv into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Cloak and Dagger+",
@@ -160,6 +167,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 6 StS2 Intent Defend.png Block. Add 2 Shivs into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Cloak and Dagger"
     },
@@ -170,7 +178,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "4 AoE dmg twice. Solid early AoE.",
-      "description": "Deal 4 damage to ALL enemies twice."
+      "description": "Deal 4 damage to ALL enemies twice.",
+      "tier": "C"
     },
     {
       "name": "Dagger Spray+",
@@ -180,6 +189,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 6 damage to ALL enemies twice.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Dagger Spray"
     },
@@ -190,7 +200,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "9 dmg + draw 1, discard 1. Sly activator.",
-      "description": "Deal 9 damage. Draw 1 card. Discard 1 card."
+      "description": "Deal 9 damage. Draw 1 card. Discard 1 card.",
+      "tier": "B"
     },
     {
       "name": "Dagger Throw+",
@@ -200,6 +211,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 12 damage. Draw 1 card. Discard 1 card.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Dagger Throw"
     },
@@ -210,7 +222,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Apply 5 Poison. Core Poison card.",
-      "description": "Apply 5 Poison."
+      "description": "Apply 5 Poison.",
+      "tier": "C"
     },
     {
       "name": "Deadly Poison+",
@@ -220,6 +233,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Apply 7 Poison.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Deadly Poison"
     },
@@ -230,7 +244,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "4 Block. 0-cost defend.",
-      "description": "Gain 4 StS2 Intent Defend.png Block."
+      "description": "Gain 4 StS2 Intent Defend.png Block.",
+      "tier": "D"
     },
     {
       "name": "Deflect+",
@@ -240,6 +255,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 7 StS2 Intent Defend.png Block.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Deflect"
     },
@@ -250,7 +266,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "4 Block now + 4 next turn. Two-turn block.",
-      "description": "Gain 4 StS2 Intent Defend.png Block. Next turn, gain 4 StS2 Intent Defend.png Block."
+      "description": "Gain 4 StS2 Intent Defend.png Block. Next turn, gain 4 StS2 Intent Defend.png Block.",
+      "tier": "D"
     },
     {
       "name": "Dodge and Roll+",
@@ -260,6 +277,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 6 StS2 Intent Defend.png Block. Next turn, gain 6 StS2 Intent Defend.png Block.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Dodge and Roll"
     },
@@ -270,7 +288,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Sly. 7 AoE dmg. Strong Sly damage card.",
-      "description": "Sly. Deal 7 damage to ALL enemies."
+      "description": "Sly. Deal 7 damage to ALL enemies.",
+      "tier": "B"
     },
     {
       "name": "Flick-Flack+",
@@ -280,6 +299,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Sly. Deal 9 damage to ALL enemies.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Flick-Flack"
     },
@@ -290,7 +310,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "7 dmg + add 1 Shiv. Shiv enabler.",
-      "description": "Deal 3 damage. Add 2 Shivs into your Hand."
+      "description": "Deal 3 damage. Add 2 Shivs into your Hand.",
+      "tier": "B"
     },
     {
       "name": "Leading Strike+",
@@ -300,6 +321,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 6 damage. Add 2 Shivs into your Hand.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Leading Strike"
     },
@@ -310,7 +332,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "All enemies lose 6 Strength this turn. Exhaust. Strong debuff.",
-      "description": "ALL enemies lose 6 Strength this turn. Exhaust."
+      "description": "ALL enemies lose 6 Strength this turn. Exhaust.",
+      "tier": "S"
     },
     {
       "name": "Piercing Wail+",
@@ -320,6 +343,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "ALL enemies lose 8 Strength this turn. Exhaust.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Piercing Wail"
     },
@@ -330,7 +354,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "6 dmg + 3 Poison. Efficient Poison applicator.",
-      "description": "Deal 6 damage. Apply 3 Poison."
+      "description": "Deal 6 damage. Apply 3 Poison.",
+      "tier": "C"
     },
     {
       "name": "Poisoned Stab+",
@@ -340,6 +365,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 8 damage. Apply 4 Poison.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Poisoned Stab"
     },
@@ -350,7 +376,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "15 dmg. Draw 2 next turn if enemy dies. Good single target.",
-      "description": "Deal 15 damage. Next turn, draw 2 cards."
+      "description": "Deal 15 damage. Next turn, draw 2 cards.",
+      "tier": "B"
     },
     {
       "name": "Predator+",
@@ -360,6 +387,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 20 damage. Next turn, draw 2 cards.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Predator"
     },
@@ -370,7 +398,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Draw 1, discard 1. 0-cost Sly activator.",
-      "description": "Draw 1 card. Discard 1 card."
+      "description": "Draw 1 card. Discard 1 card.",
+      "tier": "S"
     },
     {
       "name": "Prepared+",
@@ -380,6 +409,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 2 cards. Discard 2 cards.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Prepared"
     },
@@ -390,7 +420,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "Sly. 3 dmg x4 random. Sly card.",
-      "description": "Sly. Deal 3 damage to a random enemy 4 times."
+      "description": "Sly. Deal 3 damage to a random enemy 4 times.",
+      "tier": "B"
     },
     {
       "name": "Ricochet+",
@@ -400,6 +431,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Sly. Deal 3 damage to a random enemy 5 times.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Ricochet"
     },
@@ -410,7 +442,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "6 dmg. 0-cost attack. Good in Sly/Shiv.",
-      "description": "Deal 6 damage."
+      "description": "Deal 6 damage.",
+      "tier": "C"
     },
     {
       "name": "Slice+",
@@ -420,6 +453,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 9 damage.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Slice"
     },
@@ -430,7 +464,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Retain. Apply 7 Poison. High Poison with Retain.",
-      "description": "Retain. Apply 7 Poison."
+      "description": "Retain. Apply 7 Poison.",
+      "tier": "D"
     },
     {
       "name": "Snakebite+",
@@ -440,6 +475,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Retain. Apply 10 Poison.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Snakebite"
     },
@@ -450,7 +486,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "8 dmg + 1 Weak. Decent early attack.",
-      "description": "Deal 8 damage. Apply 1 Weak."
+      "description": "Deal 8 damage. Apply 1 Weak.",
+      "tier": "C"
     },
     {
       "name": "Sucker Punch+",
@@ -460,6 +497,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Apply 2 Weak.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Sucker Punch"
     },
@@ -470,7 +508,8 @@ const SILENT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Sly. 9 Block. Core Sly block card.",
-      "description": "Sly. Gain 6 StS2 Intent Defend.png Block."
+      "description": "Sly. Gain 6 StS2 Intent Defend.png Block.",
+      "tier": "S"
     },
     {
       "name": "Untouchable+",
@@ -480,6 +519,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Sly. Gain 9 StS2 Intent Defend.png Block.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Untouchable"
     },
@@ -490,7 +530,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Poison triggers 1 extra time. Core Poison scaling.",
-      "description": "Poison is triggered 1 additional time."
+      "description": "Poison is triggered 1 additional time.",
+      "tier": "C"
     },
     {
       "name": "Accelerant+",
@@ -500,6 +541,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Poison is triggered 2 additional times.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Accelerant"
     },
@@ -510,7 +552,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Shivs deal 4 more dmg. Core Shiv scaling. Take multiples.",
-      "description": "Shivs deal 4 additional damage."
+      "description": "Shivs deal 4 additional damage.",
+      "tier": "C"
     },
     {
       "name": "Accuracy+",
@@ -520,6 +563,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Shivs deal 6 additional damage.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Accuracy"
     },
@@ -530,7 +574,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Draw 3, discard 1. Core Sly cycling card. Moved to Uncommon in v0.103.",
-      "description": "Draw 3 cards. Discard 1 card."
+      "description": "Draw 3 cards. Discard 1 card.",
+      "tier": "S"
     },
     {
       "name": "Acrobatics+",
@@ -540,6 +585,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 4 cards. Discard 1 card.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Acrobatics"
     },
@@ -550,7 +596,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "Innate. 11 dmg. Exhaust. Guaranteed first-turn damage.",
-      "description": "Innate. Deal 11 damage. Exhaust."
+      "description": "Innate. Deal 11 damage. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Backstab+",
@@ -560,6 +607,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Innate. Deal 15 damage. Exhaust.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Backstab"
     },
@@ -592,7 +640,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "5 Block + Block not removed next turn. Persistent block.",
-      "description": "Gain 5 StS2 Intent Defend.png Block. StS2 Intent Defend.png Block is not removed at the start of your next turn."
+      "description": "Gain 5 StS2 Intent Defend.png Block. StS2 Intent Defend.png Block is not removed at the start of your next turn.",
+      "tier": "A"
     },
     {
       "name": "Blur+",
@@ -602,6 +651,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 8 StS2 Intent Defend.png Block. StS2 Intent Defend.png Block is not removed at the start of your next turn.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Blur"
     },
@@ -612,7 +662,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "3 Poison to 3 random enemies. AoE Poison spread.",
-      "description": "Apply 3 Poison to a random enemy 3 times."
+      "description": "Apply 3 Poison to a random enemy 3 times.",
+      "tier": "D"
     },
     {
       "name": "Bouncing Flask+",
@@ -622,6 +673,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Apply 3 Poison to a random enemy 4 times.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Bouncing Flask"
     },
@@ -632,7 +684,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "If enemy Poisoned, apply 9 Poison. Very efficient stacker.",
-      "description": "If the enemy has Poison, apply 9 Poison."
+      "description": "If the enemy has Poison, apply 9 Poison.",
+      "tier": "D"
     },
     {
       "name": "Bubble Bubble+",
@@ -642,6 +695,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "If the enemy has Poison, apply 12 Poison.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Bubble Bubble"
     },
@@ -652,7 +706,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Discard hand, draw same amount. Exhaust. Panic button + Sly.",
-      "description": "Discard your Hand, then draw that many cards. Exhaust."
+      "description": "Discard your Hand, then draw that many cards. Exhaust.",
+      "tier": "S"
     },
     {
       "name": "Calculated Gamble+",
@@ -662,6 +717,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Retain. Discard your Hand, then draw that many cards. Exhaust.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Calculated Gamble"
     },
@@ -694,7 +750,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "10 Block + 10 dmg. Strong balanced card.",
-      "description": "Gain 10 StS2 Intent Defend.png Block. Deal 10 damage."
+      "description": "Gain 10 StS2 Intent Defend.png Block. Deal 10 damage.",
+      "tier": "B"
     },
     {
       "name": "Dash+",
@@ -704,6 +761,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Gain 13 StS2 Intent Defend.png Block. Deal 13 damage.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Dash"
     },
@@ -714,7 +772,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "10 AoE. Repeats for each enemy killed. Multi-enemy payoff.",
-      "description": "Deal 10 damage to ALL enemies. Repeat this effect for each enemy killed."
+      "description": "Deal 10 damage to ALL enemies. Repeat this effect for each enemy killed.",
+      "tier": "C"
     },
     {
       "name": "Echoing Slash+",
@@ -724,6 +783,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 13 damage to ALL enemies. Repeat this effect for each enemy killed.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Echoing Slash"
     },
@@ -734,7 +794,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Draw 1. If Skill drawn, gain 3 Block. Synergizes with Skill-heavy decks.",
-      "description": "Draw 1 card. If you draw a Skill, gain 3 StS2 Intent Defend.png Block."
+      "description": "Draw 1 card. If you draw a Skill, gain 3 StS2 Intent Defend.png Block.",
+      "tier": "A"
     },
     {
       "name": "Escape Plan+",
@@ -744,6 +805,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 1 card. If you draw a Skill, gain 5 StS2 Intent Defend.png Block.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Escape Plan"
     },
@@ -754,7 +816,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Draw until you have 6 cards. Huge hand refill.",
-      "description": "Draw 2 cards. They gain Retain this turn."
+      "description": "Draw 2 cards. They gain Retain this turn.",
+      "tier": "C"
     },
     {
       "name": "Expertise+",
@@ -764,6 +827,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 3 cards. They gain Retain this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Expertise"
     },
@@ -774,7 +838,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Remove Artifact + Block from enemy. Apply 2 Vulnerable. Exhaust.",
-      "description": "Remove all Artifact and StS2 Intent Defend.png Block from the enemy. Apply 2 Vulnerable. Exhaust."
+      "description": "Remove all Artifact and StS2 Intent Defend.png Block from the enemy. Apply 2 Vulnerable. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Expose+",
@@ -784,6 +849,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Remove all Artifact and StS2 Intent Defend.png Block from the enemy. Apply 3 Vulnerable. Exhaust.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Expose"
     },
@@ -816,7 +882,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "6 dmg per Attack already played this turn. High Shiv payoff.",
-      "description": "Deal 6 damage for each Attack already played this turn."
+      "description": "Deal 6 damage for each Attack already played this turn.",
+      "tier": "C"
     },
     {
       "name": "Finisher+",
@@ -826,6 +893,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 8 damage for each Attack already played this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Finisher"
     },
@@ -836,7 +904,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "5 dmg per Skill in hand. Scales with Skill-heavy hand.",
-      "description": "Deal 5 damage for each Skill in your Hand."
+      "description": "Deal 5 damage for each Skill in your Hand.",
+      "tier": "B"
     },
     {
       "name": "Flechettes+",
@@ -846,6 +915,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 7 damage for each Skill in your Hand.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Flechettes"
     },
@@ -876,7 +946,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Gain 2 Dexterity. Passive Block scaling.",
-      "description": "Gain 2 Dexterity."
+      "description": "Gain 2 Dexterity.",
+      "tier": "A"
     },
     {
       "name": "Footwork+",
@@ -886,6 +957,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Gain 3 Dexterity.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Footwork"
     },
@@ -896,7 +968,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "7 Block + add Sly to a Skill in hand. Sly enabler.",
-      "description": "Gain 7 StS2 Intent Defend.png Block. Add Sly to a Skill in your Hand this turn."
+      "description": "Gain 7 StS2 Intent Defend.png Block. Add Sly to a Skill in your Hand this turn.",
+      "tier": "C"
     },
     {
       "name": "Hand Trick+",
@@ -906,6 +979,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 10 StS2 Intent Defend.png Block. Add Sly to a Skill in your Hand this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Hand Trick"
     },
@@ -936,7 +1010,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Discard 2, add 2 Shivs. Shiv+Sly crossover.",
-      "description": "Discard 2 cards. Add 2 Shivs into your Hand."
+      "description": "Discard 2 cards. Add 2 Shivs into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Hidden Daggers+",
@@ -946,6 +1021,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Discard 2 cards. Add 2 Shivs+ into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Hidden Daggers"
     },
@@ -956,7 +1032,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Add 1 Shiv at turn start. Core Shiv generator.",
-      "description": "At the start of your turn, add 1 Shiv into your Hand."
+      "description": "At the start of your turn, add 1 Shiv into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Infinite Blades+",
@@ -966,6 +1043,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Innate. At the start of your turn, add 1 Shiv into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Infinite Blades"
     },
@@ -976,7 +1054,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "2 Weak + 11 Block. Expensive but versatile debuff+block.",
-      "description": "Apply 2 Weak. Gain 11 StS2 Intent Defend.png Block."
+      "description": "Apply 2 Weak. Gain 11 StS2 Intent Defend.png Block.",
+      "tier": "B"
     },
     {
       "name": "Leg Sweep+",
@@ -986,6 +1065,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Apply 3 Weak. Gain 14 StS2 Intent Defend.png Block.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Leg Sweep"
     },
@@ -996,7 +1076,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "8 dmg + 4 per card discarded this turn. Discard payoff.",
-      "description": "Deal 9 damage. Deals 4 additional damage for each card discarded this turn."
+      "description": "Deal 9 damage. Deals 4 additional damage for each card discarded this turn.",
+      "tier": "C"
     },
     {
       "name": "Memento Mori+",
@@ -1006,6 +1087,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 11 damage. Deals 5 additional damage for each card discarded this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Memento Mori"
     },
@@ -1036,7 +1118,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Apply 2 Poison to all enemies each turn. Core Poison passive.",
-      "description": "At the start of your turn, apply 2 Poison to ALL enemies."
+      "description": "At the start of your turn, apply 2 Poison to ALL enemies.",
+      "tier": "B"
     },
     {
       "name": "Noxious Fumes+",
@@ -1046,6 +1129,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, apply 3 Poison to ALL enemies.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Noxious Fumes"
     },
@@ -1056,7 +1140,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Shivs gain Retain. First Shiv per turn deals 9 extra. Shiv scaling.",
-      "description": "Shivs gain Retain. The first Shiv you play each turn deals 9 additional damage."
+      "description": "Shivs gain Retain. The first Shiv you play each turn deals 9 additional damage.",
+      "tier": "D"
     },
     {
       "name": "Phantom Blades+",
@@ -1066,6 +1151,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Shivs gain Retain. The first Shiv you play each turn deals 12 additional damage.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Phantom Blades"
     },
@@ -1076,7 +1162,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "17 dmg. Costs 1 less per Skill played this turn. Combo finisher.",
-      "description": "Deal 15 damage. Costs 1 less StS2 EnergySilent.png for each Skill played this turn."
+      "description": "Deal 15 damage. Costs 1 less StS2 EnergySilent.png for each Skill played this turn.",
+      "tier": "A"
     },
     {
       "name": "Pinpoint+",
@@ -1086,6 +1173,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 19 damage. Costs 1 less StS2 EnergySilent.png for each Skill played this turn.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Pinpoint"
     },
@@ -1096,7 +1184,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "14 dmg. Next Skill costs 0. Attack/Skill bridge.",
-      "description": "Deal 14 damage. The next Skill you play costs 0 StS2 EnergySilent.png."
+      "description": "Deal 14 damage. The next Skill you play costs 0 StS2 EnergySilent.png.",
+      "tier": "C"
     },
     {
       "name": "Pounce+",
@@ -1106,6 +1195,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 20 damage. The next Skill you play costs 0 StS2 EnergySilent.png.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Pounce"
     },
@@ -1116,7 +1206,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "13 dmg minus 2 per other card in hand. Rewards empty hand play.",
-      "description": "Deal 13 damage. Deals 2 less damage for each other card in your Hand."
+      "description": "Deal 13 damage. Deals 2 less damage for each other card in your Hand.",
+      "tier": "B"
     },
     {
       "name": "Precise Cut+",
@@ -1126,6 +1217,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 16 damage. Deals 2 less damage for each other card in your Hand.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Precise Cut"
     },
@@ -1136,7 +1228,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Sly. Draw 2 cards. 0-cost Sly cycling.",
-      "description": "Sly. Draw 2 cards."
+      "description": "Sly. Draw 2 cards.",
+      "tier": "S"
     },
     {
       "name": "Reflex+",
@@ -1146,6 +1239,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Sly. Draw 3 cards.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Reflex"
     },
@@ -1156,7 +1250,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "7 dmg X times. Scales with Energy.",
-      "description": "Deal 8 damage X times."
+      "description": "Deal 8 damage X times.",
+      "tier": "C"
     },
     {
       "name": "Skewer+",
@@ -1166,6 +1261,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 11 damage X times.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Skewer"
     },
@@ -1176,7 +1272,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Whenever you draw a card during your turn, deal 2 to all. Passive damage.",
-      "description": "Whenever you draw a card during your turn, deal 2 damage to ALL enemies."
+      "description": "Whenever you draw a card during your turn, deal 2 damage to ALL enemies.",
+      "tier": "C"
     },
     {
       "name": "Speedster+",
@@ -1186,6 +1283,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Innate. Whenever you draw a card during your turn, deal 2 damage to ALL enemies.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Speedster"
     },
@@ -1196,7 +1294,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "8 dmg. Whenever you play a card this turn, enemy loses 2 HP. Combo dmg.",
-      "description": "Deal 8 damage. Whenever you play a card this turn, the enemy loses 2 HP."
+      "description": "Deal 8 damage. Whenever you play a card this turn, the enemy loses 2 HP.",
+      "tier": "C"
     },
     {
       "name": "Strangle+",
@@ -1206,6 +1305,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Whenever you play a card this turn, the enemy loses 3 HP.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Strangle"
     },
@@ -1216,7 +1316,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Sly. Gain 1 Energy. Critical Sly engine.",
-      "description": "Sly. Gain StS2 EnergySilent.png."
+      "description": "Sly. Gain StS2 EnergySilent.png.",
+      "tier": "A"
     },
     {
       "name": "Tactician+",
@@ -1226,6 +1327,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Sly. Gain StS2 EnergySilent.pngStS2 EnergySilent.png.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Tactician"
     },
@@ -1236,7 +1338,8 @@ const SILENT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Add 3 Shivs to hand. Cost reduces each play. Shiv generator.",
-      "description": "Add 3 Shivs into your Hand. Reduce this card's cost by 1."
+      "description": "Add 3 Shivs into your Hand. Reduce this card's cost by 1.",
+      "tier": "C"
     },
     {
       "name": "Up My Sleeve+",
@@ -1246,6 +1349,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Add 4 Shivs into your Hand. Reduce this card's cost by 1.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Up My Sleeve"
     },
@@ -1276,7 +1380,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Sly. Gain Dexterity + Thorns. Sly defensive engine.",
-      "description": "Sly. Gain 1 Dexterity. Gain 4 Thorns."
+      "description": "Sly. Gain 1 Dexterity. Gain 4 Thorns.",
+      "tier": "A"
     },
     {
       "name": "Abrasive+",
@@ -1286,6 +1391,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Sly. Gain 1 Dexterity. Gain 6 Thorns.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Abrasive"
     },
@@ -1296,7 +1402,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Gain 1 Energy + draw 2. Exhaust. Explosive turn enabler.",
-      "description": "Gain StS2 EnergySilent.png. Draw 2 cards. Exhaust."
+      "description": "Gain StS2 EnergySilent.png. Draw 2 cards. Exhaust.",
+      "tier": "S"
     },
     {
       "name": "Adrenaline+",
@@ -1306,6 +1413,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain StS2 EnergySilent.pngStS2 EnergySilent.png. Draw 2 cards. Exhaust.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Adrenaline"
     },
@@ -1316,7 +1424,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Gain 1 Block per card played. Scales massively with Sly discard loops (each Sly trigger counts), Calculated Gamble, and high card-volume turns. Best block card for Silent.",
-      "description": "Whenever you play a card, gain 1 StS2 Intent Defend.png Block."
+      "description": "Whenever you play a card, gain 1 StS2 Intent Defend.png Block.",
+      "tier": "A"
     },
     {
       "name": "Afterimage+",
@@ -1326,6 +1435,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Innate. Whenever you play a card, gain 1 StS2 Intent Defend.png Block.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Afterimage"
     },
@@ -1336,7 +1446,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Innate. 10 dmg + 1 Vulnerable. Exhaust. Guaranteed opener.",
-      "description": "Innate. Deal 10 damage. Apply 1 Vulnerable. Exhaust."
+      "description": "Innate. Deal 10 damage. Apply 1 Vulnerable. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Assassinate+",
@@ -1346,6 +1457,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Innate. Deal 13 damage. Apply 2 Vulnerable. Exhaust.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Assassinate"
     },
@@ -1376,7 +1488,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "No extra draw this turn. All hand cards cost 0. Massive turn.",
-      "description": "You cannot draw additional cards this turn. ALL cards in your Hand are free to play this turn."
+      "description": "You cannot draw additional cards this turn. ALL cards in your Hand are free to play this turn.",
+      "tier": "D"
     },
     {
       "name": "Bullet Time+",
@@ -1386,6 +1499,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "You cannot draw additional cards this turn. ALL cards in your Hand are free to play this turn.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Bullet Time"
     },
@@ -1396,7 +1510,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Next Skill is played twice. Pairs with Noxious Fumes (double Poison passive), Deadly Poison (10 Poison in one action), Accelerant (double-trigger stops Poison decaying). Best with any high-value Skill.",
-      "description": "This turn, your next Skill is played an extra time."
+      "description": "This turn, your next Skill is played an extra time.",
+      "tier": "C"
     },
     {
       "name": "Burst+",
@@ -1406,6 +1521,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "This turn, your next 2 Skills are played an extra time.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Burst"
     },
@@ -1416,7 +1532,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Each card drawn this turn applies 3 Poison to all. Poison burst.",
-      "description": "Whenever you draw a card this turn, apply 2 Poison to ALL enemies."
+      "description": "Whenever you draw a card this turn, apply 2 Poison to ALL enemies.",
+      "tier": "A"
     },
     {
       "name": "Corrosive Wave+",
@@ -1426,6 +1543,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Whenever you draw a card this turn, apply 3 Poison to ALL enemies.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Corrosive Wave"
     },
@@ -1436,7 +1554,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Attacks apply 1 Poison when they deal unblocked dmg. Passive Poison.",
-      "description": "Whenever an Attack deals unblocked damage, apply 1 Poison."
+      "description": "Whenever an Attack deals unblocked damage, apply 1 Poison.",
+      "tier": "D"
     },
     {
       "name": "Envenom+",
@@ -1446,6 +1565,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever an Attack deals unblocked damage, apply 2 Poison.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Envenom"
     },
@@ -1456,7 +1576,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Shivs hit all enemies. Add 4 Shivs to hand. Core Shiv AoE.",
-      "description": "Shivs now hit ALL enemies. Add 4 Shivs into your Hand."
+      "description": "Shivs now hit ALL enemies. Add 4 Shivs into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Fan of Knives+",
@@ -1466,6 +1587,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Shivs now hit ALL enemies. Add 5 Shivs into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Fan of Knives"
     },
@@ -1498,7 +1620,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "50 AoE if draw pile empty. 0-cost nuke with setup required.",
-      "description": "Can only be played if there are no cards in your Draw Pile. Deal 60 damage to ALL enemies."
+      "description": "Can only be played if there are no cards in your Draw Pile. Deal 60 damage to ALL enemies.",
+      "tier": "D"
     },
     {
       "name": "Grand Finale+",
@@ -1508,6 +1631,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Can only be played if there are no cards in your Draw Pile. Deal 75 damage to ALL enemies.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Grand Finale"
     },
@@ -1518,7 +1642,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Play all Shivs from Exhaust pile on enemy. Core Shiv finisher.",
-      "description": "Play every Shiv in your Exhaust Pile on the enemy."
+      "description": "Play every Shiv in your Exhaust Pile on the enemy.",
+      "tier": "C"
     },
     {
       "name": "Knife Trap+",
@@ -1528,6 +1653,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Upgrade and play every Shiv in your Exhaust Pile on the enemy.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Knife Trap"
     },
@@ -1538,7 +1664,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Enemy loses X Strength + X Weak. Exhaust. Strong debuff.",
-      "description": "Enemy loses X Strength. Apply X Weak. Exhaust."
+      "description": "Enemy loses X Strength. Apply X Weak. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Malaise+",
@@ -1548,6 +1675,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Enemy loses X+1 Strength. Apply X+1 Weak. Exhaust.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Malaise"
     },
@@ -1558,7 +1686,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "All Skills gain Sly. Core Sly engine.",
-      "description": "When you play a Skill, it gains Sly."
+      "description": "When you play a Skill, it gains Sly.",
+      "tier": "C"
     },
     {
       "name": "Master Planner+",
@@ -1568,6 +1697,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "When you play a Skill, it gains Sly.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Master Planner"
     },
@@ -1578,7 +1708,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "1 dmg + 1 per card drawn this combat. Scales over long runs.",
-      "description": "Deal 1 damage. Deals 1 additional damage for each card drawn this combat."
+      "description": "Deal 1 damage. Deals 1 additional damage for each card drawn this combat.",
+      "tier": "C"
     },
     {
       "name": "Murder+",
@@ -1588,6 +1719,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 1 damage. Deals 1 additional damage for each card drawn this combat.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Murder"
     },
@@ -1598,7 +1730,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Choose a card. Next turn add 3 copies. Exhaust. Powerful duplicator.",
-      "description": "Choose a card. Next turn, add 3 copies of that card into your Hand. Exhaust."
+      "description": "Choose a card. Next turn, add 3 copies of that card into your Hand. Exhaust.",
+      "tier": "D"
     },
     {
       "name": "Nightmare+",
@@ -1608,6 +1741,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Choose a card. Next turn, add 3 copies of that card into your Hand. Exhaust.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Nightmare"
     },
@@ -1638,7 +1772,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Deal 4 dmg to random enemy per card played. Passive scaling.",
-      "description": "Whenever you play a card, deal 4 damage to a random enemy."
+      "description": "Whenever you play a card, deal 4 damage to a random enemy.",
+      "tier": "C"
     },
     {
       "name": "Serpent Form+",
@@ -1648,6 +1783,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you play a card, deal 6 damage to a random enemy.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Serpent Form"
     },
@@ -1658,7 +1794,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Discard hand. Next turn Attacks deal double dmg. Setup card.",
-      "description": "Discard your Hand. Next turn, Attacks deal double damage."
+      "description": "Discard your Hand. Next turn, Attacks deal double damage.",
+      "tier": "D"
     },
     {
       "name": "Shadow Step+",
@@ -1668,6 +1805,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Discard your Hand. Next turn, Attacks deal double damage.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Shadow Step"
     },
@@ -1678,7 +1816,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Double your Block gain this turn. Defensive burst.",
-      "description": "Double your StS2 Intent Defend.png Block gain this turn."
+      "description": "Double your StS2 Intent Defend.png Block gain this turn.",
+      "tier": "C"
     },
     {
       "name": "Shadowmeld+",
@@ -1688,6 +1827,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Double your StS2 Intent Defend.png Block gain this turn.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Shadowmeld"
     },
@@ -1720,7 +1860,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Discard hand. Add 1 Shiv per card discarded. High Shiv volume.",
-      "description": "Discard your Hand. Add 1 Shiv into your Hand for each card discarded."
+      "description": "Discard your Hand. Add 1 Shiv into your Hand for each card discarded.",
+      "tier": "D"
     },
     {
       "name": "Storm of Steel+",
@@ -1730,6 +1871,7 @@ const SILENT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Discard your Hand. Add 1 Shiv+ into your Hand for each card discarded.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Storm of Steel"
     },
@@ -1740,7 +1882,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "10 dmg. If fatal, gain extra card reward. Exhaust.",
-      "description": "Deal 10 damage. If Fatal, gain an additional card reward. Exhaust."
+      "description": "Deal 10 damage. If Fatal, gain an additional card reward. Exhaust.",
+      "tier": "S"
     },
     {
       "name": "The Hunt+",
@@ -1750,6 +1893,7 @@ const SILENT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 15 damage. If Fatal, gain an additional card reward. Exhaust.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "The Hunt"
     },
@@ -1760,7 +1904,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Draw 1 and discard 1 at turn start. Core Sly cycling.",
-      "description": "At the start of your turn, draw 1 card and discard 1 card."
+      "description": "At the start of your turn, draw 1 card and discard 1 card.",
+      "tier": "S"
     },
     {
       "name": "Tools of the Trade+",
@@ -1770,6 +1915,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, draw 1 card and discard 1 card.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Tools of the Trade"
     },
@@ -1780,7 +1926,8 @@ const SILENT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Weak enemies take double dmg from Attacks. Weak synergy.",
-      "description": "Weak enemies take 50% more damage from Attacks."
+      "description": "Weak enemies take 50% more damage from Attacks.",
+      "tier": "A"
     },
     {
       "name": "Tracking+",
@@ -1790,6 +1937,7 @@ const SILENT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Weak enemies take 50% more damage from Attacks.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Tracking"
     },

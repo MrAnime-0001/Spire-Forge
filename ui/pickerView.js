@@ -98,24 +98,7 @@ function renderRewardUnified(el) {
         html += '<div style="min-width:0"><div style="font-size:13px;'+nameStyle+';overflow:hidden;text-overflow:ellipsis"><span class="cf-row-orb">'+cardOrbHtml(c, true)+'</span>'+c.name+crossLabel+'</div>'+detailHtml+noteHtml+'</div>';
         html += '<span class="deck-item-tag '+typeCls(c.type)+'" style="font-size:9px;padding:1px 5px">'+(c.type||'skl').replace(/_/g,'·').toUpperCase()+'</span>';
         html += rarityBadgeHtml(getRarity(c));
-        // Build tier badge
-        var bBadge = '';
-        if (currentChar && typeof BUILD_DATA !== 'undefined' && BUILD_DATA[currentChar]) {
-          var bdBuilds = BUILD_DATA[currentChar].builds;
-          if (bdBuilds) {
-            for (var bi = 0; bi < Object.keys(bdBuilds).length; bi++) {
-              var bk = Object.keys(bdBuilds)[bi];
-              var bd = bdBuilds[bk];
-              if (bd.mustPick && bd.mustPick.indexOf(c.name) >= 0) { bBadge = 'MUST PICK'; break; }
-              if (bd.highPriority && bd.highPriority.indexOf(c.name) >= 0) { bBadge = 'HIGH'; break; }
-              if (bd.essential && bd.essential.indexOf(c.name) >= 0) { bBadge = 'essential'; break; }
-            }
-          }
-        }
-        var bc = bBadge === 'MUST PICK' ? '#ff6040' : bBadge === 'HIGH' ? 'var(--amber-bright)' : 'var(--teal-bright)';
-        if (bBadge) {
-          html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+bc+'60;color:'+bc+';background:'+bc+'15;font-weight:600;margin-left:auto">'+bBadge+'</span>';
-        }
+        html += verdictBadgeHtml(scoreCard(c.name));
         html += '</div>';
       });
     }
@@ -148,25 +131,7 @@ function renderRewardVerdictHtml() {
   };
 
   var scored = scoreRewardPool(rewardOffered);
-
-  // Sort by acquisition priority: mustPick > highPriority > synergy > other
-  if (typeof BUILD_DATA !== 'undefined' && BUILD_DATA[currentChar]) {
-    var mustPickSet = {}, highPriSet = {}, synergySet = {};
-    Object.values(BUILD_DATA[currentChar].builds).forEach(function(b) {
-      if (b.priorityOrder) {
-        (b.priorityOrder.mustPick || []).forEach(function(c) { mustPickSet[c] = true; });
-        (b.priorityOrder.high || []).forEach(function(c) { highPriSet[c] = true; });
-        (b.priorityOrder.medium || []).forEach(function(c) { synergySet[c] = true; });
-      }
-    });
-    scored.sort(function(a, b) {
-      var ap = mustPickSet[a.name] ? 0 : highPriSet[a.name] ? 1 : synergySet[a.name] ? 2 : 3;
-      var bp = mustPickSet[b.name] ? 0 : highPriSet[b.name] ? 1 : synergySet[b.name] ? 2 : 3;
-      return ap - bp;
-    });
-  }
-
-  var allSkip = currentAct===3 && scored.every(function(s){return s.verdict==='skip';});
+  var allSkip = scored.skipAdvice;
 
   var axes = calcSixAxes();
   var targets = AXIS_TARGETS[currentAct] || AXIS_TARGETS[1];
@@ -201,8 +166,8 @@ function renderRewardVerdictHtml() {
 
   if (allSkip) {
     html += '<div style="padding:.75rem;border:1px solid rgba(200,146,42,.25);border-radius:4px;background:rgba(200,146,42,.07);margin-bottom:8px">';
-    html += '<div style="font-size:9px;color:var(--amber);letter-spacing:.1em;margin-bottom:4px">ACT 3 — SKIP RECOMMENDED</div>';
-    html += '<div style="font-size:12px;color:var(--text-dim)">None of these fit your core build. Adding off-build cards now increases bad draw risk.</div></div>';
+    html += '<div style="font-size:9px;color:var(--amber);letter-spacing:.1em;margin-bottom:4px">SKIP RECOMMENDED</div>';
+    html += '<div style="font-size:12px;color:var(--text-dim)">None of these make your deck stronger. Taking a weak card means drawing your good cards less often.</div></div>';
   }
 
   scored.forEach(function(s, i) {
@@ -222,7 +187,7 @@ function renderRewardVerdictHtml() {
     html += '<span class="deck-item-tag '+typeCls(s.card.type)+'" style="font-size:9px;padding:1px 5px">'+typeTag+'</span>';
     html += rarityBadgeHtml(sRarity);
     if (deck[s.name]) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×'+deck[s.name]+'</span>';
-    html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+';margin-left:auto">'+s.vLabel+'</span>';
+    html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+';margin-left:auto">'+s.vLabel+' '+s.score+'</span>';
     html += '</div>';
 
     var rCtx = rarityContext(sRarity, s.verdict);
@@ -257,105 +222,12 @@ function renderRewardVerdictHtml() {
       }
     }
 
-    // Potion priority from detected builds
-    var potionShown = {};
-    (s.priorityBuilds||[]).concat(s.tipsBuilds||[]).concat(s.fitsBuilds||[]).concat(s.synergyBuilds||[]).forEach(function(entry) {
-      if (entry.b.potionPriority && !potionShown[entry.b.name]) {
-        potionShown[entry.b.name] = true;
-        html += '<div style="font-size:10px;color:var(--teal);margin-bottom:3px">';
-        html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;letter-spacing:.06em">☗ potion:</span> ';
-        html += '<span style="color:var(--text-dim)">' + entry.b.potionPriority + ' <span style="color:var(--text-muted)">(' + entry.b.name + ')</span></span>';
-        html += '</div>';
-      }
-    });
-
-    var hasIndicators = s.tipsBuilds.length>0 || s.priorityBuilds.length>0 || s.synergyBuilds.length>0 || s.fitsBuilds.length>0;
-    if (hasIndicators) {
-      html += '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">';
-      var tipsShown = new Set();
-      s.tipsBuilds.forEach(function(entry){
-        tipsShown.add(entry.key);
-        var tier = entry.b.rank ? ' '+entry.b.rank : '';
-        html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+entry.b.color+'80;color:'+entry.b.color+';background:'+entry.b.color+'25;font-weight:600">\u2605 '+entry.b.name+tier+'</span>';
-      });
-      s.priorityBuilds.forEach(function(entry){
-        if (tipsShown.has(entry.key)) return;
-        var isMustPick = entry.b.mustPick && entry.b.mustPick.indexOf(s.name) >= 0;
-        var isHigh = entry.b.highPriority && entry.b.highPriority.indexOf(s.name) >= 0;
-        var label = isMustPick ? '\u2605 MUST PICK' : isHigh ? '\u2191 HIGH' : '\u2B06';
-        html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+entry.b.color+'60;color:'+entry.b.color+';background:'+entry.b.color+'18">'+label+' '+entry.b.name+'</span>';
-      });
-      s.fitsBuilds.forEach(function(entry){
-        if (tipsShown.has(entry.key)) return;
-        html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+entry.b.color+'35;color:'+entry.b.color+'bb;background:'+entry.b.color+'0d">\u25CF '+entry.b.name+'</span>';
-      });
-      s.synergyBuilds.forEach(function(entry){
-        if (tipsShown.has(entry.key)) return;
-        html += '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+entry.b.color+'25;color:'+entry.b.color+'80;background:none">~ '+entry.b.name+'</span>';
-      });
-      html += '</div>';
-    }
-
-    var _activePairs = s.activePairs || [];
-    if (_activePairs.length > 0) {
-      html += '<div style="margin-bottom:5px">';
-      html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--purple-bright);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;opacity:.9">synergy pairs</div>';
-      _activePairs.slice(0, 3).forEach(function(p) {
-        var bondColor = p.bond==='Enable'?'#4a9a8a': p.bond==='Finisher'?'#c04040': p.bond==='Loop'?'#9a6aba':'#6aac5f';
-        html += '<div style="font-size:11px;margin-bottom:3px;padding:3px 7px;border-left:2px solid '+bondColor+'40;background:'+bondColor+'08">';
-        html += '<span style="color:'+bondColor+';font-family:\'Share Tech Mono\',monospace;font-size:8px">'+p.bond+'</span>';
-        html += ' <span style="color:var(--text)">'+p.partner+'</span>';
-        html += ' <span style="color:var(--text-muted);font-style:italic;font-size:10px">\u2014 '+p.note.substring(0,80)+(p.note.length>80?'...':'')+'</span>';
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    var engineMatches = s.engineMatches || [];
-    if (engineMatches.length > 0) {
-      html += '<div style="margin-bottom:5px">';
-      engineMatches.forEach(function(e) {
-        html += '<div style="font-size:11px;margin-bottom:2px">';
-        html += '<span style="color:'+e.buildColor+';font-family:\'Cinzel\',serif;font-size:11px">'+e.buildName+'</span>';
-        html += ' <span style="color:var(--text-muted)">engine — '+e.label+'</span>';
-        html += ' <span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--teal-bright)">('+e.have+'/'+e.total+' in deck)</span>';
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    // Scoring transparency: expandable reason breakdown
-    if (s.reasons.length > 0) {
-      var reasonId = 'reasonDetail_'+i;
-      html += '<div style="margin-bottom:3px">';
-      html += '<div style="font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.55">'+s.reasons.slice(0,3).join(' · ')+'</div>';
-      if (s.reasons.length > 3) {
-        html += '<div onclick="var e=document.getElementById(\''+reasonId+'\');e.style.display=e.style.display===\'none\'?\'block\':\'none\';this.textContent=this.textContent===\'▸ show all\'?\'▾ show less\':\'▸ show all\'" style="font-size:9px;color:var(--amber);cursor:pointer;margin-top:2px;user-select:none">▸ show all ('+s.reasons.length+' reasons)</div>';
-        html += '<div id="'+reasonId+'" style="display:none;font-size:10px;color:var(--text-dim);line-height:1.6;padding:6px 8px;border:1px solid rgba(100,90,70,.15);border-radius:3px;background:rgba(100,90,70,.04);margin-top:4px">'+s.reasons.join('<br>')+'</div>';
-      }
-      html += '</div>';
-    }
+    html += verdictChipsHtml(s);
 
     if (s.card.note) {
       html += '<div style="font-size:10px;color:var(--text-muted);margin-top:3px;opacity:.65">'+s.card.note+'</div>';
     }
 
-    if (s.eradicateEstimate) {
-      var era = s.eradicateEstimate;
-      if (era) {
-        var eraHtml = '<div style="margin-top:5px;padding:5px 8px;border:1px solid rgba(74,154,138,.35);border-radius:3px;background:rgba(74,154,138,.07)">';
-        eraHtml += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--teal-bright);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">eradicate nuke turn</div>';
-        eraHtml += '<div style="font-size:11px;color:var(--text-dim)">';
-        eraHtml += era.energy + ' energy available &rarr; <strong style="color:var(--text)">' + era.base + ' base damage</strong>';
-        if (era.hasLethality || era.hasDebilitate) {
-          eraHtml += ' &rarr; <strong style="color:var(--amber-bright)">' + era.withMultipliers + ' with multipliers</strong>';
-          if (era.hasLethality) eraHtml += ' (Lethality ×1.5)';
-          if (era.hasDebilitate) eraHtml += ' (Debilitate ×1.5)';
-        }
-        eraHtml += '</div></div>';
-        html += eraHtml;
-      }
-    }
 
     html += '</div>';
   });
@@ -406,8 +278,6 @@ function renderPickerAdd() {
   if (!currentChar) { el.innerHTML = '<div class="picker-empty">Select a character first.</div>'; return; }
   const q = (document.getElementById('pickerSearch').value || '').toLowerCase();
   const allCards = getAllCardsForPicker();
-  const builds = BUILD_DATA[currentChar] ? BUILD_DATA[currentChar].builds : {};
-  const stats = getDeckStats();
   const typeCls = t => {
     if (!t) return 'tag-skl';
     if (t.includes('atk')) return 'tag-atk';
@@ -425,43 +295,7 @@ function renderPickerAdd() {
     matches.forEach(card => {
       const name = card.name;
       const alreadyInDeck = deck[name] || 0;
-
-      const essentialMatches = [];
-      const synergyMatches   = [];
-      const mustPickBuilds = [];
-      const highPriBuilds = [];
-      Object.values(builds).forEach(build => {
-        var mp = (build.mustPick || []).indexOf(name) >= 0;
-        var hp = (build.highPriority || []).indexOf(name) >= 0;
-        var es = (build.essential || []).indexOf(name) >= 0;
-        if (mp) mustPickBuilds.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
-        if (hp) highPriBuilds.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
-        if (es) essentialMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
-        else if ((build.synergy || []).includes(name)) synergyMatches.push({ buildName: build.name, buildColor: build.color, rank: build.rank });
-      });
-
-      let borderColor, bgColor, verdictLabel, verdictStyle;
-      if (mustPickBuilds.length > 0) {
-        borderColor = 'rgba(192,66,26,.5)'; bgColor = 'rgba(192,66,26,.08)';
-        verdictLabel = 'MUST PICK';
-        verdictStyle = 'background:rgba(192,66,26,.2);color:#ff6040;border:1px solid rgba(192,66,26,.4)';
-      } else if (highPriBuilds.length > 0) {
-        borderColor = 'rgba(200,146,42,.5)'; bgColor = 'rgba(200,146,42,.08)';
-        verdictLabel = 'HIGH PRIORITY';
-        verdictStyle = 'background:rgba(200,146,42,.2);color:var(--amber-bright);border:1px solid rgba(200,146,42,.4)';
-      } else if (essentialMatches.length > 0) {
-        borderColor = 'rgba(74,154,138,.5)'; bgColor = 'rgba(74,154,138,.08)';
-        verdictLabel = 'ESSENTIAL';
-        verdictStyle = 'background:rgba(74,154,138,.2);color:var(--teal-bright);border:1px solid rgba(74,154,138,.4)';
-      } else if (synergyMatches.length > 0) {
-        borderColor = 'rgba(106,172,95,.45)'; bgColor = 'rgba(74,124,63,.08)';
-        verdictLabel = 'SYNERGY';
-        verdictStyle = 'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)';
-      } else {
-        borderColor = 'rgba(100,90,70,.15)'; bgColor = 'rgba(0,0,0,.35)';
-        verdictLabel = 'NOT A PRIORITY';
-        verdictStyle = 'background:rgba(100,90,70,.15);color:var(--text-muted);border:1px solid var(--border)';
-      }
+      const s = scoreCard(name);
 
       const t = card.type || 'skl';
       const tCls = t.startsWith('atk')?'tag-atk':t.startsWith('def')?'tag-def':t==='pow'?'tag-pow':t==='vel'?'tag-vel':'tag-skl';
@@ -470,13 +304,14 @@ function renderPickerAdd() {
       const deckTag = alreadyInDeck > 0 ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×${alreadyInDeck}</span>` : '';
       const isUpgraded = name.endsWith('+');
       const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:var(--text)';
+      const bg = s.verdict === 'skip' ? 'rgba(0,0,0,.35)' : s.vBg;
 
-      html += `<div style="padding:7px 9px;border:1px solid ${borderColor};border-radius:3px;background:${bgColor};margin-bottom:4px">`;
+      html += `<div style="padding:7px 9px;border:1px solid ${s.vBorder};border-radius:3px;background:${bg};margin-bottom:4px">`;
       html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">`;
-      html += `<span style="font-size:13px;${nameStyle}">${name}</span>`;
+      html += `<span data-card="${name}" style="font-size:13px;${nameStyle}"><span class="cf-row-orb">${cardOrbHtml(card, true)}</span>${name}</span>`;
       html += typeTag + deckTag + crossTag;
       html += card.rarity ? rarityBadgeHtml(card.rarity) : '';
-      html += `<span class="card-check-verdict" style="${verdictStyle}">${verdictLabel}</span>`;
+      html += `<span class="card-check-verdict" style="background:${s.vBg};color:${s.vColor};border:1px solid ${s.vBorder}">${s.vLabel} ${s.score}</span>`;
       html += `</div>`;
 
       // Inline card detail
@@ -510,41 +345,7 @@ function renderPickerAdd() {
         }
       }
 
-      if (mustPickBuilds.length > 0) {
-        mustPickBuilds.forEach(b => {
-          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:#ff6040;font-family:'Cinzel',serif;font-size:11px">${b.buildName}</span>`;
-          if (b.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff6040">[${b.rank}]</span>`;
-          html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#ff6040;letter-spacing:.06em">MUST PICK</span></div>`;
-        });
-      }
-
-      if (highPriBuilds.length > 0) {
-        highPriBuilds.forEach(b => {
-          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:var(--amber-bright);font-family:'Cinzel',serif;font-size:11px">${b.buildName}</span>`;
-          if (b.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber-bright)">[${b.rank}]</span>`;
-          html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--amber-bright);letter-spacing:.06em">HIGH PRIORITY</span></div>`;
-        });
-      }
-
-      if (essentialMatches.length > 0) {
-        essentialMatches.forEach(e => {
-          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${e.buildColor};font-family:'Cinzel',serif;font-size:11px">${e.buildName}</span>`;
-          if (e.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">[${e.rank}]</span>`;
-          html += `</div>`;
-        });
-      }
-
-      if (synergyMatches.length > 0) {
-        synergyMatches.forEach(s => {
-          html += `<div style="font-size:11px;margin-bottom:2px"><span style="color:${s.buildColor};font-family:'Cinzel',serif;font-size:11px">${s.buildName}</span>`;
-          if (s.rank) html += ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted)">[${s.rank}]</span>`;
-          html += `</div>`;
-        });
-      }
-
-      if (essentialMatches.length === 0 && synergyMatches.length === 0) {
-        html += `<div style="font-size:11px;color:var(--text-muted)">Not a priority for any ${currentChar.charAt(0).toUpperCase()+currentChar.slice(1)} build. Skip unless you have a specific reason.</div>`;
-      }
+      html += verdictChipsHtml(s);
 
       if (card.note) html += `<div style="font-size:10px;color:var(--text-muted);margin-top:3px;opacity:.65">${card.note}</div>`;
 
@@ -558,40 +359,23 @@ function renderPickerAdd() {
     return;
   }
 
-  // No query: grouped priority list for quick browsing
-  function categorise(card) {
-    const needsDef = stats.def < 3 && (card.type==='def'||card.type.includes('def'));
-    const needsAtk = stats.atk < 3 && (card.type==='atk'||card.type.includes('atk'));
-    if (needsDef) return {v:'rec', label:'ESSENTIAL', reason:'fixes low defense'};
-    if (needsAtk) return {v:'syn', label:'CONSIDER', reason:'fixes low attacks'};
-    return {v:'skip', label:'', reason:''};
-  }
+  // No query: the best cards to add right now, from your own pool
+  const top = allCards.filter(c => !c.crossChar && !c.name.endsWith('+'))
+    .map(c => ({c: c, s: scoreCard(c.name)}))
+    .filter(x => x.s.verdict !== 'skip')
+    .sort((a, b) => b.s.raw - a.s.raw)
+    .slice(0, 15);
 
-  let items = allCards.filter(c => categorise(c).v !== 'skip');
-  items = items.map(c => ({...c, cat:categorise(c)}));
-  const order = {rec:0,syn:1,other:2,skip:3};
-  items.sort((a,b)=>{
-    const va = order[a.cat.v]+(a.crossChar?10:0);
-    const vb = order[b.cat.v]+(b.crossChar?10:0);
-    return va-vb || a.name.localeCompare(b.name);
-  });
+  if (!top.length) { el.innerHTML='<div class="picker-empty">No strong picks right now — try searching.</div>'; return; }
 
-  if (!items.length) { el.innerHTML='<div class="picker-empty">No priority cards — try searching.</div>'; return; }
-
-  const vs = {rec:'background:rgba(74,124,63,.2);color:var(--green-bright);border:1px solid rgba(106,172,95,.35)',syn:'background:rgba(200,146,42,.15);color:var(--amber-bright);border:1px solid rgba(200,146,42,.3)',other:'',skip:''};
-  let html = '<div style="font-size:10px;color:var(--text-muted);font-style:italic;padding:2px 2px 6px">Search a card name for full build details.</div>';
-  [{key:'rec',label:'recommended'},{key:'syn',label:'synergy'},{key:'other',label:'other cards'}].forEach(g=>{
-    const ownCards = items.filter(c=>c.cat.v===g.key && !c.crossChar);
-    const crossCards = items.filter(c=>c.cat.v===g.key && c.crossChar);
-    if (!ownCards.length && !crossCards.length) return;
+  let html = '<div style="font-size:10px;color:var(--text-muted);font-style:italic;padding:2px 2px 6px">Best cards for your deck right now. Search a card name to check any card.</div>';
+  [{key:'pick',label:'pick'},{key:'consider',label:'consider'}].forEach(g=>{
+    const rows = top.filter(x => x.s.verdict === g.key);
+    if (!rows.length) return;
     html += `<div class="picker-group-label">${g.label}</div>`;
-    ownCards.forEach(c=>{ html += pickerRowHtmlAdd(c, typeCls, vs); });
-    if (crossCards.length > 0) {
-      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--text-muted);opacity:.6;text-transform:uppercase;padding:4px 2px 2px;margin-top:2px">from other characters</div>`;
-      crossCards.forEach(c=>{ html += pickerRowHtmlAdd(c, typeCls, vs); });
-    }
+    rows.forEach(x => { html += pickerRowHtmlAdd(x.c, x.s, typeCls); });
   });
-  el.innerHTML = html || '<div class="picker-empty">No priority cards — try searching.</div>';
+  el.innerHTML = html;
 }
 
 function renderPickerList() {
@@ -603,28 +387,43 @@ function renderPickerList() {
   setTimeout(function() { if (el) el.scrollTop = savedScroll; }, 0);
 }
 
-function pickerRowHtmlAdd(c, typeCls, vs) {
+function pickerRowHtmlAdd(c, s, typeCls) {
   const inDeck = deck[c.name] ? ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber)">(×${deck[c.name]})</span>` : '';
-  const crossTag = c.crossChar ? ` <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-muted);opacity:.7;border:1px solid var(--border);border-radius:2px;padding:0 4px">${c.crossCharName}</span>` : '';
-  const rowCls = c.cat.v==='rec'?' rec':c.cat.v==='syn'?' syn':'';
+  const rowCls = s.verdict==='pick'?' rec':' syn';
   const safeN = c.name.replace(/'/g,"\\'");
-  const noteText = [c.cat.reason, c.note].filter(Boolean).join('. ');
-  const isUpgraded = c.name.endsWith('+');
-  const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : '';
+  const noteText = s.reasons.join(' · ');
   const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
   const finalCostStr = (currentChar === 'regent' && c.starCost) ? costStr + '✦'.repeat(c.starCost) : costStr;
   const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
   const descHtml = formatCardDescription(c.description || '');
   const cardDetail = descHtml ? `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">${typeLabel}${finalCostStr?' · '+finalCostStr:''} — ${descHtml}</div>` : '';
-  return `<div class="picker-card-row${rowCls}" data-card="${c.name}" onclick="pickerAddCard('${safeN}')" style="grid-template-columns:1fr auto auto auto;gap:5px">
+  return `<div class="picker-card-row${rowCls}" data-card="${c.name}" onclick="pickerAddCard('${safeN}')" style="grid-template-columns:1fr auto auto;gap:5px">
     <div style="min-width:0">
-      <div class="picker-card-name" style="${nameStyle}"><span class="cf-row-orb">${cardOrbHtml(c, true)}</span>${c.name}${inDeck}${crossTag}</div>
+      <div class="picker-card-name"><span class="cf-row-orb">${cardOrbHtml(c, true)}</span>${c.name}${inDeck}</div>
       ${cardDetail}
       ${noteText ? `<div class="picker-card-note">${noteText}</div>` : ''}
     </div>
     <span class="deck-item-tag ${typeCls(c.type)}" style="font-size:9px;padding:1px 5px;white-space:nowrap">${(c.type||'skl').replace(/_/g,'·').toUpperCase()}</span>
-    ${c.cat.label ? `<span class="picker-verdict" style="${vs[c.cat.v]||''}">${c.cat.label}</span>` : '<span style="width:20px"></span>'}
+    ${verdictBadgeHtml(s)}
   </div>`;
+}
+
+// Compact "PICK 78" badge for search rows.
+function verdictBadgeHtml(s) {
+  if (!s) return '';
+  return '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+s.vBorder+';color:'+s.vColor+';background:'+s.vBg+';font-weight:600;white-space:nowrap">'+s.vLabel+' '+s.score+'</span>';
+}
+
+// Up to 3 "why" chips under a verdict.
+function verdictChipsHtml(s) {
+  if (!s || !s.chips.length) return '';
+  var tones = {pos: 'var(--green-bright)', neg: '#c06060', neutral: 'var(--text-dim)'};
+  var html = '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">';
+  s.chips.forEach(function(c) {
+    var col = tones[c.tone] || tones.neutral;
+    html += '<span style="font-size:9px;padding:1px 6px;border-radius:2px;border:1px solid rgba(100,90,70,.3);color:'+col+';background:rgba(0,0,0,.25)">'+c.text+'</span>';
+  });
+  return html + '</div>';
 }
 
 function pickerAddCard(name) { addCard(name); renderPickerAdd(); }

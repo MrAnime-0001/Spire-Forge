@@ -19,6 +19,36 @@ const OVERRIDES = {
   'Guiding Star': { StarCost: 1, note: '12 dmg now, draw 2 next turn (v0.111). Cheap Star-cost attack.', Text: 'Deal [12|13] damage.<br>Next turn, draw [2|3] cards.' },
 };
 
+// Community tier list (S-D, class cards only) used as the scorer's base card power.
+// Source: https://slaythetierlist.com/ (credit them). Cards reworked after the list's v0.107.1
+// baseline get no tier, so the scorer falls back to the card's own stats.
+const TIER_URL = 'https://slaythetierlist.com/';
+const STALE_TIER = new Set(['Expect a Fight', 'Hyperbeam', 'Mirage', 'Sidestep', 'Haze', 'Outbreak',
+  'Well-Laid Plans', 'Blade of Ink', 'Rocket Punch', 'Synchronize']);
+const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+export function parseTiers(html) {
+  const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '').replace(/<[^>]+>/g, '\n')
+    .replace(/&#x27;|&#39;|&rsquo;/g, "'").replace(/&amp;/g, '&');
+  const tiers = {};
+  for (const m of text.matchAll(/^\s*(.+?) — (Ironclad|Silent|Regent|Necrobinder|Defect) ([SABCD])-Tier card/gm))
+    tiers[`${m[2]}:${norm(m[1])}`] = m[3];
+  return tiers;
+}
+
+async function fetchTiers() {
+  try {
+    const res = await fetch(TIER_URL, { headers: { 'User-Agent': 'Mozilla/5.0 SpireForge card sync' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const tiers = parseTiers(await res.text());
+    if (Object.keys(tiers).length < 300) throw new Error(`only ${Object.keys(tiers).length} entries parsed`);
+    return tiers;
+  } catch (e) {
+    console.warn(`tier list fetch failed, keeping existing tiers: ${e.message}`);
+    return null;
+  }
+}
+
 export function parseLua(lua) {
   const out = [];
   for (const m of lua.matchAll(/\["([^"]+)"\]\s*=\s*\{([\s\S]*?)\n  \}/g)) {
@@ -50,7 +80,7 @@ const roleTag = (w, text) => w.Type === 'Attack' ? 'atk' : w.Type === 'Power' ? 
 const cost = c => c === -1 ? 'X' : c;
 
 // Upgrade notes were copies of old descriptions, so they're left empty; the popup shows the live text.
-function toEntries(w, old) {
+function toEntries(w, old, tier) {
   const o = OVERRIDES[w.name] || {};
   const src = { ...w, ...o };
   const base = {
@@ -58,6 +88,7 @@ function toEntries(w, old) {
     rarity: src.Rarity.toLowerCase(), cardType: src.Type, note: o.note ?? old?.note ?? '',
     description: renderText(src.Text, false),
   };
+  if (tier) base.tier = tier;
   if (src.StarCost !== undefined) base.starCost = src.StarCost;
   if (src.Multiplayer === 'true') base.multiplayer = true;
   const plus = { ...base, name: w.name + '+', cost: cost(src.CostPlus ?? src.Cost),
@@ -96,6 +127,8 @@ function check() {
   eq(renderText('Gain [@IE|@IE@IE] and 5 $Block. Add {{C2|Shiv|Shivs}}.', true),
     'Gain StS2 EnergyIronclad.pngStS2 EnergyIronclad.png and 5 StS2 Intent Defend.png Block. Add Shivs.');
   eq(renderText("{{KW|Osty|Osty's|2}} gains 9 @Gold.", false), "Osty's gains 9 StS2 Gold.png.");
+  eq(parseTiers('<h3>x</h3><p>Pact&#x27;s End — Ironclad B-Tier card in Slay the Spire 2</p>')['Ironclad:pactsend'], 'B');
+  eq(toEntries(w, null, 'A')[1].tier, 'A');
   console.log('check ok');
 }
 
@@ -104,6 +137,8 @@ async function main() {
   const find = (pool, name) => app[pool].find(c => c.name === name) ||
     POOLS.map(p => app[p].find(c => c.name === name)).find(Boolean);
   const report = { added: [], removed: [], moved: [], cost: [], rarity: [] };
+  const tiers = await fetchTiers();
+  let tiered = 0;
   const wikiPools = {};
   for (const pool of POOLS) wikiPools[pool] = (await fetchPool(pool)).filter(w => !w.noList);
   const synced = new Set(POOLS.flatMap(p => wikiPools[p].filter(w => !SKIP_RARITY.has(w.Rarity)).map(w => w.name)));
@@ -114,7 +149,9 @@ async function main() {
     for (const w of wikiPools[pool]) {
       if (SKIP_RARITY.has(w.Rarity)) continue;
       const old = find(pool, w.name);
-      const [b, p] = toEntries(w, old);
+      const tier = !tiers ? old?.tier : STALE_TIER.has(w.name) ? undefined : tiers[`${pool}:${norm(w.name)}`];
+      if (tier) tiered++;
+      const [b, p] = toEntries(w, old, tier);
       if (!old) report.added.push(`${pool}: ${w.name}`);
       else {
         if (!app[pool].includes(old)) report.moved.push(`${w.name} -> ${pool}`);
@@ -143,6 +180,7 @@ async function main() {
 
   for (const [k, v] of Object.entries(report)) console.log(`\n${k} (${v.length}):\n  ${v.join('\n  ')}`);
   console.log(`\nbroken references (${broken.length}):\n  ${broken.join('\n  ')}`);
+  console.log(`\ncards with a tier: ${tiered}${tiers ? '' : ' (kept from previous sync)'}`);
 }
 
 if (process.argv.includes('--check')) check(); else await main();

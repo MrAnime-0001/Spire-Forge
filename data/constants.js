@@ -11,36 +11,6 @@ const AXIS_TARGETS = {
   3: { Attack: 90, Defense: 48, Scaling: 55, Consistency: 55, Efficiency: 45, Synergy: 60 }
 };
 
-// Per-character axis target overrides. Applied as additive offsets to base AXIS_TARGETS.
-// null = use base targets as-is. Each offset is +/- to the base value for that character.
-// Rationale:
-//   Defect:  Frost orbs provide passive block. Focus scales ALL orbs multiplicatively.
-//   Silent:  Weak + Evasion reduce damage without block cards. Sly discard = free plays.
-//   Regent:  Fewer pure block options. Star economy demands more card coordination.
-//   Necrobinder: Osty IS defense layer. Summon cards fill defense role.
-//   Ironclad: Most straightforward — Barricade/block cards match baseline well.
-const CHAR_AXIS_OVERRIDES = {
-  ironclad:    null,
-  silent:      { Defense: -10, Efficiency: +5 },
-  defect:      { Defense: -15, Scaling: +10 },
-  regent:      { Defense: -10, Synergy: +10 },
-  necrobinder: { Defense: -10 }
-};
-
-// Per-ascension-tier axis target offsets. Additive on top of AXIS_TARGETS + CHAR_AXIS_OVERRIDES.
-// Nested by tier threshold → act. A10 reuses tier 8 (same stats; double boss Act 3 only).
-// A5-A7: Ascender's Bane, fewer rest sites, scarcer upgraded cards.
-// A8-A9: Enemy HP/dmg up. A10: double boss Act 3 only, no additional stat change.
-const ASC_AXIS_OVERRIDES = {
-  5: { 1: { Attack:  4, Defense:  3 }, 2: { Attack:  6, Defense:  4 }, 3: { Attack: 10, Defense:  4 } },
-  8: { 1: { Attack:  8, Defense:  6 }, 2: { Attack: 17, Defense: 10 }, 3: { Attack: 10, Defense: 12 } }
-};
-
-// Bosses with long kill windows where scaling matters most (1.5× scl bonus)
-const SCL_PRIORITY_BOSSES = new Set([
-  'Knowledge Demon', 'The Queen', 'Aeonglass', 'Test Subject #C8'
-]);
-
 const DECK_THRESHOLDS = {
   lean: 10,
   healthyMin: 15,
@@ -98,138 +68,6 @@ const ASCENSION_DATA = [
 // NEW SCORING DATA — boss tags, act scaling, anti-synergy
 // ============================================================
 
-// Maps card names to the boss-relevant tag keywords that appear
-// in BOSS_MATRIX punishes[] and rewards[]. Keywords must be
-// substrings of the actual punish/reward strings (case-insensitive match).
-const CARD_BOSS_TAGS = {
-  // --- Multi-hit / Shiv ---
-  'Whirlwind':        ['multi-hit','AoE','burst'],
-  'Twin Strike':      ['multi-hit','burst'],
-  'Anger':            ['multi-hit'],
-  'Pommel Strike':    ['multi-hit','burst'],
-  'Sword Boomerang':  ['multi-hit'],
-  'Blade Dance':      ['multi-hit','Shiv','fast'],
-  'Finisher':         ['multi-hit','Shiv'],
-  'Infinite Blades':  ['Shiv','fast'],
-  'Accuracy':         ['Shiv'],
-  'Leading Strike':   ['Shiv'],
-  'Hidden Daggers':   ['Shiv'],
-  'Cloak and Dagger': ['Shiv'],
-  'Knife Trap':       ['Shiv'],
-  'Up My Sleeve':     ['Shiv'],
-  // --- Weak application ---
-  'Neutralize':       ['Weak'],
-  'Leg Sweep':        ['Weak'],
-  'Sucker Punch':     ['Weak'],
-  'Malaise':          ['Weak','Poison'],
-  'Expose':           ['Weak'],
-  // --- Poison ---
-  'Noxious Fumes':    ['Poison'],
-  'Deadly Poison':    ['Poison'],
-  'Poisoned Stab':    ['Poison'],
-  'Bouncing Flask':   ['Poison'],
-  'Bubble Bubble':    ['Poison'],
-  'Haze':             ['Poison'],
-  'Corrosive Wave':   ['Poison'],
-  'Accelerant':       ['Poison','fast'],
-  // --- Doom / No Escape ---
-  'No Escape':        ['No Escape','Doom','threshold'],
-  'Deathbringer':     ['Doom'],
-  "Death's Door":     ['Doom'],
-  'Scourge':          ['Doom'],
-  'End of Days':      ['Doom'],
-  // --- Exhaust ---
-  'Corruption':       ['Exhaust','Corruption','big turn'],
-  'Dark Embrace':     ['Exhaust'],
-  'Feel No Pain':     ['Exhaust'],
-  'Fiend Fire':       ['Exhaust','big turn','burst'],
-  "Pact's End":       ['Exhaust'],
-  'Second Wind':      ['Exhaust'],
-  'Forgotten Ritual': ['Exhaust'],
-  // --- Single big hits ---
-  'Bludgeon':         ['single-hit','burst'],
-  'Reap':             ['single-hit'],
-  'Bury':             ['single-hit','burst'],
-  'Devastate':        ['single-hit','burst'],
-  'Kingly Kick':      ['single-hit','burst'],
-  'Comet':            ['single-hit','burst'],
-  'Heavenly Drill':   ['single-hit','burst'],
-  'Hyperbeam':        ['single-hit','burst'],
-  'Ice Lance':        ['single-hit'],
-  // --- Strength / Demon Form ---
-  'Demon Form':       ['Strength','Demon Form','scaling'],
-  'Inflame':          ['Strength','burst'],
-  'Fight Me!':        ['Strength'],
-  'Rupture':          ['Strength','self-damage'],
-  'Limit Break':      ['Strength','burst'],
-  'Conqueror':        ['Sovereign Blade','forge','burst'],
-  'Sovereign Blade':  ['Sovereign Blade','forge','burst'],
-  'The Smith':        ['forge'],
-  'Summon Forth':     ['forge'],
-  // --- Barricade / Body Slam ---
-  'Barricade':        ['Barricade','block'],
-  'Body Slam':        ['Body Slam','block'],
-  'Juggernaut':       ['block'],
-  'Impervious':       ['block'],
-  // --- AoE ---
-  'Thunderclap':      ['AoE'],
-  'Shockwave':        ['AoE'],
-  'Seven Stars':      ['Seven Stars','AoE','burst'],
-  'Gamma Blast':      ['AoE','burst'],
-  'Radiate':          ['AoE','burst'],
-  'Meteor Strike':    ['AoE','burst'],
-  // --- Fast / cycle / draw ---
-  'Acrobatics':       ['fast','cycle','draw'],
-  'Adrenaline':       ['fast','cycle','draw'],
-  'Expertise':        ['draw','fast'],
-  'Tactician':        ['fast','cycle','Sly-discard'],
-  'Reflex':           ['fast','cycle','Sly-discard'],
-  'Tools of the Trade':['fast','cycle','Sly-discard'],
-  'Master Planner':   ['fast','cycle','Sly-discard'],
-  'Prepared':         ['fast','Sly-discard'],
-  'Calculated Gamble':['fast','Sly-discard'],
-  // --- Compress / burst ---
-  'Offering':         ['burst','compressed'],
-  'Battle Trance':    ['burst','draw'],
-  'Bloodletting':     ['burst','self-damage'],
-  // --- Sly discard ---
-  'Dagger Throw':     ['Sly-discard','fast'],
-  'Memento Mori':     ['Sly-discard'],
-  // --- Stars / Regent ---
-  'Genesis':          ['stars','scaling'],
-  'Alignment':        ['stars','fast','compressed'],
-  'Stardust':         ['stars','burst'],
-  'Terraforming':     ['stars','burst'],
-  // --- Osty / Necrobinder ---
-  'Rattle':           ['Osty','multi-hit'],
-  "Sic 'Em":          ['Osty','multi-hit'],
-  'Necro Mastery':    ['Osty'],
-  // --- Soul cycle ---
-  'Haunt':            ['soul','cycle','draw'],
-  'Devour Life':      ['soul'],
-  // --- Sustained damage ---
-  'Catalyst':         ['Catalyst','Poison','burst'],
-  'Claw':             ['multi-hit','fast'],
-  'All for One':      ['multi-hit','fast'],
-  'Loop':             ['scaling','orb'],
-  'Defragment':       ['scaling','orb'],
-  'Echo Form':        ['scaling','burst'],
-};
-
-// Cards that gain value in Act 2-3 (scale well)
-const ACT_SCALES_INTO = new Set([
-  'Demon Form','Rupture','Accuracy','Accelerant','Defragment','Haunt',
-  'No Escape','Genesis','Echo Form','Loop','Limit Break','Barricade',
-  'Body Slam','Juggernaut','Noxious Fumes','Corruption','Dark Embrace',
-  'Feel No Pain','Conqueror','Radiate','Alignment','Seven Stars',
-  'Infinite Blades','Claw','All for One','Necro Mastery',
-  'Grave Warden','Afterimage','Nightmare','Blade Dance',
-  'Sword Sage','Seeking Edge','Countdown','Reaper Form',
-  'Dirge','Rattle','Burst','Catalyst','Adrenaline',
-  'Biased Cognition','Glacier','Creative AI',
-  'The Scythe','Void Form',
-]);
-
 // Cards that are strong in Act 1 but actively fall off by Act 3
 const ACT_CARRY_FALLOFF = new Set([
   'Shrug It Off','Poisoned Stab','Ball Lightning','Solar Strike',
@@ -267,9 +105,9 @@ const BOSS_MATRIX = {
   },
   'The Kin': {
     punishes:['single-target only','no AoE'],
-    rewards: ['AoE (Whirlwind, Shockwave, Seven Stars)','Poison (ticks all 3)','hard burst ignoring Followers'],
+    rewards: ['hard single-target burst on the Priest','AoE and Thorns vs three multi-hitters','damage/block that ignores Weak and Frail (Poison, Feel No Pain)'],
     difficulty: 'Medium',
-    killWindow: '≤5 turns before Dark Ritual Str spirals'
+    killWindow: '≤5 turns — all three keep stacking Strength'
   },
   'Vantom': {
     punishes:['heavy single-hit decks (Slippery wastes big swings)','slow decks (Strength ramp + Wound pollution)','entering below 40 HP'],
@@ -278,13 +116,13 @@ const BOSS_MATRIX = {
     killWindow: '≤4 cycles before Str makes Dismember lethal. SKIP ELITES under 40 HP.'
   },
   'Lagavulin Matriarch': {
-    punishes:['slow kills (Soul Siphon ruins stats)','raw damage-reliant decks'],
-    rewards: ['Poison, Doom, Shivs (bypass Str/Dex debuffs)','multi-hit to strip Plating during sleep'],
+    punishes:['slow kills (each Soul Siphon: -2 Str, -2 Dex)','multi-hit and many small blocks'],
+    rewards: ['3 free setup turns for powers','big single hits and big single blocks','Poison/Doom (ignore Str loss)'],
     difficulty: 'Hard',
     killWindow: '≤5 turns after wake — each Soul Siphon compounds'
   },
   'Soul Fysh': {
-    punishes:['pure burst (wasted in Intangible)','block-only (Beckons bypass block)','heavy decks that can\'t cycle'],
+    punishes:['burst wasted into Fade (Intangible)','decks that can\'t get rid of Beckons','low block after Scream (3 Vulnerable)'],
     rewards: ['Silent Sly-discard hands','Exhaust to clear Beckons','Discard/cycle engines'],
     difficulty: 'Medium-Hard',
     killWindow: '≤6 — Beckon flood accelerates'
@@ -316,22 +154,22 @@ const BOSS_MATRIX = {
   },
   // Act 3
   'The Queen': {
-    punishes:['draw-starved decks (Bound locks cards)','mono-Necrobinder without draw','no-AoE decks'],
-    rewards: ['draw-spam decks','AoE to pressure both','4+ cards per turn decks'],
+    punishes:['draw-starved decks (3 Bound cards each turn)','Frail-dependent card block (99 Frail from turn 2)','slow decks once she enrages'],
+    rewards: ['extra draw','block from powers/Plating/Intangible','burst to kill the Amalgam, then the Queen'],
     difficulty: 'Hard',
     killWindow: 'Torch Head (199 HP) by turn 4-5, Queen (400 HP) by turn 8-10'
   },
   'Test Subject #C8': {
-    punishes:['slow Phase 1 (Enrage ramps)','wasteful turns in Phase 3 Intangible','no saved burst'],
-    rewards: ['fast Phase 1 kill','burst held for Phase 2','sustain + patience for Phase 3 windows'],
-    difficulty: 'Moderate — plan phases and it\'s manageable',
-    killWindow: 'Phase 1 fast, Phase 2 burst (200 HP), Phase 3 patience (300 HP, attack Intangible gaps)'
+    punishes:['Skill-heavy Phase 1 (Enrage: +Str per Skill)','slow Phase 2 (Multi-Claw +1 hit each turn)','low block (Big Pounce 45)'],
+    rewards: ['attack-heavy burst','big single blocks','Burn clearing in Phase 3'],
+    difficulty: 'Hard — 600 HP over 3 phases',
+    killWindow: 'Phase 1 (100 HP) fast, Phase 2 (200 HP) before the claws stack, Phase 3 (300 HP) block every Big Pounce'
   },
   'Aeonglass': {
-    punishes:['not clearing Wither status cards from hand (each deals damage)','slow decks that let Wither pile up','ignoring Withering Presence power stacks'],
-    rewards: ['exhaust engines that clear Wither for free','fast burst to end before Wither accumulates','block-heavy decks that tank Wither chip damage'],
-    difficulty: 'Hard A3 boss',
-    killWindow: 'Consistent pressure each turn. Wither cards must be cleared every hand — build around free Exhaust or plan plays around them.'
+    punishes:['decks without scaling (512 HP, Strength grows every cycle)','Wither piling up in the deck','debuff-only plans (3 Artifact)'],
+    rewards: ['strong scaling engines','Exhaust to remove Wither (Stoke, GUARDS!!!, Purity)','big damage on non-Ebb turns'],
+    difficulty: 'Hardest Act 3 boss',
+    killWindow: 'Each Increasing Intensity adds more Strength than the last — aim to win within 4 cycles.'
   }
 };
 
@@ -349,80 +187,8 @@ const STARTING_DECKS = {
 const CHAR_HP = {ironclad:80, silent:70, defect:75, necrobinder:66, regent:75};
 
 // ============================================================
-// COMBAT MECHANICS CONSTANTS
-// ============================================================
-
-// Multi-hit cards per character — cards that hit multiple times per play.
-// Each hit independently benefits from Strength, making these high-value in Strength builds.
-const MULTI_HIT_CARDS = {
-  ironclad:    {'Twin Strike':2, 'Whirlwind':'X', 'Sword Boomerang':3, 'Heavy Blade':'X', 'Pummel':4, 'Fiend Fire':'X', 'Conflagration':'X', 'Stomp':'X', 'One-Two Punch':2, 'Spite':2, 'Thrash':2, 'Tear Asunder':'X'},
-  silent:      {'Blade Dance':3, 'Finisher':'X', 'Ricochet':4, 'Dagger Spray':2, 'Eviscerate':'X', 'Skewer':'X', 'Grand Finale':1},
-  defect:      {'Claw':'X', 'Rip and Tear':2, 'Gunk Up':3, 'Uproar':2, 'Refract':2, 'Barrage':'X', 'Multi-Cast':'X'},
-  necrobinder: {'The Scythe':'X', 'Blight Strike':1, 'Rattle':'X', "Sic 'Em":'X', 'Eradicate':'X', 'Soul Storm':'X'},
-  regent:      {'Conqueror':'X', 'Seven Stars':7, 'Celestial Might':3, 'Glitterstream':4, 'Heavenly Drill':'X', 'Stardust':'X'}
-};
-
-// Status effect modifier map for pseudo-defense/attack credit
-const STATUS_MATH = {
-  Weak:       { damageReduction: 0.25, defenseCredit: 5 },   // 25% less enemy damage -> +5 defense score
-  Vulnerable: { damageAmplification: 0.50, attackCredit: 5 } // 50% more damage taken -> +5 attack score
-};
-
-// Card play order priority — defines which card types to play first in different fight contexts
-const CARD_PLAY_ORDER_PRIORITY = {
-  general: ['AoE', 'frontload block', 'scaling (powers/poison/strength)', 'single target damage'],
-  hallway: { priority: 'frontload damage > block > scaling', note: 'End fights fast, minimize HP loss' },
-  elite:   { priority: 'block > scaling > damage', note: 'Survive setup, then outscale' },
-  boss:    { priority: 'scaling > block > damage', note: 'Scale first, boss fights are marathons' }
-};
-
-// Pacing context per act — adjusts scoring urgency based on act pacing needs
-const PACING_CONTEXT = {
-  1: { pace: 'fast', focus: 'frontload damage', hallwayToElite: 'quick damage favored', note: 'Act 1: kill before enemy scales' },
-  2: { pace: 'mid', focus: 'balanced scaling + frontload', note: 'Act 2: mix of hallway attrition and elite scaling checks' },
-  3: { pace: 'slow', focus: 'sustained output', scalingUrgency: 'high', note: 'Act 3: bosses demand sustained scaling, not burst' }
-};
-
-// ============================================================
 // STATE
 // ============================================================
-
-const TIPS_CARDS = {
-  ironclad: {
-    strength:   ['Demon Form','Feed','Fight Me!','Inflame','Pommel Strike','Whirlwind'],
-    block:      ['Barricade','Body Slam','Juggernaut','Taunt'],
-    exhaust:    ['Ashen Strike','Corruption','Dark Embrace','Feel No Pain','Forgotten Ritual',"Pact's End",'Second Wind','Stoke','Vicious'],
-    selfdamage: ['Crimson Mantle','Feed','Inferno','Rupture','Spite'],
-    strike:     ['Colossus','Expect a Fight','Hellraiser','Perfected Strike','Pommel Strike','Pyre','Taunt'],
-    infinite:   ['Battle Trance','Bloodletting','Burning Pact','Dark Embrace','Expect a Fight','Fiend Fire','Offering','Second Wind','Spite','True Grit','Vicious']
-  },
-  silent: {
-    shiv:   ['Accuracy','Hidden Daggers','Infinite Blades','Knife Trap'],
-    poison: ['Accelerant','Bubble Bubble','Footwork','Malaise','Noxious Fumes','Shadowmeld'],
-    sly:    ['Adrenaline','Afterimage','Master Planner','Prepared','Reflex','Tactician','Tools of the Trade','Well-Laid Plans'],
-    tank:   ['Accelerant','Footwork','Malaise','Noxious Fumes','Shadowmeld']
-  },
-  defect: {
-    claw:     ['All for One','Claw','Panache','Scrape'],
-    orb:      ['Barrage','Defragment','Echo Form','Loop','Multi-Cast'],
-    frost:    ['Chill','Glacier','Hailstorm','Loop'],
-    toolbox:  ['Double Energy','Echo Form','Hologram','Meteor Strike','Skim','TURBO'],
-    darkness: ['Darkness','Defragment','Dualcast','Multi-Cast','Shadow Shield']
-  },
-  necrobinder: {
-    doom:     ['Borrowed Time',"Death's Door",'End of Days','Neurosurge','Reap',"Time's Up"],
-    osty:     ['Flatten','Necro Mastery','Pull Aggro','Rattle',"Sic 'Em"],
-    soul:     ['Borrowed Time','Captured Spirit','Devour Life','Dirge','Haunt','Neurosurge','Severance','Soul Storm','Undeath'],
-    ethereal: ["Banshee's Cry",'Borrowed Time','Eradicate','Graveblast','Pagestorm','Seance']
-  },
-  regent: {
-    blade:    ['Beat into Shape','Conqueror','Falling Star','Gamma Blast'],
-    star:     ['Alignment','Child of the Stars','Cloak of Stars','Genesis','Royal Gamble'],
-    starfall: ['Alignment','Radiate','Royal Gamble','Stardust','Terraforming'],
-    midrange: ['Child of the Stars','Comet','Convergence','Genesis','Reflect'],
-    infinite: ['Alignment','Convergence','Decisions, Decisions','Glow','GUARDS!!!']
-  }
-};
 
 const VELOCITY_CARDS = {
   ironclad: ['Shrug It Off','Pommel Strike','Headbutt','Battle Trance','Burning Pact','Second Wind','Offering','Corruption','Dark Embrace','Feel No Pain','Pyre','Hellraiser'],
@@ -500,10 +266,6 @@ const VEL_STAR_GEN_BONUS = {
 
 const BASE_STARS_PER_TURN = 0; // Stars don't auto-replenish each turn
 
-const STAR_GEN_CARDS = {
-  regent: Object.keys(VEL_STAR_GEN_BONUS).filter(function(k) { return VEL_STAR_GEN_BONUS[k] > 0; })
-};
-
 // ============================================================
 // DECK SIZE ANALYSIS
 // ============================================================
@@ -516,95 +278,96 @@ const REGION_DATA = {
     bosses: {
       'Vantom': {
         type: 'Gimmick',
-        hp: '173 HP',
+        hp: '173 HP (A9+: 183)',
+        needs: {multihit:2, frontload:1, burstBlock:1, statusClear:1},
         pattern: [
-          ['Attack2','Ink Blot: 7 dmg'],
+          ['Attack2','Ink Blot: 7 (8) dmg'],
+          ['Attack3','Inky Lance: 6x2 (7x2)'],
+          ['Attack4+Status','Dismember: 27 (30) + 3 Wounds into discard'],
           ['Buff','Prepare: +2 Str'],
-          ['Attack3','Inky Lance: 6x2'],
-          ['Attack4+Status','Dismember: 27 + 3 Wounds'],
-          ['cycle','→ repeat cycle'],
-          ['power','Slippery: 9 stacks — each hit deals only 1 dmg (multi-hit strips fast)']
+          ['cycle','→ fixed 4-move cycle, repeats forever'],
+          ['power','Slippery: 9 stacks — each hit deals only 1 dmg and removes a stack']
         ],
-        strategy: 'Starts with 9 Slippery. Str +2 per cycle makes late Dismember lethal. Wounds pollute deck.',
-        killOrder: 'Multi-hit strips Slippery fast. Block Dismember (27). Kill before 3rd cycle.'
+        strategy: 'Starts with 9 Slippery. +2 Str every cycle makes later Dismembers lethal. Wounds clog your deck.',
+        killOrder: 'Strip Slippery with multi-hits or Poison ticks first. Block Dismember (27+). Kill before the 3rd cycle.'
       },
       'The Kin': {
         type: 'Multi-Enemy',
-        hp: 'Priest 190 HP, 2 Followers 47-54 HP each',
+        hp: 'Priest 190 HP (A9+: 199), 2 Followers 58-59 HP (A9+: 62-63)',
+        needs: {frontload:2, aoe:1},
         pattern: [
-          ['Att+Debuff','Orb of Frailty: 6 + Frail'],
-          ['Att+Debuff','Orb of Weakness: 6 + Weak'],
-          ['Attack3','Soul Beam: 12 + 3 Regen to Priest'],
-          ['Buff','Dark Ritual: +6 Str'],
-          ['cycle','→ repeat cycle'],
-          ['power','Regen: heals Priest 3 HP/turn (stacks)'],
+          ['Att+Debuff','Orb of Frailty: 8 (9) + 1 Frail'],
+          ['Att+Debuff','Orb of Weakness: 8 (9) + 1 Weak'],
+          ['Attack3','Soul Beam: 3x3'],
+          ['Buff','Dark Ritual: +2 (3) Str'],
+          ['cycle','→ Priest repeats this cycle'],
           ['divider'],
-          ['Attack2','Follower Assault: 8 dmg'],
-          ['Defend','Follower Guard: Block to Priest']
+          ['Attack2','Follower Quick Slash: 5 dmg'],
+          ['Attack1','Follower Boomerang: 2x2'],
+          ['Buff','Follower Power Dance: +2 (3) Str'],
+          ['note','Followers are Minions — the fight ends when the Priest dies.']
         ],
-        strategy: 'Fight ends when Priest dies — Followers flee. Priest Regen heals. Dark Ritual ramps Str fast.',
-        killOrder: 'Pure single-target Priest. Ignore Followers. Kill Priest before 2nd Dark Ritual.'
+        strategy: 'Three attackers who all ramp Strength, with constant Weak and Frail. Followers are Minions.',
+        killOrder: 'Focus the Priest — Followers flee when it dies. AoE helps, Thorns punishes the many small hits.'
       },
       'Ceremonial Beast': {
         type: 'Phase-Shift',
-        hp: '252 HP — Plow threshold 150 HP',
+        hp: '252 HP (A9+: 262) — Plow threshold 150 (160)',
+        needs: {frontload:2, burstBlock:1, scaling:1},
         pattern: [
-          ['Buff','Phase1: Stamp — gains Plow'],
-          ['Att+Buff','Phase1: Plow — 2x7 +2 Str per turn'],
-          ['phase','↓ Cross 150 HP → stunned, Str reset ↓'],
-          ['Debuff','Phase2: Beast Cry — Ringing (1 card/turn)'],
-          ['Attack3','Beast Roar: 2x12'],
-          ['Att+Buff','Plow: 2x7 +2 Str'],
-          ['power','Plow: HP threshold (150). Cross it = stun + resets Str'],
-          ['power','Ringing: limits you to 1 card play that turn (Phase 2 debuff)']
+          ['Buff','Phase 1, T1: Stamp — gains Plow 150 (160)'],
+          ['Att+Buff','Phase 1: Plow — 18 (20) dmg, +2 Str, every turn'],
+          ['phase','↓ HP reaches the Plow threshold → Stunned, loses all Str ↓'],
+          ['Debuff','Phase 2: Beast Cry — 1 Ringing (you can play only 1 card)'],
+          ['Attack3','Stomp: 15 (17) dmg'],
+          ['Att+Buff','Crush: 17 (19) dmg, +3 (4) Str'],
+          ['cycle','→ Phase 2 repeats Beast Cry → Stomp → Crush']
         ],
-        strategy: 'Phase 1 ramps Str each turn. Crossing threshold stuns + resets Str. Phase 2 limits to 1 card/turn.',
-        killOrder: 'Burst past 150 HP to trigger stun + Str reset. In Phase 2, every card must count.'
+        strategy: 'Phase 1 hits harder every turn. Dropping it to the threshold stuns it and wipes its Strength (free turn). Phase 2 Ringing turns allow only 1 card.',
+        killOrder: 'Burst 102+ damage early to reach the stun. Save a big single card for Ringing turns.'
       }
     },
     elites: {
       'Bygone Effigy': {
         type: 'Gimmick',
-        hp: '127 HP',
+        hp: '127 HP (A9+: 132)',
+        needs: {burstBlock:2, frontload:1, strDown:1},
         pattern: [
           ['Sleep','T1: Sleep — free setup turn'],
           ['Buff','T2: Wake — +10 Str'],
-          ['Attack2','→ Slashes: 13 dmg'],
-          ['Attack2','→ Slashes: 13 dmg'],
-          ['cycle','repeat (always attacks after wake)'],
-          ['power','Slow: each card you play = 10% more Attack dmg it takes this turn']
+          ['Attack3','Slashes: 13 (15) +10 Str = 23 (25) every turn after'],
+          ['power','Slow: each card you play this turn adds 10% damage it takes from cards']
         ],
-        strategy: 'Wakes with +10 Str then attacks every turn. Slow makes your attacks hit harder the more cards you play.',
-        killOrder: 'Free T1 for powers. After wake, block first then attack — each prior card stacks Slow. Poison bypasses Slow.'
+        strategy: 'Free first turn, then 23+ damage every turn. Slow rewards playing many cards before your big hit.',
+        killOrder: 'Use T1 for powers. Block 23 each turn; play cheap cards first, biggest attack last. Poison/Doom ignore Slow.'
       },
       'Phrog Parasite': {
         type: 'Multi-Enemy',
-        hp: '61-64 HP, then 4 Wrigglers (17-21 HP each)',
+        hp: '61-64 HP (A9+: 66-68), then 4 Wrigglers',
+        needs: {aoe:2, statusClear:1},
         pattern: [
-          ['Status','Infect: shuffles 3 Infections'],
-          ['Attack3','Lash: 4x4 dmg'],
-          ['cycle','→ alternating pattern'],
-          ['power','Infection: status card that deals dmg if held at turn end'],
+          ['Status','Infect: shuffles 3 Infections into discard'],
+          ['Attack3','Lash: 4x4 (5x4)'],
+          ['cycle','→ alternates Infect / Lash'],
           ['divider'],
-          ['spawn','↓ On death → 4 Wrigglers ↓'],
-          ['Buff','Wrigglers: gain 1 Str/turn'],
-          ['note','Poison/Doom kill = Wrigglers stunned on your next turn. Attack/Orb kill = they act immediately.']
+          ['spawn','↓ On death → 4 Wrigglers (Stunned on their first turn) ↓'],
+          ['note','Kill it with an Attack/Orb: Wrigglers are stunned right away. Poison/Doom kill: they are stunned on your next turn.']
         ],
-        strategy: 'Alternates Infect/Lash. On death splits into 4 Wrigglers that scale Str each turn.',
-        killOrder: 'Let Poison/Doom finish it for free stunned turn. Otherwise AoE Wrigglers fast.'
+        strategy: 'Pollutes your deck with Infections, then splits into 4 Wrigglers. The fight ends when all Wrigglers die.',
+        killOrder: 'Kill the Parasite with Poison/Doom for a free AoE turn on the Wrigglers. AoE is king here.'
       },
       'Byrdonis': {
         type: 'Scaling',
-        hp: '81-84 HP',
+        hp: '81-84 HP (A9+: 90)',
+        needs: {frontload:2, strDown:1},
         pattern: [
-          ['Attack2','Swoop: 17 dmg'],
-          ['Attack2','Peck: 4x3 (triple-dips Str)'],
-          ['Buff','+1 Str at end of every turn'],
-          ['cycle','→ Swoop → Peck → repeat'],
-          ['power','Territorial: unknown effect (likely damage amp)']
+          ['Attack3','Swoop: 17 (19) dmg'],
+          ['Attack2','Peck: 3x3 (4x3)'],
+          ['cycle','→ alternates Swoop / Peck'],
+          ['power','Territorial 1: +1 Str at the end of every turn']
         ],
-        strategy: 'Just attacks and scales. No mechanics to exploit — raw speed check.',
-        killOrder: 'Kill in 3 turns max. Every stall turn = +3 more Peck damage.'
+        strategy: 'Raw damage race. Peck multiplies every point of Strength by 3.',
+        killOrder: 'Kill within 3-4 turns. Strength-down and Weak cut Peck damage hard.'
       }
     }
   },
@@ -615,90 +378,98 @@ const REGION_DATA = {
     bosses: {
       'Waterfall Giant': {
         type: 'Gimmick',
-        hp: '240 HP (3-phase fight) — explodes on death',
+        hp: '240 HP (A9+: 250) — explodes on death',
+        needs: {frontload:1, burstBlock:2, scaling:1},
         pattern: [
-          ['Buff','T1: Pressurize — +15 Steam Eruption'],
-          ['Att+Debuff','Slosh: 9 dmg + Weak + 3 SE'],
-          ['Attack3','Slam: 18 dmg + 3 SE'],
-          ['Att+Debuff','Stomp: 15 dmg + Weak + 3 SE'],
-          ['cycle','→ repeat cycle'],
-          ['power','Steam Eruption: accumulates each turn. On death, explodes for accumulated damage (~30-40) next turn']
+          ['Buff','T1: Pressurize — +15 (20) Steam Eruption'],
+          ['Att+Debuff','Stomp: 15 (16) dmg + 1 Weak'],
+          ['Attack3','Ram: 10 (11) dmg'],
+          ['Heal','Siphon: heals 15 HP'],
+          ['Attack4','Pressure Gun: 20 (23) dmg, +5 each use'],
+          ['Attack3','Pressure Up: 13 (14) dmg'],
+          ['cycle','→ Stomp → Ram → Siphon → Pressure Gun → Pressure Up → repeat'],
+          ['power','Steam Eruption: +3 almost every move. On death it turns invulnerable, then Explodes next turn for the stored amount']
         ],
-        strategy: 'Accumulates Steam Eruption each turn. On death, becomes invulnerable then explodes for accumulated damage. No SE = no explosion.',
-        killOrder: 'Save block for kill turn — explosion hits 1 turn later. Poison/Doom bypass death invulnerability.'
+        strategy: 'Long fight that heals itself and keeps storing Steam Eruption. Killing it starts a 1-turn countdown to a big explosion.',
+        killOrder: 'Keep a big block ready for the turn after the kill. A Doom kill with no Steam Eruption skips the explosion.'
       },
       'Soul Fysh': {
         type: 'Gimmick',
-        hp: '211 HP',
+        hp: '211 HP (A9+: 221)',
+        needs: {statusClear:2, burstBlock:1},
         pattern: [
-          ['Status','Beckon: shuffle 2 Beckons (1 draw, 1 discard)'],
-          ['Attack3','De-Gas: 16 dmg'],
-          ['Attack2+Status','Gaze: 7 dmg + 1 Beckon'],
-          ['Buff','Fade: 1 Intangible (fades on your turn)'],
-          ['cycle','→ repeat cycle'],
-          ['power','Beckon: status card. 6 dmg if held at turn end'],
-          ['power','Fade: grants 1 Intangible that fades instantly on your turn']
+          ['Status','Beckon: 2 Beckons (1 into draw pile, 1 into discard)'],
+          ['Attack3','De-Gas: 16 (17) dmg'],
+          ['Attack2+Status','Gaze: 7 (8) dmg + 1 Beckon'],
+          ['Buff','Fade: 2 Intangible (only 1 lasts into your turn)'],
+          ['Att+Debuff','Scream: 13 (15) dmg + 3 Vulnerable'],
+          ['cycle','→ fixed 5-move cycle'],
+          ['power','Beckon: status card, hurts you if still in hand at end of turn']
         ],
-        strategy: 'Beckon cards deal damage if held at end of turn. Fade makes it immune for 1 attack then fades.',
-        killOrder: 'Clear Beckons every turn. Attack on non-Fade turns. Skip attacking during Fade.'
+        strategy: 'Fills your deck with Beckons and goes Intangible every 5th turn. Scream leaves you Vulnerable for the next De-Gas.',
+        killOrder: 'Exhaust or play off Beckons. Do your damage on non-Fade turns; block after Scream.'
       },
       'Lagavulin Matriarch': {
         type: 'Phase-Shift',
-        hp: '222 HP — starts with 12 Plating + 3 Asleep',
+        hp: '222 HP (A9+: 233) — 12 Plating, Asleep 3',
+        needs: {frontload:1, scaling:1, burstBlock:1},
         pattern: [
-          ['Sleep','Turns 1-3: Asleep — does nothing'],
-          ['Attack3','Slash: 19 dmg'],
-          ['Attack3','Disembowel: 9x2'],
-          ['Att+Defend','Slash2: 12 dmg + 12 Block'],
-          ['Debuff','Soul Siphon: permanent -1 Str, -1 Dex'],
-          ['cycle','→ repeat cycle'],
-          ['power','Plating: 12 stacks — absorbs damage. Wake early by dealing unblocked dmg'],
-          ['power','Asleep: 3 turns of free setup. Wake early = lose free turns']
+          ['Sleep','Turns 1-3: Asleep (wakes early on unblocked damage, loses Plating on waking)'],
+          ['Attack3','Slash: 19 (21) dmg'],
+          ['Attack3','Disembowel: 9x2 (10x2)'],
+          ['Att+Defend','Slash2: 12 (14) dmg + 12 (14) Block'],
+          ['Debuff','Soul Siphon: you lose 2 Str and 2 Dex; it gains 2 Str'],
+          ['cycle','→ repeats the 4-move cycle after waking']
         ],
-        strategy: '3 free setup turns with 12 Plating. Soul Siphon permanently reduces Str AND Dex each cycle.',
-        killOrder: 'Use 3 free turns for powers. Strip Plating with multi-hit. Kill before 2nd Soul Siphon.'
+        strategy: 'Three free setup turns. Every Soul Siphon permanently drains 2 Strength and 2 Dexterity, so multi-hit and many small blocks get worse over time.',
+        killOrder: 'Play expensive powers while it sleeps. Favour big single hits and big single blocks. Kill before the 2nd Soul Siphon.'
       }
     },
     elites: {
       'Phantasmal Gardeners': {
         type: 'Multi-Enemy',
-        hp: '4 Gardeners, 26-31 HP each (7 Skittish)',
+        hp: '4 Gardeners, 26-31 HP each (A9+: 27-32), Skittish 6 (7)',
+        needs: {aoe:2, multihit:1},
         pattern: [
           ['Attack2','Bite: 5 dmg'],
           ['Attack2','Lash: 7 dmg'],
           ['Attack1','Flail: 1x3'],
-          ['Buff','Enlarge: +2 Str'],
-          ['cycle','→ repeat (all 4 offset-start)'],
-          ['power','Skittish: 7 stacks — takes extra damage while active']
+          ['Buff','Enlarge: +2 (3) Str'],
+          ['cycle','→ all four share the cycle, each starting on a different move'],
+          ['power','Skittish: gains Block after the first attack against it each turn']
         ],
-        strategy: 'Four enemies on same cycle offset. Combined damage ramps with each Enlarge.',
-        killOrder: 'Focus one to drop incoming damage. Priority: closest to Enlarge. AoE kills all 4.'
+        strategy: 'Four small enemies offset on the same cycle. Skittish blocks after your first attack on each one.',
+        killOrder: 'AoE ignores Skittish best. Otherwise kill one at a time, starting with whoever is about to Enlarge.'
       },
       'Terror Eel': {
         type: 'Gimmick',
-        hp: '140 HP',
+        hp: '140 HP (A9+: 150) — Shriek at 70 (75)',
+        needs: {frontload:2, burstBlock:1},
         pattern: [
-          ['Attack3','Crash: 16 dmg'],
-          ['Att+Buff','Thrash: 3x3 + 6 Vigor'],
-          ['cycle','→ Crash → Thrash → repeat'],
-          ['Stun','↓ At 70 HP ↓'],
-          ['Debuff','99 Vulnerable (permanent)'],
-          ['power','Vigor: adds flat +6 dmg to next Attack (Crash hits 22 instead of 16)']
+          ['Attack3','Crash: 16 (18) dmg'],
+          ['Att+Buff','Thrash: 3x3 (4x3) + 6 Vigor'],
+          ['cycle','→ alternates Crash / Thrash'],
+          ['Stun','↓ HP reaches the Shriek threshold → Stunned for a turn ↓'],
+          ['Debuff','Terror: 99 Vulnerable on you for the rest of the fight'],
+          ['power','Vigor: next Crash hits for 22+']
         ],
-        strategy: 'Vigor from Thrash boosts next Crash. At 70 HP, stuns itself then applies permanent 99 Vulnerable.',
-        killOrder: 'Plan when to cross 70 HP. Set up burst during stun. After Vulnerable, end fast.'
+        strategy: 'Thrash gives Vigor so the next Crash hits for 22+. At half HP it stuns itself, then makes you permanently Vulnerable.',
+        killOrder: 'Plan to cross 70 HP with burst ready: use the stun turn to deal as much as possible and finish quickly.'
       },
       'Skulking Colony': {
         type: 'Gimmick',
-        hp: '75 HP — Hardened Shell 20',
+        hp: '75 HP (A9+: 80) — Hardened Shell 20',
+        needs: {burstBlock:1, scaling:1},
         pattern: [
-          ['Attack3','Zoom: 13 dmg'],
-          ['Buff','Grow: +4 Str'],
-          ['cycle','→ Zoom → Zoom → Grow → repeat'],
-          ['power','Hardened Shell: 20 — max 20 HP loss per turn. Attacks EVERY turn. No longer gains Block on Grow.']
+          ['Attack3','Zoom: 14 (16) dmg'],
+          ['Attack3','Zoom: 14 (16) dmg'],
+          ['Att+Buff','Inertia: 9 (11) dmg + 2 (3) Str'],
+          ['Attack2','Piercing Stabs: 7x2 (8x2)'],
+          ['cycle','→ fixed 4-move cycle'],
+          ['power','Hardened Shell: max 20 HP lost per turn (resets on your turn and on its turn)']
         ],
-        strategy: 'Hardened Shell caps damage at 20/turn. No safe Grow turn — attacks every turn. No Block gained on Grow.',
-        killOrder: '4-turn minimum at cap. Consistent 20/turn optimal.'
+        strategy: 'Attacks every turn and caps your damage at 20 per turn, so it takes at least 4 turns.',
+        killOrder: 'Steady 20 damage per turn. Poison and Thorns hit on its turn, letting you push 40 a round.'
       }
     }
   },
@@ -709,94 +480,101 @@ const REGION_DATA = {
     bosses: {
       'The Insatiable': {
         type: 'Timer',
-        hp: '321 HP + Sandpit (4-turn instant death)',
+        hp: '321 HP (A9+: 341) + Sandpit',
+        needs: {frontload:2, burstBlock:1, statusClear:1},
         pattern: [
-          ['Buff+Status','T1: Sandpit — 4 countdown + 6 Frantic Escapes'],
-          ['Attack4','Lunging Bite: 28 dmg'],
-          ['Attack3','Thrash: 8x2'],
-          ['Buff','Desperate Lunge: +6 Str + more Escapes'],
-          ['cycle','→ repeat cycle'],
-          ['power','Sandpit: 4-turn death countdown. Extended by playing Frantic Escape'],
-          ['power','Frantic Escape: status. Extends Sandpit by 1. Energy cost +1 each use']
+          ['Buff+Status','T1: Liquify Ground — 4 Sandpit + 6 Frantic Escapes (3 draw, 3 discard)'],
+          ['Attack3','Thrash: 8x2 (9x2)'],
+          ['Attack4','Lunging Bite: 28 (31) dmg'],
+          ['Buff','Salivate: +2 (3) Str'],
+          ['Attack3','Thrash: 8x2 (9x2)'],
+          ['cycle','→ Thrash → Lunging Bite → Salivate → Thrash → repeat'],
+          ['power','Sandpit: death countdown. Playing Frantic Escape pushes it back']
         ],
-        strategy: 'Timer-capped boss. Frantic Escapes are mandatory each turn. Energy cost scales, making late game brutally expensive.',
-        killOrder: 'Must draw and play a Frantic Escape every turn. High energy gen is critical. Damage between surviving.'
+        strategy: 'Timer fight: you must keep playing Frantic Escapes or die to Sandpit. They cost energy that would otherwise go to damage and block.',
+        killOrder: 'Draw and energy are survival. Kill fast — every cycle adds Strength to the 28-damage bite.'
       },
       'Knowledge Demon': {
         type: 'Strategic Choice',
-        hp: '379 HP',
+        hp: '379 HP (A9+: 399)',
+        needs: {scaling:2, burstBlock:1, multihit:0},
         pattern: [
-          ['Debuff','T1: Curse of Knowledge — choose curse'],
-          ['Attack3','Claw: 15 dmg'],
-          ['Attack3','Claw: 15 dmg'],
-          ['Attack4','Grasping Void: 25 dmg'],
-          ['Debuff','Curse of Knowledge — choose again'],
-          ['cycle','→ repeat cycle'],
-          ['power','Disintegration: 6-8 dmg/turn (increasing each set)'],
-          ['power','Mind Rot: draw 1 fewer card per turn'],
-          ['power','Sloth: max 3 cards played per turn'],
-          ['power','Waste Away: -1 energy per turn']
+          ['Debuff','Curse of Knowledge: choose 1 of 2 debuffs'],
+          ['Attack3','Slap: 17 (18) dmg'],
+          ['Attack3','Knowledge Overwhelming: 8x3 (9x3)'],
+          ['Att+Buff','Ponder: 11 (13) dmg, heals 30, +2 (3) Str'],
+          ['cycle','→ 4-move cycle; after the 3rd Curse it only repeats the 3 attacks'],
+          ['note','Curse sets: Disintegration 6 / Mind Rot · Disintegration 7 / Sloth (max 3 cards) · Disintegration 8 / Waste Away (-1 energy)']
         ],
-        strategy: 'Each Curse offers a binary choice between damage or resource loss. Both paths stack over time.',
-        killOrder: 'Fast builds: take resource curses (Mind Rot, Sloth, Waste Away). Slow builds: tank Disintegration.'
+        strategy: 'Long fight: it heals 30 every cycle and gains Strength. Each Curse makes you pick damage-per-turn or a resource loss.',
+        killOrder: 'Scaling decks win here. Fast decks take the resource curses; slow decks take Disintegration and outlast.'
       },
       'Kaiser Crab': {
         type: 'Multi-Enemy',
-        hp: 'Crusher Claw 209 HP, Rocket Claw 199 HP',
+        hp: 'Crusher 209 HP (A9+: 219), Rocket 199 HP (A9+: 209)',
+        needs: {aoe:1, burstBlock:2, scaling:1},
         pattern: [
-          ['Attack2','Crusher: Clamp — 12 dmg'],
-          ['Att+Buff','Crusher: Adapt — +2 Str + 8 Block'],
-          ['Attack3','Crusher: Crush — 18 dmg'],
+          ['Attack3','Crusher: Thrash 12 (14)'],
+          ['Attack2','Crusher: Enlarging Strike 4'],
+          ['Att+Debuff','Crusher: Bug Sting 6x2 (7x2) + 2 Weak + 2 Frail'],
+          ['Buff','Crusher: Adapt +2 (3) Str'],
+          ['Att+Defend','Crusher: Guarded Strike 12 (14) + 18 Block'],
           ['divider'],
-          ['Attack3','Rocket: Slam — 15 dmg'],
-          ['Buff','Rocket: Charge Up — +2 Str'],
-          ['Attack4','Rocket: Laser — 24 dmg'],
-          ['power','Surrounded: take 50% more dmg from behind (use targeting cards to face attacker)'],
-          ['power','Crab Rage: when one claw dies, survivor gains +5 Str + 99 Block']
+          ['Attack1','Rocket: Targeting Reticle 3 (4)'],
+          ['Attack3','Rocket: Precision Beam 18 (20)'],
+          ['Buff','Rocket: Charge Up +2 (3) Str'],
+          ['Attack4','Rocket: Laser 31 (35)'],
+          ['Sleep','Rocket: Recharge — does nothing'],
+          ['power','Surrounded: you take 50% more from the claw behind you. Targeting a claw turns you to face it'],
+          ['power','Crab Rage: when one claw dies, the other gains 6 Str + 99 Block']
         ],
-        strategy: 'Two independent claws. Surrounded makes you take 50% more damage from the wrong direction. Crab Rage punishes killing one too early.',
-        killOrder: 'Face the attacking claw. Kill Rocket first (faster scaler). Kill both near-simultaneously.'
+        strategy: 'Two claws on 5-move cycles. Laser (31) and attacks from behind are the big threats. Killing one claw enrages the other.',
+        killOrder: 'Face whichever claw is about to hit hardest. Bring both low, then finish them close together. AoE splits damage well.'
       }
     },
     elites: {
       'Decimillipede': {
         type: 'Multi-Enemy',
-        hp: '3x 40-46 HP segments',
+        hp: '3 segments, 40-46 HP each (A9+: 46-52)',
+        needs: {aoe:2, frontload:1},
         pattern: [
-          ['Att+Debuff','Bulk: 5 dmg + 3 Str'],
-          ['Att+Debuff','Gnaw: 8 dmg + Weak'],
-          ['Att+Debuff','Outgas: 6 dmg + Weak'],
-          ['Heal','On death: revives 25 HP if other segment alive'],
-          ['power','Reattach: when a segment dies, revives with 25 HP if another segment still alive']
+          ['Att+Buff','Bulk: 6 (7) dmg + 2 Str'],
+          ['Attack2','Writhe: 5x2 (6x2)'],
+          ['Att+Debuff','Outgas: 8 (9) dmg + 1 Weak'],
+          ['cycle','→ each segment cycles Bulk → Writhe → Outgas from a different start'],
+          ['Heal','Reattach: a dead segment revives with 25 HP while another segment lives']
         ],
-        strategy: 'Three segments with staggered cycles. Killing one triggers revival unless all die same turn.',
-        killOrder: 'Focus one dead before touching others. Only AoE that kills all 3 at once. Never spread damage.'
+        strategy: 'Three segments. A killed segment comes back with 25 HP unless all of them die together.',
+        killOrder: 'Bring all three low, then finish them in the same turn. AoE is ideal.'
       },
       'Entomancer': {
         type: 'Gimmick',
-        hp: '145 HP — Personal Hive',
+        hp: '145 HP (A9+: 155) — Personal Hive 1',
+        needs: {burstBlock:1, strDown:1, statusClear:1},
         pattern: [
-          ['Attack3','Entangle: 23 dmg'],
-          ['Attack3','Swarm: 10x2'],
-          ['Buff','Hive Mind: +6 Str'],
-          ['cycle','→ repeat cycle'],
-          ['power','Personal Hive: each Attack you play shuffles 1 Dazed into your draw pile']
+          ['Attack4','Beeeees!: 3x7 (3x8)'],
+          ['Attack3','Spear!: 18 (20) dmg'],
+          ['Buff','Pheromone Spit: +1 Personal Hive and +1 Str (+2 Str once Hive is 3)'],
+          ['cycle','→ fixed 3-move cycle'],
+          ['power','Personal Hive: each time it takes Attack damage, adds Dazed to your draw pile']
         ],
-        strategy: 'Personal Hive punishes multi-hit decks. Every attack clogs your draw pile with Dazed cards.',
-        killOrder: 'One heavy hit per turn > many small. Hit on Swarm, block on Entangle. Poison/Doom bypass Dazed.'
+        strategy: 'Every hit you land adds Dazed (multi-hits add several). Beeeees! multiplies its Strength 7 times.',
+        killOrder: 'Few big hits, or Poison/Doom/Inferno damage that adds no Dazed. Thorns and Strength-down blunt Beeeees!.'
       },
       'Infested Prism': {
         type: 'Gimmick',
-        hp: '200 HP — Vital Spark',
+        hp: '161 HP (A9+: 171) — Vital Spark 2 (3)',
+        needs: {burstBlock:1, frontload:1},
         pattern: [
-          ['Attack4','Prism Blast: 20 dmg'],
-          ['Defend','Crystalize: +15 Block — skip attacking'],
-          ['Att+Defend','Shimmer: +5 Str + 15 Block'],
-          ['cycle','→ repeat cycle'],
-          ['power','Vital Spark: +1 energy first time you deal Attack damage each turn']
+          ['Attack4','Jab: 15 (17) dmg'],
+          ['Att+Defend','Radiate: 11 (13) dmg + 16 (18) Block'],
+          ['Attack3','Whirlwind: 5x3 (6x3)'],
+          ['Att+Defend','Pulsate: 8 (10) dmg + 20 (22) Block + more Vital Spark'],
+          ['cycle','→ fixed 4-move cycle'],
+          ['power','Vital Spark: all your Skills are Tainted (playing one costs you HP)']
         ],
-        strategy: 'Gives free energy for attacking. Cycle alternates damage and Block turns — timing matters.',
-        killOrder: 'Hit once per turn for +1 energy. Concentrate damage on Prism Blast. Use extra energy to scale.'
+        strategy: 'Punishes Skills: each Skill you play hurts you, and Pulsate makes it worse.',
+        killOrder: 'Block with Attacks/Powers that give Block. Prefer one expensive Skill over many cheap ones. Hit hard between Block turns.'
       }
     }
   },
@@ -807,100 +585,111 @@ const REGION_DATA = {
     bosses: {
       'The Queen': {
         type: 'Multi-Enemy',
-        hp: 'Queen 400 HP + Torch Head Amalgam 199 HP (Minion)',
+        hp: 'Queen 400 HP (A9+: 419) + Torch Head Amalgam 199 HP (A9+: 211, Minion)',
+        needs: {frontload:1, burstBlock:2, scaling:1},
         pattern: [
-          ['Debuff','Puppet Strings: Chain of Binding (Bound cards)'],
-          ['Debuff','You\'re Mine: 99 Frail/Weak/Vuln'],
-          ['Att+Defend','Burn Bright: +2 Str + def'],
-          ['Attack4','Off With Your Head: 25 dmg'],
-          ['Buff','Enrage: gain Str'],
-          ['cycle','→ repeat cycle'],
-          ['power','Chains of Binding: first X cards drawn each turn are Bound — cannot be played'],
+          ['Debuff','T1: Puppet Strings — 3 Chains of Binding'],
+          ['Debuff','T2: You\'re Mine — 99 Frail, Weak and Vulnerable'],
+          ['Defend','While the Amalgam lives: Burn Bright for Me — Amalgam +1 Str, Queen +20 Block'],
+          ['phase','↓ Amalgam dies → Queen enrages ↓'],
+          ['Attack4','Off with Your Head: 3x5 (4x5)'],
+          ['Attack3','Execution: 15 (18) dmg'],
+          ['Buff','Enrage: +2 Str'],
+          ['cycle','→ enraged loop: Off with Your Head → Execution → Enrage'],
+          ['power','Chains of Binding: the first 3 cards you draw each turn are Bound (only one Bound card per turn)'],
           ['divider'],
-          ['Attack3','Torch Head: Tackle — 18 dmg'],
-          ['Attack3','Torch Head: Beam — 14 dmg'],
-          ['power','Minion: Torch Head has 199 HP. Dies when reduced to 0. Queen exposed after']
+          ['Attack4','Amalgam: Strong Tackle 26 (32)'],
+          ['Attack3','Amalgam: Tackle 18 (22) · Weak Tackle 14 (16)'],
+          ['Attack3','Amalgam: Beam 8x3']
         ],
-        strategy: 'Queen hides behind Torch Head Amalgam. Applies Chains of Binding (can\'t play drawn cards) and mass debuffs.',
-        killOrder: 'Kill Amalgam first to expose Queen. After that, unload everything. Draw power offsets Bound cards.'
+        strategy: 'After turn 2 you are permanently Weak, Frail and Vulnerable, and Bound cards limit your hand. The Amalgam hits hard while the Queen shields; killing it enrages her.',
+        killOrder: 'Kill the Amalgam, then burst the Queen before her Enrage loop stacks. Blocks that ignore Frail (powers, Plating, Intangible) and extra draw both help a lot.'
       },
       'Aeonglass': {
         type: 'Attrition',
-        hp: 'Aeonglass ~450 HP',
+        hp: '512 HP (A9+: 535) — 3 Artifact',
+        needs: {scaling:2, statusClear:2, burstBlock:1},
         pattern: [
-          ['power','Withering Presence: generates Wither cards into player hand each turn'],
-          ['Status','Wither: shuffled into player hand. Each unplayed Wither deals damage at turn end'],
-          ['Debuff','Ebb: Aeonglass gains Block (v0.107 — no longer debuffs player)'],
-          ['Attack','Increasing Intensity: damage ramps each cycle']
+          ['Att+Defend','Ebb: 22 (26) dmg + 33 Block'],
+          ['Attack3','Eye Lasers: 11x2 (12x2)'],
+          ['Buff+Status','Increasing Intensity: 1 (2) Wither into discard, +2 (3) +X Str, upgrades all Wither'],
+          ['cycle','→ fixed 3-move cycle (X = times Increasing Intensity has been used)'],
+          ['power','Withering Presence: every 6 cards you play, a Wither goes into your hand']
         ],
-        strategy: 'Wither status cards pollute your hand and deal chip damage if unplayed. Exhaust engines clear them for free.',
-        killOrder: 'Clear Wither every turn. Consistent damage each cycle. Block Ebb turns. Burst during Increasing Intensity windows.'
+        strategy: 'Huge HP pool with 3 Artifact. Strength grows faster every cycle, and Wither cards keep clogging your deck.',
+        killOrder: 'You need real scaling. Exhaust Withers (Stoke, GUARDS!!!, Purity). Hit hardest on Eye Laser and Increasing Intensity turns — Ebb gives it 33 Block.'
       },
       'Test Subject #C8': {
         type: 'Phase-Shift',
-        hp: 'P2 revives 200 HP, P3 revives 300 HP',
+        hp: '100 HP (A9+: 111) → 200 (212) → 300 (313)',
+        needs: {frontload:1, burstBlock:2, scaling:2},
         pattern: [
-          ['phase','Phase 1: Enrage (dmg reduction + Str/turn)'],
-          ['power','Enrage: reduces incoming damage + gains Strength each turn'],
-          ['phase','↓ killed → revives with Painful Stabs ↓'],
-          ['Attack4','Phase 2: Multi-Claw — 3x9 (+1 hit/use)'],
-          ['power','Painful Stabs: Multi-Claw gains +1 hit each use (3→4→5→6 hits)'],
-          ['phase','↓ killed → revives with Intangibility ↓'],
-          ['Buff','Phase 3: Intangible — immune on alternating turns'],
-          ['power','Intangible: reduces damage from all sources to 1 (immune in practice)']
+          ['phase','Phase 1: Adaptable + Enrage 2 (3) — gains Str whenever you play a Skill'],
+          ['Attack4','Bite: 20 (22) dmg'],
+          ['Att+Debuff','Skull Bash: 14 (16) dmg + 1 Vulnerable'],
+          ['phase','↓ Revives with 200 HP, Painful Stabs, loses all buffs ↓'],
+          ['Attack4','Phase 2: Multi-Claw 10x3 (11x3) every turn, +1 hit each use'],
+          ['phase','↓ Revives with 300 HP, Nemesis ↓'],
+          ['Attack3','Phase 3: Lacerate 10x3 (11x3)'],
+          ['Attack4','Big Pounce: 45 dmg'],
+          ['Buff+Status','Burning Growl: 3 (5) Burns into discard, +2 (3) Str'],
+          ['cycle','→ Phase 3 repeats Lacerate → Big Pounce → Burning Growl']
         ],
-        strategy: 'Three-phase fight. Phase 1 ramps Enrage. Phase 2 ramps Multi-Claw hits. Phase 3 alternates Intangible.',
-        killOrder: 'Burst Phase 1. Kill Phase 2 fast before Claw ramps. Phase 3: attack non-Intangible turns only.'
+        strategy: '600 HP over three phases. Phase 1 punishes Skills, Phase 2 gets one more hit every turn, Phase 3 hits for 45.',
+        killOrder: 'Phase 1: attack-heavy turns. Phase 2: kill fast before Multi-Claw stacks. Phase 3: big block for Big Pounce, clear Burns.'
       }
     },
     elites: {
       'Knight Trio': {
         type: 'Multi-Enemy',
-        hp: 'Flail 101 HP, Spectral 93 HP, Magi 82 HP',
+        hp: 'Flail 101 HP (A9+: 108), Spectral 93 (97), Magi 82 (89)',
+        needs: {aoe:2, burstBlock:1, frontload:1},
         pattern: [
-          ['Defend','Magi: Power Shield — +12 Block'],
-          ['power','Dampen: weakens your powers (Magi Knight)'],
-          ['Attack2','Magi: Ram — 8 dmg'],
-          ['Attack4','Magi: Magic Bomb — 25 dmg'],
-          ['power','Magic Bomb: 25 dmg attack from Magi Knight'],
+          ['Debuff','Magi: Dampen — your cards are Downgraded while it lives'],
+          ['Att+Defend','Magi: Power Shield — 6 (7) dmg + 5 (9) Block'],
+          ['Attack2','Magi: Ram — 10 (11)'],
+          ['Defend','Magi: Prep — +5 (9) Block'],
+          ['Attack4','Magi: Magic Bomb — 35 (40)'],
           ['divider'],
-          ['Attack2','Spectral: Spectral Slash — 13 dmg'],
-          ['power','Hex: ALL your cards gain Ethereal while Spectral Knight is alive'],
-          ['Attack2','Spectral: Shadow Slash — 2x8'],
+          ['Debuff','Spectral: Hex'],
+          ['Attack3','Spectral: Soul Slash — 15 (17)'],
+          ['Attack2','Spectral: Soul Flame — 3x3 (4x3)'],
           ['divider'],
-          ['Attack3','Flail: Flail — 2x9'],
-          ['Attack3','Flail: Heavy Swing — 18 dmg']
+          ['Attack3','Flail: Ram — 15 (17), always first'],
+          ['Attack3','Flail: Flail — 9x2 (10x2)'],
+          ['Buff','Flail: Breaker — +3 Str (never twice in a row)']
         ],
-        strategy: 'Three enemies with different patterns. Hex is devastating — makes all cards Ethereal. Magic Bomb hits hard.',
-        killOrder: 'Kill Magi first (stops Dampen + Bomb). Then Spectral (drops Hex). Flail last. AoE hits all three.'
+        strategy: 'Three knights with different threats. Dampen downgrades your whole deck, and Magic Bomb hits for 35.',
+        killOrder: 'Kill Magi first (ends Dampen, no Bomb), then Spectral, then Flail. AoE hits all three.'
       },
       'Mecha Knight': {
         type: 'Gimmick',
-        hp: '300 HP — starts with 3 Artifact',
+        hp: '300 HP (A9+: 320) — 3 Artifact',
+        needs: {burstBlock:2, statusClear:1, scaling:1},
         pattern: [
-          ['Attack4','Charge: 25 dmg'],
-          ['Status','Flamethrower: 4 Burns to hand'],
-          ['Att+Defend','Windup: +15 Block +5 Str — skip attacking'],
-          ['Attack4','Heavy Cleave: 35 dmg'],
-          ['cycle','→ Charge → Flamethrower → Windup → Heavy Cleave → repeat'],
-          ['power','Artifact: 3 stacks — blocks first 3 debuffs completely'],
-          ['power','Burn: status card. 8 unblockable dmg if held at turn end']
+          ['Attack4','T1: Charge — 25 (30) dmg'],
+          ['Attack2+Status','Flamethrower: 4 Burns into your hand (+ 8 (12) dmg since v0.111)'],
+          ['Defend','Windup: +15 Block, +5 Str'],
+          ['Attack4','Heavy Cleave: 35 (40) dmg + Str'],
+          ['cycle','→ Flamethrower → Windup → Heavy Cleave → repeat'],
+          ['power','Artifact 3: blocks your first 3 debuffs']
         ],
-        strategy: 'Fixed cycle with clear telegraphs. Only attacks on Charge and Heavy Cleave. Burns punish holding cards.',
-        killOrder: 'Strip 3 Artifact with cheap debuffs. Attack Charge/Flamethrower. Skip Windup. Block Cleave. Clear Burns.'
+        strategy: 'Telegraphed cycle; Heavy Cleave gets 5 Strength more every cycle. Burns punish holding cards.',
+        killOrder: 'Strip Artifact with cheap debuffs. Damage on Flamethrower/Windup turns, full block on Heavy Cleave, play or exhaust Burns.'
       },
       'Soul Nexus': {
         type: 'Gimmick',
-        hp: '234 HP',
+        hp: '234 HP (A9+: 254)',
+        needs: {burstBlock:2, frontload:1},
         pattern: [
-          ['Attack4','T1: Soul Burn — 29 dmg (must block)'],
-          ['Attack4','Soul Burn: 29 dmg'],
-          ['Attack4','Maelstrom: 6x4 (best attack window)'],
-          ['Att+Debuff','Drain Life: 18 dmg + 2 Vuln + 2 Weak'],
-          ['note','Non-repeating random rotation. Drain Life debuffs stack each cycle.']
+          ['Attack4','T1: Soul Burn — 29 (31) dmg'],
+          ['Attack4','Soul Burn: 29 (31)'],
+          ['Attack4','Maelstrom: 6x4 (7x4)'],
+          ['Att+Debuff','Drain Life: 18 (19) + 2 Vulnerable + 2 Weak'],
+          ['note','After T1: random, never the same move twice in a row.']
         ],
-        strategy: 'Hardest elite opener (29 guaranteed). No repeat moves. Drain Life debuffs stack every cycle.',
-        killOrder: 'Block 29 on T1. Attack on Maelstrom turns. After Drain Life, block extra next turn.'
+        strategy: 'Opens with 29 damage, then random heavy attacks. Drain Life makes the following hit worse.',
+        killOrder: 'Block 29 on turn 1. Block extra the turn after Drain Life. Push damage on Maelstrom turns.'
       }
     }
   }
@@ -950,66 +739,5 @@ const ENGINES = {
     {name:'Star Burst engine',cards:['Stardust','Seven Stars','Black Hole','Glow'],note:'Stockpile Stars then unload. Black Hole + Glow = AoE per Star generation. Seven Stars = 7-hit nuke.'},
     {name:'Void Form engine',cards:['Void Form','Convergence','Comet'],note:'First 2 cards per turn are free. Comet (33 dmg, 5-star cost) becomes zero-cost bomb. Convergence retains hand.'},
     {name:'Bombardment engine',cards:['Bombardment','Meteor Shower','Gamma Blast'],note:'AoE via Star generation. Bombardment auto-plays from Exhaust pile. Meteor Shower hits all for 14.'}
-  ]
-};
-
-// RECOMMENDED_RELICS: Global relic recommendations per character
-// Maps to relicPriority fields in BUILD_DATA per build
-// Format: character -> array of {name:string, forBuild:string, reason:string}
-const RECOMMENDED_RELICS = {
-  ironclad: [
-    {name:'Vajra', forBuild:'Strength', reason:'+1 Strength each turn'},
-    {name:'Shuriken', forBuild:'Strength', reason:'+1 Str on 3-attack turn'},
-    {name:'Pen Nib', forBuild:'Strength', reason:'Doubles every 10th attack'},
-    {name:'Dead Branch', forBuild:'Exhaust', reason:'Infinite with Corruption'},
-    {name:'Charon\'s Saddle', forBuild:'Exhaust', reason:'Exhaust synergy'},
-    {name:'Magic Flower', forBuild:'Bloodletting', reason:'Better self-heal offset'},
-    {name:'Calipers', forBuild:'Block', reason:'Block retention'},
-    {name:'Tough Bandages', forBuild:'Block', reason:'Block on discard'},
-    {name:'Mark of Pain', forBuild:'Self-Wound', reason:'Status draw fuel with Evolve'},
-    {name:'Burning Blood', forBuild:'any', reason:'Core sustain for all builds'}
-  ],
-  silent: [
-    {name:'Shuriken', forBuild:'Shiv', reason:'+1 Str on multi-attack turns'},
-    {name:'Kunai', forBuild:'Shiv', reason:'+1 Dex on multi-attack turns'},
-    {name:'Pen Nib', forBuild:'Grand Finale', reason:'100 damage every other Finale'},
-    {name:'Tough Bandages', forBuild:'Sly', reason:'Block on discard triggers'},
-    {name:'Tingsha', forBuild:'Sly', reason:'Damage on discard triggers'},
-    {name:'Snecko Skull', forBuild:'Poison', reason:'Extra Poison per application'},
-    {name:'Twisted Funnel', forBuild:'Poison', reason:'Free Poison each combat'},
-    {name:'Ornamental Fan', forBuild:'Shiv', reason:'Block from attacks'},
-    {name:'Bag of Preparation', forBuild:'any', reason:'+2 draw turn 1'},
-    {name:'Runic Pyramid', forBuild:'any', reason:'Retain cards'}
-  ],
-  defect: [
-    {name:'Inserter', forBuild:'any', reason:'Extra orb slot each turn'},
-    {name:'Runic Capacitor', forBuild:'any', reason:'Start with +3 orb slots'},
-    {name:'Gold-Plated Cables', forBuild:'any', reason:'Dark/Lightning passives dual-hit'},
-    {name:'Symbiotic Virus', forBuild:'any', reason:'Free Dark orb start'},
-    {name:'Nuclear Battery', forBuild:'any', reason:'+1 Energy + Lightning start'},
-    {name:'Cracked Core', forBuild:'any', reason:'Default Lightning orb start'},
-    {name:'Data Disk', forBuild:'any', reason:'+1 Focus start'},
-    {name:'Orange Pellets', forBuild:'Frost', reason:'Clear Biased Cog debuff'},
-    {name:'Mummified Hand', forBuild:'Creative AI', reason:'Powers reduce costs'},
-    {name:'Snecko Eye', forBuild:'Claw', reason:'Randomize costs (0-cost overlap)'}
-  ],
-  necrobinder: [
-    {name:'Soul Crystal', forBuild:'Soul', reason:'Extra Soul generation'},
-    {name:'Osty Treat', forBuild:'Osty', reason:'+Osty HP gain'},
-    {name:'Grave Dust', forBuild:'Doom', reason:'Doom spreads on kill'},
-    {name:'Reaper\'s Scythe', forBuild:'Reaper', reason:'Amplify lifesteal'},
-    {name:'Burial Shroud', forBuild:'Osty', reason:'Osty protection'},
-    {name:'Necronomicon', forBuild:'any', reason:'Double first attack each turn'},
-    {name:'Snecko Eye', forBuild:'any', reason:'Randomize costs'},
-    {name:'Runic Pyramid', forBuild:'any', reason:'Retain key cards'}
-  ],
-  regent: [
-    {name:'Star Chart', forBuild:'Star Burst', reason:'+Star generation'},
-    {name:'Forge Hammer', forBuild:'Forge', reason:'Double Forge gains'},
-    {name:'Void Crystal', forBuild:'Void Form', reason:'+Void trigger value'},
-    {name:'Graviton Lens', forBuild:'Bombardment', reason:'AoE Star burst'},
-    {name:'Snecko Eye', forBuild:'Void Form', reason:'Randomize costs (Void Form free)'},
-    {name:'Runic Pyramid', forBuild:'Forge', reason:'Retain Sovereign Blade'},
-    {name:'Bag of Preparation', forBuild:'any', reason:'+2 draw T1'}
   ]
 };

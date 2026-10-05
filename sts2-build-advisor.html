@@ -631,20 +631,6 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
   </div>
 </div>
 
-<!-- Manually add card modal -->
-<div class="modal-overlay hidden" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Manually Add Card</span>
-      <button class="modal-close" onclick="closeModal()">&#x2716;</button>
-    </div>
-    <div class="modal-search">
-      <input type="text" id="modalSearch" placeholder="Search cards to add..." oninput="renderModalCards()">
-    </div>
-    <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
-
 <div id="bgAtmosphere" style="position:fixed;inset:0;z-index:-1;pointer-events:none;transition:opacity 1s ease"></div>
 <div id="bgActOverlay" style="position:fixed;inset:0;z-index:-1;pointer-events:none;transition:opacity .8s ease;background:transparent"></div>
 <canvas id="bgCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:-1;"></canvas>
@@ -657,13 +643,13 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 <script src="data/cards-regent.js?v=2"></script>
 <script src="data/cards-colorless.js?v=2"></script>
 <script src="data/cards.js"></script>
-<script src="data/constants.js?v=3"></script>
+<script src="data/constants.js?v=4"></script>
 <script src="data/builds.js?v=7"></script>
-<script src="data/bossTips.js?v=1"></script>
+<script src="data/bossTips.js?v=2"></script>
 <script src="core/state.js?v=2"></script>
-<script src="core/deckStats.js?v=5"></script>
+<script src="core/deckStats.js?v=6"></script>
 <script src="core/engineTracker.js?v=1"></script>
-<script src="core/rewardAdvisor.js?v=4"></script>
+<script src="core/rewardAdvisor.js?v=5"></script>
 <script src="core/storage.js?v=1"></script>
 <script>
 // Format card description with icon replacements — shared by popup and inline rendering
@@ -724,19 +710,17 @@ function formatCardDescription(desc) {
   return lines;
 }
 </script>
-<script src="ui/helpers.js?v=3"></script>
+<script src="ui/helpers.js?v=4"></script>
 <script src="ui/deckView.js?v=2"></script>
-<script src="ui/resultView.js?v=20"></script>
-<script src="ui/pickerView.js?v=15"></script>
-<script src="ui/modals.js?v=2"></script>
-<script src="ui/headerControls.js?v=10"></script>
+<script src="ui/resultView.js?v=21"></script>
+<script src="ui/pickerView.js?v=16"></script>
+<script src="ui/headerControls.js?v=11"></script>
 
 <script>
 // getCardTier, tierBadgeHtml, getCardTierNote moved to ui/helpers.js.
 // getAllCardsForPicker, getRarity, rarityBadgeHtml, rarityContext moved to ui/helpers.js.
 // calcDeckCycleTime, calcTurnsToEmpty moved to core/deckStats.js.
 // updateAscUI, updateActUI, updateGoldAdvice, renderBossAlert, setBoss, selectedBoss moved to ui/headerControls.js.
-// openModal, closeModal, renderModalCards moved to ui/modals.js.
 // toggleSafePicks, updatePriorityPanel, quickAddPriority, updateResult, renderDeckHealth, renderEngineTracker moved to ui/resultView.js.
 // safePicksOpen, pickerTab, rewardOffered, rewardBuildKey, rewardStage, and all picker render functions moved to ui/pickerView.js.
 

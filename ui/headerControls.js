@@ -14,7 +14,7 @@ const INTENT_ICONS = {
   Defend:   {icon:'🛡', label:'Defend', color:'#6090c0'},
   Status:   {icon:'∅', label:'Status', color:'#c08040'},
   Sleep:    {icon:'💤', label:'Asleep', color:'#808080'},
-  Stun:     {icon:'★', label:'Stun', color:'c0c060'},
+  Stun:     {icon:'★', label:'Stun', color:'#c0c060'},
   Heal:     {icon:'♥', label:'Heal', color:'#60c060'},
   ['Att+Buff']:   {icon:'⚔↑', label:'Atk+Buff', color:'#b09040'},
   ['Att+Debuff']: {icon:'⚔↓', label:'Atk+Debuff', color:'#b06080'},
@@ -162,13 +162,13 @@ function renderBossAlert() {
         const szp = getDeckSizeProfile();
         const total = getDeckSize();
         let insatWarnings = [];
-        if (axes && axes.vel < 30 && total > 4) {
-          insatWarnings.push(`\u26A0 Your velocity score is ${axes.vel}/100 \u2014 too low for this fight. You need consistent draw and energy to keep playing Frantic Escape cards before the Sandpit timer kills you.`);
+        if (axes && axes.Efficiency < 30 && total > 4) {
+          insatWarnings.push(`\u26A0 Your efficiency score is ${axes.Efficiency}/100 \u2014 too low for this fight. You need consistent draw and energy to keep playing Frantic Escape cards before the Sandpit timer kills you.`);
         }
         if (szp.zone === 'bloated' || szp.zone === 'danger') {
           insatWarnings.push(`\u26A0 Your deck has ${szp.total} cards. A large deck reduces your chances of drawing Frantic Escape each turn. Thin it before this fight.`);
         }
-        if (axes && axes.vel >= 40 && szp.zone === 'sweet') {
+        if (axes && axes.Efficiency >= 40 && szp.zone === 'sweet') {
           insatWarnings.push(`\u2714 Velocity looks adequate for this fight. Confirm you have energy generation \u2014 Frantic Escape costs scale up each play.`);
         }
         const drawCards = (DRAW_CARDS[currentChar]||[]).filter(n=>deck[n]);
@@ -218,96 +218,8 @@ function renderBossAlert() {
         }
 
         const deckTags = detectDeckArchetypes(deck);
+        html += renderNeedsMatchup(boss.needs, rd.color);
         if (deckTags.size > 0) {
-          const punishedBy = [];
-          const rewardedBy = [];
-          const tagMap = {
-            'heavy single-hit decks (Slippery wastes big swings)':['strength','block','forge'],
-            'slow decks':['poison','doom','ethereal'],
-            'slow scaling':['poison','doom','ethereal'],
-            'slow decks (Strength ramp + Wound pollution)':['poison','doom'],
-            'slow kills (Soul Siphon ruins stats)':['poison','doom','ethereal'],
-            'raw damage-reliant decks':['strength','forge'],
-            'card-heavy combos (Ringing = 1 card/turn)':['sly','shiv','claw'],
-            'pure burst (wasted in Intangible)':['strength','forge','starfall'],
-            'block-only (Beckons bypass block)':['block'],
-            'Strength-based decks':['strength'],
-            'Dex-based decks':['sly','shiv'],
-            'pure Poison (Sandpit resolves before tick)':['poison'],
-            'pure Poison/Doom (Intangible negates)':['poison','doom'],
-            'draw-heavy decks (Mind Rot / Sloth)':['sly'],
-            'high-energy-cost decks (Waste Away)':['big-deck'],
-            'low energy generation':['big-deck','poison'],
-            'low single-target damage':['shiv','poison','doom'],
-            'draw-starved decks (Bound locks cards)':[],
-            'card-dependent builds (Hunger drains energy)':['exhaust','infinite'],
-            'draw-heavy builds (Scrutiny stops draw)':['exhaust','infinite'],
-            'skill-reliant builds (Grasp blocks skills)':[],
-            'no compressed lethal':[],
-            'no-AoE decks':[],
-            'no facing control':[],
-            'single-target only':[],
-            'kill-and-done decks with no final-turn cushion':[],
-            'entering below 40 HP':[],
-            'slow Phase 1 (Enrage ramps)':[],
-            'wasteful turns in Phase 3 Intangible':['strength','forge','starfall'],
-          };
-          const rewardMap = {
-            'multi-hit (Shivs, Anger, Twin Strike)':['shiv','strength'],
-            'multi-hit to strip Plating':['shiv','sly'],
-            'Weak application':['silent','shiv'],
-            'fast cycling decks':['infinite','sly'],
-            'fast decks':['infinite','sly'],
-            'AoE (Whirlwind, Shockwave, Seven Stars)':['stars','strength'],
-            'Poison (ticks all 3)':['poison'],
-            'Poison, Doom, Shivs (bypass Str/Dex debuffs)':['poison','doom','shiv'],
-            'Poison (ticks regardless of debuffs)':['poison'],
-            'hard burst ignoring Followers':['strength','forge','starfall'],
-            'Silent Sly-discard hands':['sly'],
-            'Exhaust to clear Beckons':['exhaust'],
-            'Discard/cycle engines':['sly'],
-            'Plow threshold burst to stun':['strength','forge','starfall','infinite'],
-            'single big hit each turn':['strength','forge'],
-            'Strength stacking':['strength'],
-            'fast burst':['infinite','sly','claw'],
-            'high energy generation':['infinite','sly','orb'],
-            'draw-spam decks':['sly'],
-            '4+ cards per turn decks':['sly','infinite','claw'],
-            'burst that kills in 5-6 turns':['strength','forge','starfall','infinite'],
-            'consistent damage per turn':['poison','doom'],
-            'draw-independent builds':['block','strength'],
-            'balanced single-target':[],
-            'targeting cards to face the attacker':[],
-            'Silent/Defect high-tempo':['sly','orb'],
-            'fast Phase 1 kill':['strength','burst'],
-            'burst held for Phase 2':['starfall','forge'],
-            'sustain + patience for Phase 3 windows':['block','poison','doom'],
-            'compressed burst winning in each window':['infinite','starfall','forge'],
-            'Persistent DoT between phases':['poison','doom'],
-            'any damage type that carries through form changes':[],
-            'Wound-exhaust synergies':['exhaust'],
-          };
-          matrix.punishes.forEach(p => {
-            const tags = tagMap[p] || [];
-            const matched = tags.filter(t => deckTags.has(t));
-            if (matched.length > 0) punishedBy.push({text:p, tags:matched});
-          });
-          matrix.rewards.forEach(r => {
-            const tags = rewardMap[r] || [];
-            const matched = tags.filter(t => deckTags.has(t));
-            if (matched.length > 0) rewardedBy.push({text:r, tags:matched});
-          });
-          if (punishedBy.length > 0 || rewardedBy.length > 0) {
-            html += `<div style="margin-top:6px;padding:6px 8px;border:1px solid ${rd.color}30;border-radius:3px;background:${rd.color}08">`;
-            html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase">deck matchup</div>`;
-            if (rewardedBy.length > 0) {
-              html += `<div style="font-size:11px;color:var(--green-bright);margin-bottom:3px">\u2714 Your deck is favoured: <em>${rewardedBy.map(r=>r.tags.join('/')).join(', ')}</em></div>`;
-            }
-            if (punishedBy.length > 0) {
-              html += `<div style="font-size:11px;color:#c08060">\u26A0 Watch out \u2014 this boss punishes: <em>${punishedBy.map(p=>p.tags.join('/')).join(', ')}</em></div>`;
-            }
-            html += `</div>`;
-          }
           // Build-specific boss strategy tip \u2014 show BOSS_TIPS for detected build
           var buildTagNames = [];
           deckTags.forEach(function(t) {
@@ -375,4 +287,25 @@ function setBoss(name) {
   }
   renderBossAlert();
   autoSave();
+}
+
+// Deck vs fight demands (REGION_DATA needs): how many cards cover each one.
+function renderNeedsMatchup(needs, color) {
+  if (!needs || !currentChar || getDeckSize() === 0) return '';
+  var have = {};
+  Object.keys(deck).forEach(function(n) {
+    var f = findCard(n);
+    if (!f) return;
+    var r = rolesForNeeds(cardRoles(f.card));
+    Object.keys(needs).forEach(function(k) { if (r[k] >= 0.5) have[k] = (have[k] || 0) + deck[n]; });
+  });
+  var keys = Object.keys(needs).sort(function(a, b) { return needs[b] - needs[a]; });
+  var html = '<div style="margin-top:6px;padding:6px 8px;border:1px solid ' + color + '30;border-radius:3px;background:' + color + '08">';
+  html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:' + color + ';letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase">deck matchup</div>';
+  keys.forEach(function(k) {
+    var n = have[k] || 0, ok = n >= needs[k];
+    html += '<div style="font-size:11px;color:' + (ok ? 'var(--green-bright)' : '#c08060') + '">' + (ok ? '✔ ' : '⚠ ') +
+      NEED_LABELS[k] + (needs[k] >= 2 ? ' (key)' : '') + ': ' + n + ' card' + (n === 1 ? '' : 's') + '</div>';
+  });
+  return html + '</div>';
 }

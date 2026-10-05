@@ -90,7 +90,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "7 dmg + Channel 1 Lightning. Damage + Orb in one.",
-      "description": "Deal 7 damage. Channel 1 Lightning."
+      "description": "Deal 7 damage. Channel 1 Lightning.",
+      "tier": "A"
     },
     {
       "name": "Ball Lightning+",
@@ -100,6 +101,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Channel 1 Lightning.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Ball Lightning"
     },
@@ -110,7 +112,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "5 dmg per Orb channeled. Often 1-Energy 15+ damage.",
-      "description": "Deal 5 damage for each Channeled Orb."
+      "description": "Deal 5 damage for each Channeled Orb.",
+      "tier": "A"
     },
     {
       "name": "Barrage+",
@@ -120,6 +123,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 7 damage for each Channeled Orb.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Barrage"
     },
@@ -130,7 +134,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "0-cost. 3 dmg + 1 Vulnerable. Great Claw support.",
-      "description": "Deal 3 damage. Apply 1 Vulnerable."
+      "description": "Deal 3 damage. Apply 1 Vulnerable.",
+      "tier": "C"
     },
     {
       "name": "Beam Cell+",
@@ -140,6 +145,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 4 damage. Apply 2 Vulnerable.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Beam Cell"
     },
@@ -170,7 +176,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "7 Block + gain 1 Energy next turn. Block + energy banking.",
-      "description": "Gain 7 StS2 Intent Defend.png Block. Next turn, gain StS2 EnergyDefect.png."
+      "description": "Gain 7 StS2 Intent Defend.png Block. Next turn, gain StS2 EnergyDefect.png.",
+      "tier": "B"
     },
     {
       "name": "Charge Battery+",
@@ -180,6 +187,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 10 StS2 Intent Defend.png Block. Next turn, gain StS2 EnergyDefect.png.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Charge Battery"
     },
@@ -210,7 +218,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "6 dmg + Channel 1 Frost. Damage + Block Orb.",
-      "description": "Deal 6 damage. Channel 1 Frost."
+      "description": "Deal 6 damage. Channel 1 Frost.",
+      "tier": "B"
     },
     {
       "name": "Cold Snap+",
@@ -220,6 +229,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 9 damage. Channel 1 Frost.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Cold Snap"
     },
@@ -230,7 +240,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "7 dmg + draw 1 per unique Orb. Good draw engine.",
-      "description": "Deal 7 damage. Draw 1 card for each unique Orb you have."
+      "description": "Deal 7 damage. Draw 1 card for each unique Orb you have.",
+      "tier": "A"
     },
     {
       "name": "Compile Driver+",
@@ -240,6 +251,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Draw 1 card for each unique Orb you have.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Compile Driver"
     },
@@ -250,7 +262,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Channel 1 Frost + draw 1. Block Orb + draw.",
-      "description": "Channel 1 Frost. Draw 1 card."
+      "description": "Channel 1 Frost. Draw 1 card.",
+      "tier": "A"
     },
     {
       "name": "Coolheaded+",
@@ -260,6 +273,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Channel 1 Frost. Draw 2 cards.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Coolheaded"
     },
@@ -270,7 +284,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "9 dmg + 1 Focus this turn. Damage + Focus hybrid.",
-      "description": "Deal 9 damage. Gain 1 Focus this turn."
+      "description": "Deal 9 damage. Gain 1 Focus this turn.",
+      "tier": "D"
     },
     {
       "name": "Focused Strike+",
@@ -280,6 +295,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 11 damage. Gain 2 Focus this turn.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Focused Strike"
     },
@@ -290,7 +306,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "0-cost. 3 dmg + Weak if enemy attacking. Debuff/atk.",
-      "description": "Deal 3 damage. If the enemy intends to attack, apply 1 Weak."
+      "description": "Deal 3 damage. If the enemy intends to attack, apply 1 Weak.",
+      "tier": "C"
     },
     {
       "name": "Go for the Eyes+",
@@ -300,6 +317,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 4 damage. If the enemy intends to attack, apply 2 Weak.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Go for the Eyes"
     },
@@ -310,7 +328,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "4 dmg x3 + add Slimed to discard. Multi-hit attack.",
-      "description": "Deal 4 damage 3 times. Add a Slimed into your Discard Pile."
+      "description": "Deal 4 damage 3 times. Add a Slimed into your Discard Pile.",
+      "tier": "D"
     },
     {
       "name": "Gunk Up+",
@@ -320,6 +339,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 5 damage 3 times. Add a Slimed into your Discard Pile.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Gunk Up"
     },
@@ -330,7 +350,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "3 Block + return a discard card to hand. Exhaust. Retrieve Claw or Scrape.",
-      "description": "Gain 3 StS2 Intent Defend.png Block. Put a card from your Discard Pile into your Hand. Exhaust."
+      "description": "Gain 3 StS2 Intent Defend.png Block. Put a card from your Discard Pile into your Hand. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Hologram+",
@@ -340,6 +361,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 5 StS2 Intent Defend.png Block. Put a card from your Discard Pile into your Hand.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Hologram"
     },
@@ -370,7 +392,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "9 Block. Clean early block.",
-      "description": "Gain 9 StS2 Intent Defend.png Block."
+      "description": "Gain 9 StS2 Intent Defend.png Block.",
+      "tier": "C"
     },
     {
       "name": "Leap+",
@@ -380,6 +403,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 12 StS2 Intent Defend.png Block.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Leap"
     },
@@ -390,7 +414,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "4 Block + Channel Lightning next 2 turns. Delayed Orb setup.",
-      "description": "Gain 4 StS2 Intent Defend.png Block. At the start of the next 2 turns, Channel 1 Lightning."
+      "description": "Gain 4 StS2 Intent Defend.png Block. At the start of the next 2 turns, Channel 1 Lightning.",
+      "tier": "B"
     },
     {
       "name": "Lightning Rod+",
@@ -400,6 +425,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 7 StS2 Intent Defend.png Block. At the start of the next 2 turns, Channel 1 Lightning.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Lightning Rod"
     },
@@ -410,7 +436,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "10 dmg. Reduces to 0 cost when played. Claw synergy.",
-      "description": "Deal 11 damage. Reduce this card's cost to 0 StS2 EnergyDefect.png."
+      "description": "Deal 11 damage. Reduce this card's cost to 0 StS2 EnergyDefect.png.",
+      "tier": "D"
     },
     {
       "name": "Momentum Strike+",
@@ -420,6 +447,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 15 damage. Reduce this card's cost to 0 StS2 EnergyDefect.png.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Momentum Strike"
     },
@@ -430,7 +458,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Attack",
       "note": "6 AoE dmg + draw 1. Good early AoE.",
-      "description": "Deal 6 damage to ALL enemies. Draw 1 card."
+      "description": "Deal 6 damage to ALL enemies. Draw 1 card.",
+      "tier": "D"
     },
     {
       "name": "Sweeping Beam+",
@@ -440,6 +469,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 9 damage to ALL enemies. Draw 1 card.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Sweeping Beam"
     },
@@ -450,7 +480,8 @@ const DEFECT_CARDS = [
       "rarity": "common",
       "cardType": "Skill",
       "note": "Gain 2 Energy + add Void to discard. 0-cost energy burst.",
-      "description": "Gain StS2 EnergyDefect.pngStS2 EnergyDefect.png. Add a Void into your Discard Pile."
+      "description": "Gain StS2 EnergyDefect.pngStS2 EnergyDefect.png. Add a Void into your Discard Pile.",
+      "tier": "B"
     },
     {
       "name": "TURBO+",
@@ -460,6 +491,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain StS2 EnergyDefect.pngStS2 EnergyDefect.pngStS2 EnergyDefect.png. Add a Void into your Discard Pile.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "TURBO"
     },
@@ -490,7 +522,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Innate. 10 Block. Exhaust. Guaranteed early block.",
-      "description": "Innate. Gain 10 StS2 Intent Defend.png Block. Exhaust."
+      "description": "Innate. Gain 10 StS2 Intent Defend.png Block. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Boot Sequence+",
@@ -500,6 +533,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Innate. Gain 13 StS2 Intent Defend.png Block. Exhaust.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Boot Sequence"
     },
@@ -510,7 +544,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Lose 1 Orb slot. Gain 2 Strength + 2 Dexterity. Tradeoff scaling.",
-      "description": "Lose 1 Orb Slot. Gain 2 Strength. Gain 2 Dexterity."
+      "description": "Lose 1 Orb Slot. Gain 2 Strength. Gain 2 Dexterity.",
+      "tier": "C"
     },
     {
       "name": "Bulk Up+",
@@ -520,6 +555,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Lose 1 Orb Slot. Gain 3 Strength. Gain 3 Dexterity.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Bulk Up"
     },
@@ -530,7 +566,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Gain 2 Orb slots. More Orbs = more passive.",
-      "description": "Gain 2 Orb Slots."
+      "description": "Gain 2 Orb Slots.",
+      "tier": "A"
     },
     {
       "name": "Capacitor+",
@@ -540,6 +577,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Gain 3 Orb Slots.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Capacitor"
     },
@@ -550,7 +588,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Channel a random Orb. Consistent Orb generation.",
-      "description": "Channel 1 random Orb."
+      "description": "Channel 1 random Orb.",
+      "tier": "B"
     },
     {
       "name": "Chaos+",
@@ -560,6 +599,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Channel 2 random Orbs.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Chaos"
     },
@@ -570,7 +610,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Channel 1 Frost per enemy. Exhaust. Scales with enemies.",
-      "description": "Channel 1 Frost for each enemy. Exhaust."
+      "description": "Channel 1 Frost for each enemy. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Chill+",
@@ -580,6 +621,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Channel 1 Frost for each enemy.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Chill"
     },
@@ -590,7 +632,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "6 Block + transform Status cards in hand into Fuel. Status synergy.",
-      "description": "Gain 6 StS2 Intent Defend.png Block. Transform all Status cards in your Hand into Fuel."
+      "description": "Gain 6 StS2 Intent Defend.png Block. Transform all Status cards in your Hand into Fuel.",
+      "tier": "B"
     },
     {
       "name": "Compact+",
@@ -600,6 +643,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 7 StS2 Intent Defend.png Block. Transform all Status cards in your Hand into Fuel+.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Compact"
     },
@@ -610,7 +654,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Channel 1 Dark + trigger all Dark passive. Orb burst.",
-      "description": "Channel 1 Dark. Trigger the passive ability of all Dark Orbs."
+      "description": "Channel 1 Dark. Trigger the passive ability of all Dark Orbs.",
+      "tier": "A"
     },
     {
       "name": "Darkness+",
@@ -620,6 +665,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Channel 1 Dark. Trigger the passive ability of all Dark Orbs twice.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Darkness"
     },
@@ -630,7 +676,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Double your Energy. Exhaust. 0-cost explosive turn.",
-      "description": "Double your Energy. Exhaust."
+      "description": "Double your Energy. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Double Energy+",
@@ -640,6 +687,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Double your Energy. Exhaust.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Double Energy"
     },
@@ -672,7 +720,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "0-cost. 5 dmg. Draw 1 if played <3 cards this turn. Claw cycling.",
-      "description": "Deal 5 damage. If you have played fewer than 3 cards this turn, draw 1 card."
+      "description": "Deal 5 damage. If you have played fewer than 3 cards this turn, draw 1 card.",
+      "tier": "C"
     },
     {
       "name": "FTL+",
@@ -682,6 +731,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 6 damage. If you have played fewer than 4 cards this turn, draw 1 card.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "FTL"
     },
@@ -692,7 +742,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "First 0-cost Attack each turn returns to hand. Claw engine.",
-      "description": "The first time you play a 0 StS2 EnergyDefect.png Attack each turn, return it to your Hand."
+      "description": "The first time you play a 0 StS2 EnergyDefect.png Attack each turn, return it to your Hand.",
+      "tier": "D"
     },
     {
       "name": "Feral+",
@@ -702,6 +753,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "The first time you play a 0 StS2 EnergyDefect.png Attack each turn, return it to your Hand.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Feral"
     },
@@ -712,7 +764,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "13 Block + add 2 Wounds to discard. High block at a cost.",
-      "description": "Gain 13 StS2 Intent Defend.png Block. Add 2 Wounds into your Discard Pile."
+      "description": "Gain 13 StS2 Intent Defend.png Block. Add 2 Wounds into your Discard Pile.",
+      "tier": "D"
     },
     {
       "name": "Fight Through+",
@@ -722,6 +775,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 17 StS2 Intent Defend.png Block. Add 2 Wounds into your Discard Pile.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Fight Through"
     },
@@ -732,7 +786,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Cost 1. Channel 1 Plasma. Exhaust. Energy Orb generation.",
-      "description": "Channel 1 Plasma. Exhaust."
+      "description": "Channel 1 Plasma. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Fusion+",
@@ -742,6 +797,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Channel 1 Plasma.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Fusion"
     },
@@ -752,7 +808,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "6 Block + Channel 2 Frost. High block + double Orb.",
-      "description": "Gain 6 StS2 Intent Defend.png Block. Channel 2 Frost."
+      "description": "Gain 6 StS2 Intent Defend.png Block. Channel 2 Frost.",
+      "tier": "S"
     },
     {
       "name": "Glacier+",
@@ -762,6 +819,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 9 StS2 Intent Defend.png Block. Channel 2 Frost.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Glacier"
     },
@@ -772,7 +830,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "5 Block + Channel 1 Glass Orb. Block + unique Orb.",
-      "description": "Gain 5 StS2 Intent Defend.png Block. Channel 1 Glass."
+      "description": "Gain 5 StS2 Intent Defend.png Block. Channel 1 Glass.",
+      "tier": "B"
     },
     {
       "name": "Glasswork+",
@@ -782,6 +841,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 8 StS2 Intent Defend.png Block. Channel 1 Glass.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Glasswork"
     },
@@ -792,7 +852,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "End of turn: deal 6 AoE per Frost orb present. With Loop triggering Frost passive each turn and Glacier channeling 2 at once, Hailstorm becomes a passive AoE engine that fires every turn.",
-      "description": "At the end of your turn, if you have Frost, deal 6 damage to ALL enemies."
+      "description": "At the end of your turn, if you have Frost, deal 6 damage to ALL enemies.",
+      "tier": "C"
     },
     {
       "name": "Hailstorm+",
@@ -802,6 +863,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the end of your turn, if you have Frost, deal 8 damage to ALL enemies.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Hailstorm"
     },
@@ -856,7 +918,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "First Status drawn per turn draws 2 extra. Status engine.",
-      "description": "The first time you draw a Status card each turn, draw 2 cards."
+      "description": "The first time you draw a Status card each turn, draw 2 cards.",
+      "tier": "C"
     },
     {
       "name": "Iteration+",
@@ -866,6 +929,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "The first time you draw a Status card each turn, draw 3 cards.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Iteration"
     },
@@ -896,7 +960,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "10 dmg + 2 Weak + Channel 1 Dark. Multi-effect card.",
-      "description": "Deal 10 damage. Apply 1 Weak. Channel 1 Dark."
+      "description": "Deal 10 damage. Apply 1 Weak. Channel 1 Dark.",
+      "tier": "C"
     },
     {
       "name": "Null+",
@@ -906,6 +971,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 13 damage. Apply 2 Weak. Channel 1 Dark.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Null"
     },
@@ -916,7 +982,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Draw 2 + add Burn to discard. Draw at a cost.",
-      "description": "Draw 2 cards. Add a Burn into your Discard Pile."
+      "description": "Draw 2 cards. Add a Burn into your Discard Pile.",
+      "tier": "B"
     },
     {
       "name": "Overclock+",
@@ -926,6 +993,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 3 cards. Add a Burn into your Discard Pile.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Overclock"
     },
@@ -936,7 +1004,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "9 dmg twice + Channel 2 Glass. Damage + Orb.",
-      "description": "Deal 10 damage twice. Channel 2 Glass."
+      "description": "Deal 10 damage twice. Channel 2 Glass.",
+      "tier": "D"
     },
     {
       "name": "Refract+",
@@ -946,6 +1015,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 13 damage twice. Channel 2 Glass.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Refract"
     },
@@ -976,7 +1046,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Exhaust a card. Gain 2 Energy next turn. Exhaust + banking.",
-      "description": "Exhaust a card. Next turn, gain StS2 EnergyDefect.pngStS2 EnergyDefect.png."
+      "description": "Exhaust a card. Next turn, gain StS2 EnergyDefect.pngStS2 EnergyDefect.png.",
+      "tier": "D"
     },
     {
       "name": "Scavenge+",
@@ -986,6 +1057,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Exhaust a card. Next turn, gain StS2 EnergyDefect.pngStS2 EnergyDefect.pngStS2 EnergyDefect.png.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Scavenge"
     },
@@ -996,7 +1068,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "7 dmg + draw 4, discard non-0-cost. Key Claw cycling.",
-      "description": "Deal 7 damage. Draw 4 cards. Discard all cards drawn this way that do not cost 0 StS2 EnergyDefect.png."
+      "description": "Deal 7 damage. Draw 4 cards. Discard all cards drawn this way that do not cost 0 StS2 EnergyDefect.png.",
+      "tier": "D"
     },
     {
       "name": "Scrape+",
@@ -1006,6 +1079,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 10 damage. Draw 5 cards. Discard all cards drawn this way that do not cost 0 StS2 EnergyDefect.png.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Scrape"
     },
@@ -1016,7 +1090,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "11 Block + Channel 1 Dark. Block + Orb.",
-      "description": "Gain 11 StS2 Intent Defend.png Block. Channel 1 Dark."
+      "description": "Gain 11 StS2 Intent Defend.png Block. Channel 1 Dark.",
+      "tier": "B"
     },
     {
       "name": "Shadow Shield+",
@@ -1026,6 +1101,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 15 StS2 Intent Defend.png Block. Channel 1 Dark.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Shadow Shield"
     },
@@ -1036,7 +1112,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Draw 3. Key draw for Claw deck.",
-      "description": "Draw 3 cards."
+      "description": "Draw 3 cards.",
+      "tier": "B"
     },
     {
       "name": "Skim+",
@@ -1046,6 +1123,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Draw 4 cards.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Skim"
     },
@@ -1056,7 +1134,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Whenever you create a Status, deal 5 AoE. Status engine.",
-      "description": "Whenever you create a Status, deal 5 damage to ALL enemies."
+      "description": "Whenever you create a Status, deal 5 damage to ALL enemies.",
+      "tier": "D"
     },
     {
       "name": "Smokestack+",
@@ -1066,6 +1145,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you create a Status, deal 7 damage to ALL enemies.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Smokestack"
     },
@@ -1116,7 +1196,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "24 dmg. If fatal, gain 3 Energy. Execution finisher.",
-      "description": "Deal 26 damage. If this kills an enemy, gain StS2 EnergyDefect.pngStS2 EnergyDefect.pngStS2 EnergyDefect.png."
+      "description": "Deal 26 damage. If this kills an enemy, gain StS2 EnergyDefect.pngStS2 EnergyDefect.pngStS2 EnergyDefect.png.",
+      "tier": "C"
     },
     {
       "name": "Sunder+",
@@ -1126,6 +1207,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 34 damage. If this kills an enemy, gain StS2 EnergyDefect.pngStS2 EnergyDefect.pngStS2 EnergyDefect.png.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Sunder"
     },
@@ -1156,7 +1238,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "14 dmg. Next Power costs 0. Attack/Power bridge.",
-      "description": "Deal 14 damage. The next Power you play costs 0 StS2 EnergyDefect.png."
+      "description": "Deal 14 damage. The next Power you play costs 0 StS2 EnergyDefect.png.",
+      "tier": "D"
     },
     {
       "name": "Synthesis+",
@@ -1166,6 +1249,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 20 damage. The next Power you play costs 0 StS2 EnergyDefect.png.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Synthesis"
     },
@@ -1196,7 +1280,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Attack",
       "note": "3 dmg + trigger all Lightning against enemy. Orb dump.",
-      "description": "Deal 3 damage. Trigger all Lightning against the enemy."
+      "description": "Deal 3 damage. Trigger all Lightning against the enemy.",
+      "tier": "B"
     },
     {
       "name": "Tesla Coil+",
@@ -1206,6 +1291,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 4 damage. Trigger all Lightning against the enemy twice.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Tesla Coil"
     },
@@ -1216,7 +1302,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Power",
       "note": "Whenever Lightning Evokes, deal 6 to each enemy hit. Lightning payoff.",
-      "description": "Whenever you Evoke Lightning, deal 8 damage to each enemy hit."
+      "description": "Whenever you Evoke Lightning, deal 8 damage to each enemy hit.",
+      "tier": "C"
     },
     {
       "name": "Thunder+",
@@ -1226,6 +1313,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you Evoke Lightning, deal 11 damage to each enemy hit.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Thunder"
     },
@@ -1236,7 +1324,8 @@ const DEFECT_CARDS = [
       "rarity": "uncommon",
       "cardType": "Skill",
       "note": "Add a random free Power to hand. Exhaust. Wildcard.",
-      "description": "Add a random Power into your Hand. It's free to play this turn. Exhaust."
+      "description": "Add a random Power into your Hand. It's free to play this turn. Exhaust.",
+      "tier": "C"
     },
     {
       "name": "White Noise+",
@@ -1246,6 +1335,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Add a random Power into your Hand. It's free to play this turn. Exhaust.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "White Noise"
     },
@@ -1256,7 +1346,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "18 dmg. Adds a 0-cost copy to discard. Self-replicating attack.",
-      "description": "Deal 18 damage. Add a 0 StS2 EnergyDefect.png copy of this card into your Discard Pile."
+      "description": "Deal 18 damage. Add a 0 StS2 EnergyDefect.png copy of this card into your Discard Pile.",
+      "tier": "C"
     },
     {
       "name": "Adaptive Strike+",
@@ -1266,6 +1357,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 23 damage. Add a 0 StS2 EnergyDefect.png copy of this card into your Discard Pile.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Adaptive Strike"
     },
@@ -1276,7 +1368,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "10 dmg + return all 0-cost cards from discard to hand. Core Claw engine.",
-      "description": "Deal 10 damage. Put ALL 0 StS2 EnergyDefect.png cards from your Discard Pile into your Hand."
+      "description": "Deal 10 damage. Put ALL 0 StS2 EnergyDefect.png cards from your Discard Pile into your Hand.",
+      "tier": "S"
     },
     {
       "name": "All for One+",
@@ -1286,6 +1379,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 14 damage. Put ALL 0 StS2 EnergyDefect.png cards from your Discard Pile into your Hand.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "All for One"
     },
@@ -1296,7 +1390,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Prevent next HP loss. One-time shield.",
-      "description": "Prevent the next time you would lose HP."
+      "description": "Prevent the next time you would lose HP.",
+      "tier": "C"
     },
     {
       "name": "Buffer+",
@@ -1306,6 +1401,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Prevent the next 2 times you would lose HP.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Buffer"
     },
@@ -1316,7 +1412,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Channel 2 Dark. Evoke leftmost Orb at end of turn. Dark Orb engine.",
-      "description": "Channel 2 Dark. At the end of your turn, Evoke your leftmost Orb."
+      "description": "Channel 2 Dark. At the end of your turn, Evoke your leftmost Orb.",
+      "tier": "C"
     },
     {
       "name": "Consuming Shadow+",
@@ -1326,6 +1423,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Channel 3 Dark. At the end of your turn, Evoke your leftmost Orb.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Consuming Shadow"
     },
@@ -1336,7 +1434,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "At turn start, gain 2 Block per unique Orb. Passive block scaling.",
-      "description": "At the start of your turn, gain 2 StS2 Intent Defend.png Block for each unique Orb you have."
+      "description": "At the start of your turn, gain 2 StS2 Intent Defend.png Block for each unique Orb you have.",
+      "tier": "B"
     },
     {
       "name": "Coolant+",
@@ -1346,6 +1445,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, gain 3 StS2 Intent Defend.png Block for each unique Orb you have.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Coolant"
     },
@@ -1356,7 +1456,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "At turn start, add random Power to hand. Power generator.",
-      "description": "At the start of your turn, add a random Power into your Hand."
+      "description": "At the start of your turn, add a random Power into your Hand.",
+      "tier": "C"
     },
     {
       "name": "Creative AI+",
@@ -1366,6 +1467,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "At the start of your turn, add a random Power into your Hand.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Creative AI"
     },
@@ -1376,7 +1478,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Gain 1 Focus. Core Orb scaling. Take as many as possible.",
-      "description": "Gain 1 Focus."
+      "description": "Gain 1 Focus.",
+      "tier": "S"
     },
     {
       "name": "Defragment+",
@@ -1386,6 +1489,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Gain 2 Focus.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Defragment"
     },
@@ -1396,7 +1500,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Ethereal. First card played each turn is played twice.",
-      "description": "Ethereal. The first card you play each turn is played an extra time."
+      "description": "Ethereal. The first card you play each turn is played an extra time.",
+      "tier": "S"
     },
     {
       "name": "Echo Form+",
@@ -1406,6 +1511,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "The first card you play each turn is played an extra time.",
+      "tier": "S",
       "isUpgraded": true,
       "baseCard": "Echo Form"
     },
@@ -1416,7 +1522,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "Exhaust all Status cards. 8 dmg per card Exhausted. Status synergy.",
-      "description": "Exhaust ALL your Status cards. Deal 8 damage to a random enemy for each card Exhausted."
+      "description": "Exhaust ALL your Status cards. Deal 8 damage to a random enemy for each card Exhausted.",
+      "tier": "D"
     },
     {
       "name": "Flak Cannon+",
@@ -1426,6 +1533,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Exhaust ALL your Status cards. Deal 11 damage to a random enemy for each card Exhausted.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Flak Cannon"
     },
@@ -1436,7 +1544,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Gain 1 Block. Permanently +3 Block each time. Exhaust. Scaling block.",
-      "description": "Gain 1 StS2 Intent Defend.png Block. Permanently increase this card's StS2 Intent Defend.png Block by 3. Exhaust."
+      "description": "Gain 1 StS2 Intent Defend.png Block. Permanently increase this card's StS2 Intent Defend.png Block by 3. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Genetic Algorithm+",
@@ -1446,6 +1555,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 1 StS2 Intent Defend.png Block. Permanently increase this card's StS2 Intent Defend.png Block by 4. Exhaust.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Genetic Algorithm"
     },
@@ -1496,7 +1606,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "19 dmg + Channel 3 Frost. Massive attack + block Orbs.",
-      "description": "Deal 19 damage. Channel 3 Frost."
+      "description": "Deal 19 damage. Channel 3 Frost.",
+      "tier": "D"
     },
     {
       "name": "Ice Lance+",
@@ -1506,6 +1617,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 24 damage. Channel 3 Frost.",
+      "tier": "D",
       "isUpgraded": true,
       "baseCard": "Ice Lance"
     },
@@ -1538,7 +1650,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Draw 1 extra card per turn. Passive draw scaling.",
-      "description": "At the start of your turn, draw 1 additional card."
+      "description": "At the start of your turn, draw 1 additional card.",
+      "tier": "A"
     },
     {
       "name": "Machine Learning+",
@@ -1548,6 +1661,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Innate. At the start of your turn, draw 1 additional card.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Machine Learning"
     },
@@ -1558,7 +1672,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "24 dmg + Channel 3 Plasma. Massive Energy/Plasma source.",
-      "description": "Deal 24 damage. Channel 3 Plasma."
+      "description": "Deal 24 damage. Channel 3 Plasma.",
+      "tier": "C"
     },
     {
       "name": "Meteor Strike+",
@@ -1568,6 +1683,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 30 damage. Channel 3 Plasma.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Meteor Strike"
     },
@@ -1578,7 +1694,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Gain 1 Orb slot + draw 1. Card's cost increases each use.",
-      "description": "Gain 1 Orb Slot. Draw 1 card. Increase this card's cost by 1."
+      "description": "Gain 1 Orb Slot. Draw 1 card. Increase this card's cost by 1.",
+      "tier": "B"
     },
     {
       "name": "Modded+",
@@ -1588,6 +1705,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 1 Orb Slot. Draw 2 cards. Increase this card's cost by 1.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Modded"
     },
@@ -1598,7 +1716,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Evoke rightmost Orb X times. Core Orb nuke card.",
-      "description": "Evoke your rightmost Orb X times."
+      "description": "Evoke your rightmost Orb X times.",
+      "tier": "C"
     },
     {
       "name": "Multi-Cast+",
@@ -1608,6 +1727,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Evoke your rightmost Orb X+1 times.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Multi-Cast"
     },
@@ -1640,7 +1760,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Channel Lightning, Frost, and Dark. Exhaust. Three Orbs at once.",
-      "description": "Channel 1 Lightning. Channel 1 Frost. Channel 1 Dark. Exhaust."
+      "description": "Channel 1 Lightning. Channel 1 Frost. Channel 1 Dark. Exhaust.",
+      "tier": "C"
     },
     {
       "name": "Rainbow+",
@@ -1650,6 +1771,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Channel 1 Lightning. Channel 1 Frost. Channel 1 Dark.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Rainbow"
     },
@@ -1660,7 +1782,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Shuffle all cards to draw pile. Draw 4. Exhaust. Full hand reset.",
-      "description": "Shuffle ALL your cards into your Draw Pile. Draw 4 cards. Exhaust."
+      "description": "Shuffle ALL your cards into your Draw Pile. Draw 4 cards. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Reboot+",
@@ -1670,6 +1793,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Shuffle ALL your cards into your Draw Pile. Draw 6 cards. Exhaust.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Reboot"
     },
@@ -1680,7 +1804,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Attack",
       "note": "7 AoE dmg. Evoke all Orbs twice. Mass Evoke finisher.",
-      "description": "Deal 7 damage to ALL enemies. Evoke all of your Orbs twice. Exhaust."
+      "description": "Deal 7 damage to ALL enemies. Evoke all of your Orbs twice. Exhaust.",
+      "tier": "B"
     },
     {
       "name": "Shatter+",
@@ -1690,6 +1815,7 @@ const DEFECT_CARDS = [
       "cardType": "Attack",
       "note": "",
       "description": "Deal 11 damage to ALL enemies. Evoke all of your Orbs twice. Exhaust.",
+      "tier": "B",
       "isUpgraded": true,
       "baseCard": "Shatter"
     },
@@ -1700,7 +1826,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Next Power is played an extra time. Exhaust. Power doubler.",
-      "description": "The next Power you play is played an additional time. Exhaust."
+      "description": "The next Power you play is played an additional time. Exhaust.",
+      "tier": "C"
     },
     {
       "name": "Signal Boost+",
@@ -1710,6 +1837,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "The next Power you play is played an additional time. Exhaust.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Signal Boost"
     },
@@ -1720,7 +1848,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Channel 1 Glass Orb at turn start. Passive Orb generation.",
-      "description": "At the start of your turn, Channel 1 Glass."
+      "description": "At the start of your turn, Channel 1 Glass.",
+      "tier": "A"
     },
     {
       "name": "Spinner+",
@@ -1730,6 +1859,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Channel 1 Glass. At the start of your turn, Channel 1 Glass.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Spinner"
     },
@@ -1740,7 +1870,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Gain 4 Energy. Exhaust. Explosive one-time energy burst.",
-      "description": "Gain 4 StS2 EnergyDefect.png. Exhaust."
+      "description": "Gain 4 StS2 EnergyDefect.png. Exhaust.",
+      "tier": "A"
     },
     {
       "name": "Supercritical+",
@@ -1750,6 +1881,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Gain 6 StS2 EnergyDefect.png. Exhaust.",
+      "tier": "A",
       "isUpgraded": true,
       "baseCard": "Supercritical"
     },
@@ -1760,7 +1892,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Power",
       "note": "Whenever you create a Status, channel random Orb. Status/Orb engine.",
-      "description": "Whenever you create a Status, Channel 1 random Orb."
+      "description": "Whenever you create a Status, Channel 1 random Orb.",
+      "tier": "C"
     },
     {
       "name": "Trash to Treasure+",
@@ -1770,6 +1903,7 @@ const DEFECT_CARDS = [
       "cardType": "Power",
       "note": "",
       "description": "Whenever you create a Status, Channel 1 random Orb.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Trash to Treasure"
     },
@@ -1780,7 +1914,8 @@ const DEFECT_CARDS = [
       "rarity": "rare",
       "cardType": "Skill",
       "note": "Channel Lightning equal to Lightning already channeled. Exhaust. Lightning burst.",
-      "description": "Channel Lightning equal to the Lightning already Channeled this combat. Exhaust."
+      "description": "Channel Lightning equal to the Lightning already Channeled this combat. Exhaust.",
+      "tier": "C"
     },
     {
       "name": "Voltaic+",
@@ -1790,6 +1925,7 @@ const DEFECT_CARDS = [
       "cardType": "Skill",
       "note": "",
       "description": "Channel Lightning equal to the Lightning already Channeled this combat.",
+      "tier": "C",
       "isUpgraded": true,
       "baseCard": "Voltaic"
     },

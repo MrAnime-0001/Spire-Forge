@@ -4,7 +4,7 @@
 //   Lagavulin Matriarch, The Insatiable, Knowledge Demon, Kaiser Crab,
 //   The Queen, Aeonglass, Test Subject #C8
 //
-// Tips reference actual StS2 boss mechanics from REGION_DATA + BOSS_MATRIX.
+// Tips reference actual StS2 boss mechanics from REGION_DATA + BOSS_MATRIX (wiki data, v0.111).
 // General tip applies to all characters. Per-character tips add class-specific nuance.
 
 const BOSS_TIPS = {
@@ -13,30 +13,30 @@ const BOSS_TIPS = {
   // ================================================================
 
   'Vantom': {
-    general: 'Starts with 9 Slippery (1 dmg per hit). Multi-hit attacks strip Slippery stacks fast. Str +2/cycle makes Dismember (27 + 3 Wounds) lethal after 3rd cycle. Entering below 40 HP is lethal.',
-    ironclad: 'Heavy Blade/Whirlwind multi-hit strips Slippery. Second Wind and Burning Pact clear Wound pollution Dismember adds.',
-    silent: 'Shivs strip Slippery 3 stacks per play. Weak from Neutralize/Leg Sweep reduces Dismember damage to ~20. Prepared discards Wounds for free.',
-    defect: 'Lightning orbs strip 1 Slippery per hit — each orb bypasses the single-hit penalty. Claw spam strips Slippery fast. Scrape cycles through Wounds.',
-    regent: 'Seven Stars strips 7 Slippery stacks in one play. Forge scaling on Sovereign Blade outpaces Vantom\'s +2 Str/cycle. Convergence retains hand through Wound pollution.',
-    necrobinder: 'Doom ignores Slippery entirely — execute when Doom >= HP. Osty tanks Dismember easily. Souls draw 2 Exhaust to cycle past Wounds.'
+    general: '173 HP with 9 Slippery (each hit deals 1 and removes a stack). Cycle: Ink Blot 7 → Inky Lance 6x2 → Dismember 27 + 3 Wounds → Prepare +2 Str. Kill before the 3rd Dismember.',
+    ironclad: 'Whirlwind/Conflagration multi-hits strip Slippery. Inferno ticks remove a stack every turn. Stoke and Burning Pact clear the Wounds Dismember adds.',
+    silent: 'Shivs strip Slippery 1 stack per Shiv. Even small Poison removes a stack per turn (Accelerant: more). Weak from Neutralize/Leg Sweep softens Dismember. Prepared discards Wounds.',
+    defect: 'Lightning orbs strip 1 Slippery per hit. Claw spam strips Slippery fast. Scrape cycles through Wounds.',
+    regent: 'Seven Stars strips 7 Slippery stacks in one play. Lunar Blast multi-hits. Forge scaling on Sovereign Blade outpaces Vantom\'s +2 Str/cycle.',
+    necrobinder: 'Doom ignores Slippery entirely — execute when Doom >= HP. Osty soaks Dismember. Souls (draw 2, Exhaust) cycle past Wounds.'
   },
 
   'The Kin': {
-    general: 'Priest (190 HP) with 2 Followers (47-54 HP). Fight ends when Priest dies — Followers flee. Dark Ritual gives +6 Str/turn. AoE hits all three.',
-    ironclad: 'Whirlwind/Immolate AoE pressures Followers while damaging Priest. Shockwave applies Vulnerable to all three. Heavy Blade focuses Priest through Followers.',
-    silent: 'Corpse Explosion kills Followers when Priest dies — no cleanup needed. Dagger Spray AoE. Poison ticks all three enemies.',
-    defect: 'Electrodynamics makes Lightning orbs hit all three every turn. Hyperbeam clears everything at once. Focus Priest with multi-target orbs.',
-    regent: 'Seven Stars hits all three. Gamma Blast AoE wave. Sovereign Blade singles out Priest while Star generators keep Followers busy.',
-    necrobinder: 'The Scythe AoE hits all three. Doom on Priest — once executed Followers flee regardless of their Doom count. Rattle multi-hit on all.'
+    general: 'Priest (190 HP) + 2 Followers (58-59 HP). All three gain Strength; Priest applies Weak and Frail. The fight ends when the Priest dies — Followers flee.',
+    ironclad: 'Whirlwind/Conflagration AoE pressures all three while you focus the Priest. Feel No Pain block ignores Frail. Flame Barrier punishes their many small hits.',
+    silent: 'Dagger Spray and Haze hit all three. Poison and No Escape ignore Weak. Focus the Priest — no Follower cleanup needed.',
+    defect: 'Hyperbeam clears all three at once. Frost orb block ignores Frail. Focus the Priest with single-target orbs.',
+    regent: 'Seven Stars and Astral Pulse hit all three. Gamma Blast AoE wave. Sovereign Blade singles out the Priest.',
+    necrobinder: 'The Scythe AoE hits all three. Doom on the Priest — once it dies the Followers flee. Rattle multi-hits.'
   },
 
   'Ceremonial Beast': {
-    general: '252 HP, must cross 150 HP threshold to trigger stun + Str reset. Phase 2 Rasps (Ringing: 1 card/turn). Phase 1 gives +2 Str each Plow turn.',
-    ironclad: 'Heavy Blade burst past 150 HP to trigger stun. Barricade+Body Slam is perfect for Phase 2 — one card, massive damage every turn.',
-    silent: 'Catalyst multiplies Poison into one huge hit to cross 150 threshold. In Phase 2, Accuracy-boosted Shiv makes each single card count.',
-    defect: 'Dark Orb stores damage then Multi-Cast bursts past 150. Hyperbeam single hit crosses threshold. Frost passive block helps in Phase 2 restricted turns.',
-    regent: 'Seven Stars is one card with massive burst for the threshold. Sovereign Blade forge turns each Phase 2 turn into scaling value.',
-    necrobinder: 'Doom on Beast — it executes regardless of Phase transitions. Osty banks HP through both phases. One big Grave Warden turn crosses 150.'
+    general: '252 HP. Phase 1: Plow 18 dmg +2 Str every turn. Dropping it to 150 HP stuns it and wipes its Strength. Phase 2: Beast Cry (Ringing: 1 card that turn) → Stomp 15 → Crush 17 +3 Str.',
+    ironclad: 'Bludgeon and Strength burst reach the 150 threshold fast. Barricade+Body Slam is perfect for Phase 2 — one card, big damage on Ringing turns.',
+    silent: 'Stack Poison (Accelerant doubles ticks) to reach the threshold. On Ringing turns play your single best card.',
+    defect: 'Multi-Cast and Hyperbeam burst past 150. Frost passive block covers Ringing turns.',
+    regent: 'Seven Stars is one card with massive burst for the threshold. Sovereign Blade makes each Ringing turn count.',
+    necrobinder: 'Doom on the Beast works through both phases. Osty banks HP. One big Grave Warden turn crosses 150.'
   },
 
   // ================================================================
@@ -44,32 +44,30 @@ const BOSS_TIPS = {
   // ================================================================
 
   'Waterfall Giant': {
-    general: '240 HP, accumulates Steam Eruption each turn. On death, becomes invulnerable then explodes for accumulated damage (~30-40). Save 30+ block for kill turn.',
-    ironclad: 'Demon Form scales damage past the fight duration. Impervious (30 block) perfectly covers the death explosion. Second Wind blocks through the explosion.',
-    silent: 'Poison bypasses the invulnerability during death sequence — Poison ticks kill through it. Catalyst burst before explosion ends it clean. Backflip+Leg Sweep for block.',
-    defect: 'Frost orbs provide passive block that carries through the explosion. Dark Orb/Multi-Cast burst bypasses invulnerability. Glacier channels 2 Frost orbs for block.',
-    regent: 'Save 30+ block via Bulwark/Bodyguard. Sovereign Blade forge scales through the fight duration. Void Form free plays save energy for block.',
-    necrobinder: 'Doom bypasses the death invulnerability — execute as normal. Osty absorbs the explosion entirely. Dirge heals you back after explosion damage.',
-    // No boss gives poison
+    general: '240 HP. Heals 15 with Siphon; Pressure Gun grows +5 each use. Stores Steam Eruption all fight — after the kill it turns invulnerable and Explodes for the stored amount next turn. Keep a big block for that turn.',
+    ironclad: 'Demon Form scales through the long fight. Impervious covers the explosion. Second Wind blocks through it.',
+    silent: 'Poison keeps ticking for steady damage through the heals. Backflip and Leg Sweep for the explosion turn.',
+    defect: 'Frost orbs give passive block that carries through the explosion. Glacier channels 2 Frost. Hyperbeam burst.',
+    regent: 'Save a big block via Bulwark/Bodyguard. Sovereign Blade forge scales through the fight. Void Form free plays save energy for block.',
+    necrobinder: 'A Doom kill with no Steam Eruption stored skips the explosion. Osty absorbs the blast. Dirge heals you back.'
   },
 
   'Soul Fysh': {
-    general: '211 HP. Beckon deals 6 dmg if held at turn end. Fade grants Intangible that fades on your turn — skip attacking during Fade. Clear Beckons every turn.',
-    ironclad: 'True Grit/Burning Pact exhausts Beckons from hand. Fiend Fire can dump entire hand. Feel No Pain generates block when exhausting Beckons.',
-    silent: 'Discard engine (Prepared, Calculated Gamble, Acrobatics) clears Beckons from hand. Afterimage triggers block on each Beckon played or discarded. Don\'t attack Fade turns.',
-    defect: 'Coolheaded clears Beckons while channeling Frost. Scrape cycles through Beckons. Hologram retrieves your key cards from discard.',
-    regent: 'Void Form free plays offset the energy waste on clearing Beckons. Glow draws past Beckons. Convergence lets you hold key cards through Beckon clutter.',
-    necrobinder: 'Souls are 0-cost draw 2 Exhaust — perfect for cycling past Beckons. Osty ignores Beckon chip damage. Haunt deals unblockable damage through Fade.'
+    general: '211 HP. Cycle: Beckon (2 Beckons) → De-Gas 16 → Gaze 7 + Beckon → Fade (Intangible) → Scream 13 + 3 Vulnerable. Clear Beckons and don\'t waste burst on Fade turns.',
+    ironclad: 'True Grit/Burning Pact exhaust Beckons. Fiend Fire dumps a cluttered hand. Feel No Pain turns each exhausted Beckon into block.',
+    silent: 'Discard engine (Prepared, Calculated Gamble, Acrobatics) clears Beckons. Afterimage gives block per card played. Hold attacks on Fade turns.',
+    defect: 'Coolheaded draws past Beckons while channeling Frost. Scrape cycles through them. Hologram fetches key cards back.',
+    regent: 'Void Form free plays offset energy spent on Beckons. Glow draws past them. Convergence holds key cards.',
+    necrobinder: 'Souls (draw 2, Exhaust) cycle past Beckons. Osty soaks chip damage. Haunt deals damage through Fade.'
   },
 
   'Lagavulin Matriarch': {
-    general: '222 HP, 12 Plating, 3 free turns (Asleep). Soul Siphon permanently reduces Str AND Dex each cycle. Kill before 2nd Soul Siphon. Multi-hit strips Plating during sleep.',
-    ironclad: 'Use 3 free turns for Demon Form/Inflame/Offering setup. Whirlwind multi-hit strips Plating. Heavy Blade benefits from setup Strength before wake.',
-    silent: 'Use free turns for Noxious Fumes/Catalyst setup. Shivs strip Plating. Poison bypasses Str/Dex debuffs entirely. Weak is unaffected by Dex loss.',
-    defect: 'Use 3 free turns for Defragment/Loop/Echo Form. Orb damage bypasses Str/Dex debuffs — Lightning/Frost deal full damage regardless of Soul Siphon.',
-    regent: 'Free turns are perfect for Forge setup (Sword Sage, Seeking Edge). Sovereign Blade forge damage is unaffected by Str debuff. Alignment generates Stars.',
-    necrobinder: 'Doom bypasses Soul Siphon debuffs entirely — execute threshold ignores your Str. Osty tanking unaffected by your Dex. Use free turns for Capture Spirit/Dirge.',
-    // All
+    general: '222 HP, 12 Plating, asleep for 3 turns (or until it takes unblocked damage). Each Soul Siphon permanently removes 2 Str and 2 Dex from you. Kill before the 2nd Soul Siphon.',
+    ironclad: 'Use the 3 free turns for Demon Form/Inflame/Offering. Favour big single hits (Bludgeon) and big single blocks (Impervious) — Soul Siphon hurts multi-hits most.',
+    silent: 'Free turns for Noxious Fumes and Footwork setup. Poison ignores the Strength loss. Big Dex-based blocks lose value after each Siphon.',
+    defect: 'Free turns for Defragment/Loop/Echo Form. Orb damage and orb block ignore the Str/Dex loss completely.',
+    regent: 'Free turns are perfect for Forge setup (Sword Sage, Seeking Edge). Sovereign Blade forge damage ignores the Strength loss.',
+    necrobinder: 'Doom ignores the Str/Dex loss. Osty blocks regardless of your Dex. Use the free turns for Capture Spirit/Dirge.'
   },
 
   // ================================================================
@@ -77,30 +75,30 @@ const BOSS_TIPS = {
   // ================================================================
 
   'The Insatiable': {
-    general: '321 HP + Sandpit (4-turn death countdown). Frantic Escape extends timer by 1, energy cost +1 each use. Must draw and play one every single turn. Energy generation is survival.',
-    ironclad: 'Corruption makes Frantic Escapes free (they are Skills). Offering/Bloodletting provide the energy to afford escalating Escape costs. Demon Form scaling between Escapes.',
-    silent: 'Adrenaline/Tactician provide the energy. Master Planner puts Escape on top of draw pile so you always have it. Calculated Gamble cycles to find Escape.',
-    defect: 'Turbo/Double Energy fuel the escalating Escape cost. Echo Form gives double value per turn. Hologram retrieves discarded Escapes from the exhaust pile.',
-    regent: 'Void Form makes Escapes completely free. Convergence retains hand to guarantee you always have an Escape. Alignment generates Stars for burst windows.',
-    necrobinder: 'Borrowed Time gives +4 energy to pay escalating Escape costs. Graveblast retrieves key cards. Osty tanks Lunging Bite and Thrash while you cycle for Escapes.'
+    general: '321 HP. Opens with 4 Sandpit and 6 Frantic Escapes. Play Frantic Escapes to push back Sandpit, or you die. Cycle: Thrash 8x2 → Lunging Bite 28 → Salivate +2 Str → Thrash. Draw and energy are survival.',
+    ironclad: 'Corruption makes Frantic Escapes free (they are Skills). Offering/Bloodletting give the energy. Demon Form scales between Escapes.',
+    silent: 'Adrenaline/Tactician provide the energy. Calculated Gamble cycles to find Escapes.',
+    defect: 'TURBO/Double Energy fuel the Escape costs. Echo Form doubles value per turn.',
+    regent: 'Void Form makes Escapes free. Convergence retains hand to guarantee an Escape. Alignment generates Stars for burst windows.',
+    necrobinder: 'Borrowed Time gives energy for Escapes. Graveblast retrieves key cards. Osty tanks Lunging Bite while you cycle.'
   },
 
   'Knowledge Demon': {
-    general: '379 HP. Choose curse per cycle: Disintegration (6-8 dmg/turn ramping), Mind Rot (-1 draw/turn), Sloth (max 3 cards/turn), Waste Away (-1 energy/turn). Burst kill in 5-6 turns.',
-    ironclad: 'Burst build kills in 5-6 turns — take Mind Rot/Sloth (least harmful for short fight). Corruption+FNP handles Disintegration chip damage. Fiend Fire for burst.',
-    silent: 'Poison bypasses all curse effects — damage keeps ticking. Take Waste Away (least harmful to 0-cost poison cards). Malaise applies Weak through all phases.',
-    defect: 'Echo Form compensates for Sloth by doubling value per play. Frost orbs provide passive block through Disintegration. Defragment scales through resource curses.',
-    regent: 'Sovereign Blade is draw-independent — counters Mind Rot gracefully. Void Form free plays counter Waste Away. Take Sloth (only limits 3, still enough with active scaling).',
-    necrobinder: 'Doom executes regardless of curses — timer keeps ticking. Osty tanks Disintegration damage. Souls cycle past Mind Rot draw reduction.'
+    general: '379 HP; heals 30 and gains Str every cycle. Cycle: Curse of Knowledge (pick Disintegration 6/7/8 dmg per turn OR Mind Rot / Sloth / Waste Away) → Slap 17 → 8x3 → Ponder. Needs real scaling.',
+    ironclad: 'Demon Form and Strength scaling outpace the heals. Corruption+Feel No Pain handles Disintegration chip damage. Fiend Fire for burst.',
+    silent: 'Poison keeps ticking through every curse. Waste Away hurts least with 0-cost cards. Malaise cuts its Strength.',
+    defect: 'Echo Form compensates for Sloth. Frost orbs block through Disintegration. Defragment scales through resource curses.',
+    regent: 'Sovereign Blade is draw-independent — counters Mind Rot. Void Form free plays counter Waste Away.',
+    necrobinder: 'Doom executes regardless of curses and heals. Osty tanks Disintegration damage. Souls cycle past Mind Rot.'
   },
 
   'Kaiser Crab': {
-    general: 'Crusher Claw (209 HP) + Rocket Claw (199 HP). Rocket is the faster scaler (+2 Str/turn). Surrounded: 50% more damage from un-faced target. Kill Rocket first, then both near-simultaneously.',
-    ironclad: 'Whirlwind hits both claws simultaneously. Heavy Blade focuses Rocket Claw first. Block the faced claw each turn while damaging the other.',
-    silent: 'Poison ticks both claws at once — ideal for balanced damage. Corpse Explosion finishes surviving claw when other dies. Dagger Spray hits both.',
-    defect: 'Electrodynamics lightning hits both every turn — perfect for this fight. Loop defragment to scale all damage sources. Hyperbeam burst when timing is right.',
-    regent: 'Seven Stars hits both claws. Burst alignment for near-simultaneous kill. Stardust damages both consistently. Black Hole AoE.',
-    necrobinder: 'The Scythe AoE hits both. Doom on both claws — they execute at their own pace, avoiding Crab Rage by killing both same turn. Rattle multi-taps both.'
+    general: 'Crusher (209 HP) + Rocket (199 HP). Rocket\'s Laser hits 31; Crusher\'s Bug Sting applies Weak and Frail. Surrounded: +50% damage from the claw behind you. Crab Rage: the survivor gains 6 Str + 99 Block — finish both close together.',
+    ironclad: 'Whirlwind hits both claws. Bludgeon finishes the second claw before Crab Rage matters. Block hardest before Laser.',
+    silent: 'Poison ticks on both claws at once — ideal for balanced damage. Dagger Spray hits both.',
+    defect: 'Lightning orbs and Hyperbeam pressure both claws. Loop/Defragment scale all damage sources.',
+    regent: 'Seven Stars hits both claws. Stardust damages both consistently. Black Hole AoE.',
+    necrobinder: 'The Scythe AoE hits both. Doom on both claws lets them die close together. Rattle multi-hits.'
   },
 
   // ================================================================
@@ -108,30 +106,30 @@ const BOSS_TIPS = {
   // ================================================================
 
   'The Queen': {
-    general: 'Torch Head Amalgam (199 HP minion) + Queen (400 HP). Chains of Binding: first X cards drawn are Bound (can\'t play). Mass debuffs (99 Frail/Weak/Vuln). Kill Torch Head first to expose Queen.',
-    ironclad: 'Evolve draws past Bound cards. Feel No Pain + Dark Embrace generates value from everything. Offering gives burst draw to offset Bound. FNP blocks chip through debuffs.',
-    silent: 'Adrenaline/Tools of the Trade provide consistent draw despite Bound cards. Poison bypasses Queen\'s mass debuffs — damage unaffected by Frail/Vuln. Afterimage blocks hits.',
-    defect: 'Creative AI generates powers that bypass Bound cards. Frost orbs provide passive block unaffected by debuffs. Defragment scales Focus through Frail. Echo Form for value.',
-    regent: 'Void Form free plays offset Bound cards — play what you can. Sovereign Blade forge outscales the fight duration. Star generators work through Chains.',
-    necrobinder: 'Souls draw 2 Exhaust — circumvent Bound by Exhausting them. Osty tanks all damage through debuffs. Doom on Queen ignores her massive HP pool\'s defenses.'
+    general: 'Queen (400 HP) + Torch Head Amalgam (199 HP). T1: 3 Chains of Binding (first 3 cards drawn are Bound). T2: 99 Frail/Weak/Vulnerable. Kill the Amalgam, then the Queen enrages: 3x5 → 15 → +2 Str.',
+    ironclad: 'Offering and Battle Trance draw past Bound cards. Feel No Pain + Dark Embrace block ignores Frail. Barricade keeps block across turns.',
+    silent: 'Adrenaline/Tools of the Trade keep drawing past Bound cards. Poison damage ignores your Weak. Afterimage blocks ignore Frail.',
+    defect: 'Frost orbs give block that ignores Frail. Creative AI makes powers. Defragment scales Focus. Echo Form for value.',
+    regent: 'Void Form free plays offset Bound cards. Sovereign Blade forge outscales the fight. Star generators work through Chains.',
+    necrobinder: 'Souls (draw 2, Exhaust) cycle past Bound cards. Osty blocks regardless of Frail. Doom on the Queen ignores her Block.'
   },
 
   'Aeonglass': {
-    general: '~450 HP. Shuffles Wither status cards into your hand — each unplayed Wither deals damage. Withering Presence generates more Wither each turn. Ebb move: Aeonglass gains Block. Increasing Intensity ramps damage.',
-    ironclad: 'Corruption makes Wither cards free Skills — clear them instantly. Second Wind exhausts Wither for Block. Fiend Fire dumps a hand full of Wither for burst damage.',
-    silent: 'Calculated Gamble discards full hand of Wither in one play. Exhaust effects (True Grit, Burning Pact) clear Wither without paying for them. Poison ticks regardless of Wither clutter.',
-    defect: 'Coolheaded/orb channeling lets you skip playing Wither (orbs deal damage passively). Scrape cycles through Wither. Frost passive block tanks Wither chip hits.',
-    regent: 'Void Form free plays offset Wither cost. Convergence retains key cards through Wither pollution. Star burst on Increasing Intensity turns.',
-    necrobinder: 'Souls (draw 2 Exhaust) clear Wither from hand efficiently. Osty tanks Wither chip damage. Doom ticks regardless of Wither hand pollution.'
+    general: '512 HP, 3 Artifact. Cycle: Ebb 22 + 33 Block → Eye Lasers 11x2 → Increasing Intensity (Wither + growing Strength). Every 6 cards you play adds a Wither to your hand. You need real scaling.',
+    ironclad: 'Stoke and Burning Pact exhaust Wither. Corruption makes Wither-clearing free. Demon Form scaling keeps up with its Strength.',
+    silent: 'Calculated Gamble discards a hand of Wither (they come back on shuffle). Poison ignores its Block on Ebb turns.',
+    defect: 'Orbs deal damage without playing cards (fewer Withering Presence triggers). Frost passive block tanks Ebb and Eye Lasers.',
+    regent: 'GUARDS!!! exhausts Wither. Void Form free plays offset Wither cost. Star burst on non-Ebb turns.',
+    necrobinder: 'Souls (draw 2, Exhaust) clear Wither from hand. Osty tanks chip damage. Doom ticks regardless of Wither.'
   },
 
   'Test Subject #C8': {
-    general: 'Phase 1: Enrage (dmg reduction + Str/turn) — burst fast. Phase 2 revives 200 HP with Multi-Claw (ramps +1 hit/use). Phase 3 revives 300 HP with Intangible (immune alternating turns).',
-    ironclad: 'Burst Phase 1 before Enrage piles up. Impervious + Second Wind for Phase 2 ramp. In Phase 3, skip Intangible turns and unload on gaps. Strength scaling wins all three phases.',
-    silent: 'Poison bypasses Phase 1 dmg reduction. Wraith Form nullifies Phase 2 Multi-Claw ramp entirely. In Phase 3, Shiv on Intangible-turn (to stack Accuracy) and burst on gaps.',
-    defect: 'Dark Orb scaling ignores Phase 1 dmg reduction (stores damage passively). Frost block holds Phase 2 claws. Echo Form doubles all value in Phase 3 playable windows.',
-    regent: 'Sovereign Blade forge scaling carries through all three phases. Void Form free plays shine in Phase 3 Intangible — efficient turns. Seven Stars burst in Phase 2 window.',
-    necrobinder: 'Doom executes regardless of Phase transitions — same threshold applies. Osty tanks Phase 2 claws. In Phase 3, wait for non-Intangible turns then execute. Souls cycle past Intangible stall.'
+    general: 'Phase 1 (100 HP): Enrage — gains Str whenever you play a Skill; Bite 20 / Skull Bash 14 + Vuln. Phase 2 (200 HP): Multi-Claw 10x3, +1 hit every turn. Phase 3 (300 HP): Lacerate 10x3 → Big Pounce 45 → Burning Growl (Burns + Str).',
+    ironclad: 'Attack-heavy turns in Phase 1 (avoid Skills). Kill Phase 2 fast before Multi-Claw stacks. Impervious for Big Pounce. Strength scaling carries all three phases.',
+    silent: 'Shivs are Attacks, so they are safe in Phase 1; Poison Skills feed Enrage. Wraith Form blunts Multi-Claw. Block every Big Pounce.',
+    defect: 'Orb damage needs no Skills in Phase 1. Frost block holds Phase 2 claws. Echo Form doubles value in Phase 3.',
+    regent: 'Sovereign Blade forge scaling carries through all three phases. Seven Stars burst to end Phase 2 quickly.',
+    necrobinder: 'Doom executes in every phase. Osty tanks Phase 2 claws and Big Pounce. Souls cycle past Burns.'
   }
 };
 

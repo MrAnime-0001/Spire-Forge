@@ -22,14 +22,14 @@ function updatePriorityPanel() {
   if (crisis.attack || crisis.defense || crisis.scaling) {
     html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#ff6040;margin-bottom:.6rem">critical needs</div>`;
     
-    const suggestNeed = (label, color, typeFilter) => {
+    const suggestNeed = (label, color, role) => {
       // Only recommend cards from current character's pool — cross-class/colorless
       // cards won't appear in normal card rewards
       const charPool = ALL_CARDS[currentChar] || [];
       const bestCards = charPool
-        .filter(c => c.type && c.type.includes(typeFilter) && !c.name.endsWith('+') && !c.multiplayer)
-        .map(c => { const r = scoreCard(c.name); return { card: c, score: r ? r.score : 0 }; })
-        .sort((a, b) => b.score - a.score)
+        .filter(c => !c.name.endsWith('+') && !c.multiplayer && cardRoles(c)[role] >= 0.5)
+        .map(c => { const r = scoreCard(c.name); return { card: c, score: r ? r.score : 0, raw: r ? r.raw : 0 }; })
+        .sort((a, b) => b.raw - a.raw)
         .slice(0, 3);
 
       bestCards.forEach(({card, score}) => {
@@ -46,9 +46,9 @@ function updatePriorityPanel() {
       });
     };
 
-    if (crisis.attack) suggestNeed('needs damage', '#ff6040', 'atk');
-    if (crisis.defense) suggestNeed('needs block', 'var(--teal-bright)', 'def');
-    if (crisis.scaling) suggestNeed('needs scaling', 'var(--purple-bright)', 'scl');
+    if (crisis.attack) suggestNeed('needs damage', '#ff6040', 'dmg');
+    if (crisis.defense) suggestNeed('needs block', 'var(--teal-bright)', 'blk');
+    if (crisis.scaling) suggestNeed('needs scaling', 'var(--purple-bright)', 'scaling');
     
     html += `<div class="divider" style="margin:.6rem 0 .7rem"></div>`;
   }
@@ -420,10 +420,18 @@ function renderPlayTips(axes, targets, crisis) {
   if (currentAct === 2) add(3, '<span style="color:var(--text-muted)">⏱ Act 2</span> — find your scaling engine, skip cards that don\'t fit');
   if (currentAct === 3) add(3, '<span style="color:var(--text-muted)">⏱ Act 3</span> — reduce variance, remove starters, only take boss answers');
 
-  // 4b. Elite pacing urgency — AoE needed for multi-enemy fights
-  if (currentAct === 1 && total <= 14) {
-    var hasAoeForElite = Object.keys(deck).some(function(n) { return n === 'Whirlwind' || n === 'Whirlwind+' || n === 'Thunderclap' || n === 'Thunderclap+' || n === 'Dagger Spray' || n === 'Dagger Spray+' || n === 'Sweeping Beam' || n === 'Sweeping Beam+'; });
-    if (!hasAoeForElite) add(2, '<span style="color:var(--amber)">⚔ Act 1 elites</span> — The Kin splits into 3, Phrog Parasite splits into 4 Wrigglers. AoE recommended');
+  // 4b. Multi-enemy fights this act (REGION_DATA needs.aoe >= 2) with no AoE in the deck
+  var hasAoe = Object.keys(deck).some(function(n) { var f = findCard(n); return f && cardRoles(f.card).aoe > 0; });
+  if (!hasAoe) {
+    var aoeFights = [];
+    Object.keys(REGION_DATA).forEach(function(rk) {
+      var reg = REGION_DATA[rk];
+      if (reg.act !== currentAct) return;
+      [reg.bosses, reg.elites].forEach(function(group) {
+        Object.keys(group).forEach(function(n) { if (group[n].needs && group[n].needs.aoe >= 2) aoeFights.push(n); });
+      });
+    });
+    if (aoeFights.length) add(2, '<span style="color:var(--amber)">⚔ No AoE</span> — ' + aoeFights.join(', ') + ' fight several enemies at once. AoE recommended');
   }
 
   // 6. Guide-derived common mistakes per class
@@ -768,25 +776,6 @@ function renderEncounterTips() {
   return html;
 }
 
-// ── renderUpgradeCandidates ─────────────────────────────────
-function renderUpgradeCandidates() {
-  if (!currentChar || getDeckSize() === 0) return '';
-  var candidates = getUpgradeCandidates();
-  if (!candidates || candidates.length === 0) return '';
-  var html = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
-  html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">upgrade priority</div>';
-  candidates.forEach(function(c) {
-    var color = c.score >= 30 ? 'var(--amber-bright)' : c.score >= 20 ? 'var(--teal-bright)' : 'var(--text-dim)';
-    var deckCount = deck[c.name] || 0;
-    html += '<div style="display:flex;align-items:center;gap:6px;padding:4px 7px;border:1px solid rgba(100,90,70,.15);border-radius:3px;background:rgba(100,90,70,.05);margin-bottom:3px;font-size:11px">';
-    html += '<span style="color:' + color + ';flex:1">' + c.name + '</span>';
-    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted)">' + deckCount + ' in deck</span>';
-    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:' + color + '">score ' + c.score + '</span>';
-    html += '</div>';
-  });
-  return html;
-}
-
 // ── renderRemoveCandidates ──────────────────────────────────
 function renderRemoveCandidates() {
   if (!currentChar || getDeckSize() === 0) return '';
@@ -795,7 +784,7 @@ function renderRemoveCandidates() {
   var html = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
   html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">remove at campfire</div>';
   candidates.forEach(function(c) {
-    var dotColor = c.tier === 1 ? '#c06060' : c.tier === 2 ? 'var(--amber-bright)' : 'var(--text-muted)';
+    var dotColor = c.priority === 'high' ? '#c06060' : c.priority === 'medium' ? 'var(--amber-bright)' : 'var(--text-muted)';
     html += '<div style="display:flex;align-items:center;gap:6px;padding:4px 7px;border:1px solid rgba(100,90,70,.15);border-radius:3px;background:rgba(100,90,70,.05);margin-bottom:3px;font-size:11px">';
     html += '<span style="color:' + dotColor + ';font-size:14px">●</span>';
     html += '<span style="color:var(--text);flex:1">' + c.name + '</span>';
