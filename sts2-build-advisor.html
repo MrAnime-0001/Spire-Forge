@@ -500,6 +500,20 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 .region-cinematic__particle{position:absolute;border-radius:50%;pointer-events:none;
   animation:regionParticleFloat linear forwards;}
 
+/* Ascension card: flame with level number + stacked-modifier pips */
+.asc-flame{position:relative;width:104px;height:104px;margin-bottom:10px;opacity:0;transform:scale(.6);
+  animation:ascFlameIn .7s cubic-bezier(.2,1.4,.4,1) .15s forwards;}
+.asc-flame img{width:100%;height:100%;filter:drop-shadow(0 0 18px var(--c)) drop-shadow(0 0 40px var(--c));
+  animation:ascFlicker 1.4s ease-in-out .9s infinite alternate;}
+.asc-flame span{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-family:var(--font-display);font-size:38px;
+  color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 12px rgba(0,0,0,.5);}
+.asc-flame.off img{filter:grayscale(1) brightness(.6);animation:none;}
+.asc-pips{display:flex;gap:6px;margin-top:16px;opacity:0;animation:regionTextIn .4s ease 1s forwards;}
+.asc-pip{display:block;width:20px;height:5px;border-radius:2px;background:rgba(255,255,255,.12);}
+.asc-pip.on{animation:ascPipOn .25s ease forwards;animation-delay:calc(1.1s + var(--i) * 70ms);}
+@keyframes ascFlameIn{0%{opacity:0;transform:scale(.6) translateY(20px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes ascFlicker{0%{transform:scale(1) rotate(-1deg);}100%{transform:scale(1.05) rotate(1deg);}}
+@keyframes ascPipOn{to{background:var(--c);box-shadow:0 0 8px var(--c);}}
 @keyframes regionKenBurns{
   0%{transform:scale(1.05);}
   100%{transform:scale(1.12);}
@@ -1111,6 +1125,9 @@ window.setAsc = function(n){
     animId = requestAnimationFrame(mainLoop);
   }
 
+  // Difficulty colour per ascension level (grey A0, green -> red), shared by the burst and the title card.
+  var ASC_COLORS = ['#8a8a80','#6aac5f','#6aac5f','#4a9a8a','#4a9a8a','#c8922a','#c8922a','#9a6aba','#9a6aba','#d0602a','#e04040'];
+
   // ── Exposed triggers ──
   window.__particle = {
     // Act transition — uses act color matching text, slower decay
@@ -1168,48 +1185,29 @@ window.setAsc = function(n){
     },
     // Ascension change: colored burst + floating text
     fireAscensionParticle: function(n){
-      var ascNames = ['Base','Swarming Elites','Weary Traveler','Poverty','Tight Blet',"Ascender's Bane",'Inflation','Scarcity','Tough Enemies','Deadly Enemies','Double Boss'];
-      var labels = ['Easy','Mild','Mild','Tricky','Tricky','Tough','Tough','Hard','Very Hard','Brutal','INSANE'];
-      var colors = ['#4a7c3f','#6aac5f','#6aac5f','#4a9a8a','#4a9a8a','#c8922a','#c8922a','#9a6aba','#9a6aba','#c0421a','#d04040'];
-      var label = labels[n] || '?';
-      var color = colors[n] || GOLD;
-      var ascLabel = 'A' + n + ' ' + ascNames[n] || '';
+      var color = ASC_COLORS[n] || GOLD;
       // Full-screen spread, avoid floating text zone (roughly 58%-82%)
       for(var i=0;i<40;i++){
         var sx = Math.random() * canvas.width;
         var sy = Math.random() < 0.6 ? Math.random() * canvas.height * 0.55 : canvas.height * (0.82 + Math.random() * 0.18);
         burstParticles(sx, sy, Math.floor(Math.random()*4)+2, color, 3, {upBias:Math.random()*2, speedMax:Math.random()*4+2, decay:0.008, glow:5, sizeRange:2});
       }
-      // Floating text element
-      var el = document.createElement('div');
-      el.style.cssText = 'position:fixed;left:50%;top:70%;transform:translateX(-50%);font-family:\'Abril Fatface\',Georgia,serif;font-size:clamp(1.2rem,3vw,2rem);color:'+color+';text-shadow:0 0 40px '+color+'88,0 2px 0 rgba(0,0,0,.5);pointer-events:none;z-index:300;opacity:0;transition:all .8s ease;letter-spacing:.03em';
-      el.textContent = label;
-      document.body.appendChild(el);
-      requestAnimationFrame(function(){ el.style.opacity='1'; el.style.transform='translateX(-50%) translateY(-30px)'; });
-      // Small sub text for ascension name
-      var sub = document.createElement('div');
-      sub.style.cssText = 'position:fixed;left:50%;top:calc(70% + 2rem);transform:translateX(-50%);font-family:\'JetBrains Mono\',monospace;font-size:9px;color:'+color+'88;pointer-events:none;z-index:300;opacity:0;transition:all .8s ease .1s;letter-spacing:.2em;text-transform:uppercase';
-      sub.textContent = ascLabel;
-      document.body.appendChild(sub);
-      requestAnimationFrame(function(){ sub.style.opacity='1'; sub.style.transform='translateX(-50%) translateY(-20px)'; });
-      setTimeout(function(){ el.style.opacity='0'; el.style.transform='translateX(-50%) translateY(-60px)'; }, 1500);
-      setTimeout(function(){ sub.style.opacity='0'; }, 1800);
-      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); if(sub.parentNode) sub.parentNode.removeChild(sub); }, 2500);
     }
   };
 
-  // Full-screen region title card shown when ascending to an act or switching region.
+  // Full-screen title card (act/region change, ascension change).
   // A fresh overlay per play so the CSS keyframes restart.
+  // o: {image | background, color, kicker, title, subtitle, decorate(content), after(content)}
   var _cinematic = null;
-  function playRegionCinematic(rk){
-    var rd = REGION_DATA[rk];
-    if(!rd || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function playTitleCard(o){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if(_cinematic && _cinematic.parentNode) _cinematic.parentNode.removeChild(_cinematic);
     var root = document.createElement('div');
     root.className = 'region-cinematic';
     var part = function(cls, parent){ var d = document.createElement('div'); d.className = 'region-cinematic__' + cls; (parent || root).appendChild(d); return d; };
-    var src = 'assets/regions/' + rk + '.webp';
-    part('bg').style.backgroundImage = 'url(' + src + ')';
+    var bg = part('bg');
+    if(o.image) bg.style.backgroundImage = 'url(' + o.image + ')';
+    else { bg.style.background = o.background; bg.style.filter = 'none'; }
     part('vignette'); part('scanlines');
     var particles = part('particles');
     for(var i = 0; i < 30; i++){
@@ -1217,19 +1215,20 @@ window.setAsc = function(n){
       p.className = 'region-cinematic__particle';
       var size = 2 + Math.random() * 4;
       p.style.cssText = 'left:' + (Math.random()*100) + '%;top:' + (30 + Math.random()*70) + '%;width:' + size + 'px;height:' + size + 'px;' +
-        'background:' + rd.color + ';box-shadow:0 0 ' + (size*3) + 'px ' + rd.color + ';animation-duration:' + (1.6 + Math.random()*1.4) + 's;' +
+        'background:' + o.color + ';box-shadow:0 0 ' + (size*3) + 'px ' + o.color + ';animation-duration:' + (1.6 + Math.random()*1.4) + 's;' +
         'animation-delay:' + (Math.random()*0.6) + 's;--p-dy:' + (-60 - Math.random()*140) + 'px;--p-dx:' + (Math.random()*60 - 30) + 'px;--p-alpha:' + (0.4 + Math.random()*0.5);
       particles.appendChild(p);
     }
     var content = part('content');
-    var who = currentChar ? 'The ' + currentChar.charAt(0).toUpperCase() + currentChar.slice(1) + ' · ' : '';
-    part('act', content).textContent = who + 'Act ' + ['I','II','III'][rd.act - 1];
+    if(o.decorate) o.decorate(content);
+    part('act', content).textContent = o.kicker;
     var name = part('name', content);
-    name.textContent = rd.label;
-    name.style.color = rd.color;
-    name.style.textShadow = '0 0 40px ' + rd.color + '99, 0 3px 0 rgba(0,0,0,.6)';
-    part('divider', content).style.background = rd.color;
-    part('subtitle', content).textContent = 'Bosses: ' + Object.keys(rd.bosses).join(' · ');
+    name.textContent = o.title;
+    name.style.color = o.color;
+    name.style.textShadow = '0 0 40px ' + o.color + '99, 0 3px 0 rgba(0,0,0,.6)';
+    part('divider', content).style.background = o.color;
+    part('subtitle', content).textContent = o.subtitle;
+    if(o.after) o.after(content);
     _cinematic = root;
     document.body.appendChild(root);
     var hide = function(){
@@ -1243,10 +1242,56 @@ window.setAsc = function(n){
       if(shown) return; shown = true;
       void root.offsetWidth; // commit the hidden state so the fade-in transition runs
       root.classList.add('active');
-      setTimeout(hide, 2200);
+      setTimeout(hide, 2400);
     };
-    var img = new Image(); img.onload = show; img.onerror = show; img.src = src;
-    setTimeout(show, 400);
+    if(o.image){ var img = new Image(); img.onload = show; img.onerror = show; img.src = o.image; setTimeout(show, 400); }
+    else show();
+  }
+
+  function charTitle(){ return currentChar ? 'The ' + currentChar.charAt(0).toUpperCase() + currentChar.slice(1) + ' · ' : ''; }
+
+  function playRegionCinematic(rk){
+    var rd = REGION_DATA[rk];
+    if(!rd) return;
+    playTitleCard({
+      image: 'assets/regions/' + rk + '.webp', color: rd.color,
+      kicker: charTitle() + 'Act ' + ['I','II','III'][rd.act - 1],
+      title: rd.label, subtitle: 'Bosses: ' + Object.keys(rd.bosses).join(' · ')
+    });
+  }
+
+  // Ascension card: the game's flame with the level inside, the new modifier, and A1-A10 pips
+  // lit up to this level (ascensions stack, so every lower modifier is active too).
+  function playAscensionCard(n){
+    var a = ASCENSION_DATA[n];
+    if(!a) return;
+    var color = ASC_COLORS[n] || GOLD;
+    playTitleCard({
+      background: 'radial-gradient(ellipse 60% 55% at 50% 48%,' + color + '55,transparent 65%),radial-gradient(ellipse at 50% 50%,#1c110c,#050302 100%)',
+      color: color,
+      kicker: charTitle() + (n ? 'Ascension ' + n : 'No Ascension'),
+      title: a.name, subtitle: a.modifier,
+      decorate: function(content){
+        var flame = document.createElement('div');
+        flame.className = 'asc-flame' + (n ? '' : ' off');
+        flame.style.setProperty('--c', color);
+        flame.innerHTML = '<img src="assets/icons/ascension.png" alt=""><span>' + n + '</span>';
+        content.appendChild(flame);
+      },
+      after: function(content){
+        var pips = document.createElement('div');
+        pips.className = 'asc-pips';
+        for(var i = 1; i <= 10; i++){
+          var pip = document.createElement('i');
+          pip.className = 'asc-pip' + (i <= n ? ' on' : '');
+          pip.style.setProperty('--c', color);
+          pip.style.setProperty('--i', i);
+          pip.title = 'A' + i + ' ' + ASCENSION_DATA[i].name;
+          pips.appendChild(pip);
+        }
+        content.appendChild(pips);
+      }
+    });
   }
 
   // Hook setAct: particles + region title card on change
@@ -1282,11 +1327,12 @@ window.setAsc = function(n){
     };
   }
 
-  // Hook setAsc for full-screen particle spread
+  // Hook setAsc: ascension title card on change (setAsc in core/state.js already fires the particle burst)
   var _origSetAsc = window.setAsc;
   window.setAsc = function(n){
+    var changed = n !== currentAsc;
     _origSetAsc(n);
-    if(window.__particle) window.__particle.fireAscensionParticle(n);
+    if(changed) playAscensionCard(n);
   };
 
   // Card hover pips — size varies by rarity
