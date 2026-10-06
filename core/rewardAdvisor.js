@@ -52,15 +52,15 @@ function rolesForNeeds(r) {
 var _scoreCtx = null, _scoreCtxKey = '';
 function scoreContext() {
   var boss = typeof selectedBoss !== 'undefined' ? selectedBoss : null;
-  var key = currentChar + '|' + currentAct + '|' + boss + '|' + JSON.stringify(deck);
+  var key = currentChar + '|' + currentAct + '|' + currentRegion + startRegion + '|' + boss + '|' + JSON.stringify(deck);
   if (key === _scoreCtxKey) return _scoreCtx;
   var axes = calcSixAxes();
   var targets = AXIS_TARGETS[currentAct] || AXIS_TARGETS[1];
-  // Fights left in this act: the chosen boss, or every boss of the act averaged with its elites.
+  // Fights left in this region: the chosen boss, or every boss of the region averaged with its elites.
   var bosses = [], elites = [];
   Object.keys(REGION_DATA).forEach(function(rk) {
     var reg = REGION_DATA[rk];
-    if (reg.act !== currentAct) return;
+    if (!inCurrentRegion(rk)) return;
     Object.keys(reg.bosses).forEach(function(n) { if (!boss || n === boss) bosses.push({name: n, needs: reg.bosses[n].needs || {}}); });
     Object.keys(reg.elites).forEach(function(n) { elites.push({name: n, needs: reg.elites[n].needs || {}}); });
   });

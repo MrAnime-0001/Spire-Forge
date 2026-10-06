@@ -420,13 +420,13 @@ function renderPlayTips(axes, targets, crisis) {
   if (currentAct === 2) add(3, '<span style="color:var(--text-muted)">⏱ Act 2</span> — find your scaling engine, skip cards that don\'t fit');
   if (currentAct === 3) add(3, '<span style="color:var(--text-muted)">⏱ Act 3</span> — reduce variance, remove starters, only take boss answers');
 
-  // 4b. Multi-enemy fights this act (REGION_DATA needs.aoe >= 2) with no AoE in the deck
+  // 4b. Multi-enemy fights in this region (REGION_DATA needs.aoe >= 2) with no AoE in the deck
   var hasAoe = Object.keys(deck).some(function(n) { var f = findCard(n); return f && cardRoles(f.card).aoe > 0; });
   if (!hasAoe) {
     var aoeFights = [];
     Object.keys(REGION_DATA).forEach(function(rk) {
       var reg = REGION_DATA[rk];
-      if (reg.act !== currentAct) return;
+      if (!inCurrentRegion(rk)) return;
       [reg.bosses, reg.elites].forEach(function(group) {
         Object.keys(group).forEach(function(n) { if (group[n].needs && group[n].needs.aoe >= 2) aoeFights.push(n); });
       });

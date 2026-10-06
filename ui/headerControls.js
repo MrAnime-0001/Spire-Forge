@@ -80,10 +80,9 @@ function updateActUI() {
     document.getElementById('act'+n+'btn').classList.toggle('active', currentAct === n);
   });
   document.getElementById('actAdvice').textContent = ACT_ADVICE[currentAct - 1];
-  if (selectedBoss) {
-    const rk = BOSS_TO_REGION[selectedBoss];
-    if (!rk || REGION_DATA[rk].act !== currentAct) selectedBoss = null;
-  }
+  syncRegionToAct();
+  if (selectedBoss && !inCurrentRegion(BOSS_TO_REGION[selectedBoss])) selectedBoss = null;
+  document.getElementById('act1btn').innerHTML = '1 &mdash; ' + (startRegion ? REGION_DATA[startRegion].label : 'Ascent');
   renderBossAlert();
 }
 
@@ -120,7 +119,7 @@ function renderBossAlert() {
   if (!el) return;
   if (!currentChar) { el.innerHTML = ''; return; }
 
-  const actRegions = Object.entries(REGION_DATA).filter(([, rd]) => rd.act === currentAct);
+  const actRegions = Object.entries(REGION_DATA).filter(([rk]) => inCurrentRegion(rk));
 
   let html = `<div style="background:rgba(0,0,0,.5);border:1px solid rgba(100,90,70,.12);border-radius:4px;padding:10px 12px">`;
   html += `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);opacity:.8;margin-bottom:.75rem">boss &amp; region</div>`;
@@ -308,4 +307,74 @@ function renderNeedsMatchup(needs, color) {
       NEED_LABELS[k] + (needs[k] >= 2 ? ' (key)' : '') + ': ' + n + ' card' + (n === 1 ? '' : 's') + '</div>';
   });
   return html + '</div>';
+}
+
+// ── Run setup: character -> Act 1 region -> Start ───────────
+// The main UI stays hidden until a run starts. A run ends via "died" (resetRun).
+let setupChar = null, setupRegion = null, setupKeepDeck = false;
+
+function inSetup() { return document.getElementById('runSetup').style.display !== 'none'; }
+
+// keepDeck: loaded data with no Act 1 region; only the region is asked, the deck stays.
+function enterSetup(char, keepDeck) {
+  setupChar = char || null;
+  setupRegion = null;
+  setupKeepDeck = !!keepDeck;
+  document.getElementById('mainUI').style.display = 'none';
+  document.getElementById('inlinePicker').style.display = 'none';
+  document.getElementById('runSetup').style.display = '';
+  document.querySelectorAll('.char-btn').forEach(b => { b.title = ''; });
+  if (typeof refreshBg === 'function') refreshBg(); // back to the cycling theme after a run ends
+  renderRunSetup();
+}
+
+function exitSetup() {
+  document.getElementById('runSetup').style.display = 'none';
+  document.querySelectorAll('.char-btn').forEach(b => { b.title = 'Run in progress — press ☠ died to start a new one'; });
+}
+
+// After loading saved data: show the run, or ask for its Act 1 region if the save never had one.
+function applyRunView() {
+  if (currentChar && currentAct === 1 && !startRegion) enterSetup(currentChar, true);
+  else exitSetup();
+}
+
+function pickSetupChar(key) {
+  if (!inSetup() || setupKeepDeck) return; // character is locked once a run starts
+  setupChar = key;
+  renderRunSetup();
+}
+
+function pickSetupRegion(rk) {
+  setupRegion = rk;
+  renderRunSetup();
+}
+
+function renderRunSetup() {
+  document.querySelectorAll('.char-btn').forEach(b => b.classList.toggle('active', b.id === 'char-' + setupChar));
+  let html = '<p class="slabel" style="margin-bottom:8px">starting region</p><div class="setup-regions">';
+  Object.keys(REGION_DATA).filter(rk => REGION_DATA[rk].act === 1).forEach(rk => {
+    const rd = REGION_DATA[rk];
+    html += `<button class="setup-region${rk === setupRegion ? ' active' : ''}" style="--rc:${rd.color};background-image:url(assets/regions/${rk}.webp)" onclick="pickSetupRegion('${rk}')"><span>${rd.label}</span></button>`;
+  });
+  html += '</div>';
+  const ready = setupChar && setupRegion;
+  const label = ready ? 'Start run &#9656;' : !setupChar ? 'Pick a character' : 'Pick a starting region';
+  html += `<button class="setup-start" ${ready ? '' : 'disabled'} onclick="startRun()">${label}</button>`;
+  document.getElementById('runSetup').innerHTML = html;
+}
+
+function startRun() {
+  if (!setupChar || !setupRegion) return;
+  if (setupKeepDeck) {
+    startRegion = setupRegion;
+    syncRegionToAct();
+    document.getElementById('mainUI').style.display = 'block';
+    document.getElementById('inlinePicker').style.display = 'block';
+    notifyListeners();
+  } else {
+    selectChar(setupChar, setupRegion);
+  }
+  exitSetup();
+  if (window.playRegionCinematic) playRegionCinematic(currentRegion);
 }

@@ -34,6 +34,7 @@ function confirmSave() {
     name,
     char: currentChar,
     act: currentAct,
+    region: startRegion,
     asc: currentAsc,
     hp: document.getElementById('hpCur').value,
     hpMax: document.getElementById('hpMax').value,
@@ -68,7 +69,7 @@ function renderLoadBody() {
     return `<div class="loadout-item">
       <div style="flex:1">
         <div class="loadout-name">${s.name}</div>
-        <div class="loadout-meta">${charLabel[s.char]||s.char} &bull; Act ${s.act} &bull; ${total} cards &bull; ${s.saved||''}</div>
+        <div class="loadout-meta">${charLabel[s.char]||s.char} &bull; ${regionText(s)} &bull; ${total} cards &bull; ${s.saved||''}</div>
       </div>
       <button class="footer-btn primary" onclick="confirmLoad(${i})" style="padding:5px 10px;font-size:9px">load</button>
       <button class="footer-btn ghost" onclick="deleteSave(${i})" style="padding:5px 8px;font-size:9px;border-color:rgba(192,64,64,.4);color:#c06060">✕</button>
@@ -82,6 +83,7 @@ function confirmLoad(i) {
   if (!s) return;
   currentChar = s.char;
   currentAct = s.act || 1;
+  restoreRegion(s.region);
   currentAsc = s.asc || 0;
   deck = {...(s.deck||{})};
   syncAscendersBane();
@@ -103,7 +105,16 @@ function confirmLoad(i) {
   updatePriorityPanel();
   renderPickerList();
   closeLoadModal();
+  applyRunView();
   autoSave();
+}
+
+// "Act 1 · Underdock" / "Act 2 · Hive"; just "Act 1" when an old save has no start region.
+function regionText(s) {
+  var act = s.act || 1;
+  var rk = act === 1 ? s.region : Object.keys(REGION_DATA).find(function(k) { return REGION_DATA[k].act === act; });
+  var rd = rk && REGION_DATA[rk];
+  return 'Act ' + act + (rd ? ' &middot; ' + rd.label : '');
 }
 
 function deleteSave(i) {
@@ -125,6 +136,7 @@ function autoSave() {
       localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify({
         char: currentChar,
         act: currentAct,
+        region: startRegion,
         asc: currentAsc,
         deck: Object.assign({}, deck),
         hp: document.getElementById('hpCur').value,
@@ -145,6 +157,7 @@ function autoRestore() {
     if (s.ts && Date.now() - s.ts > 86400000) { localStorage.removeItem(AUTO_SAVE_KEY); return; }
     currentChar = s.char;
     currentAct = s.act || 1;
+    restoreRegion(s.region);
     currentAsc = s.asc || 0;
     deck = Object.assign({}, s.deck);
     syncAscendersBane();
@@ -164,6 +177,7 @@ function autoRestore() {
     updatePriorityPanel();
     renderPickerList();
     renderBossAlert();
+    applyRunView();
     _showRestoreToast(s);
   } catch(e) {}
 }
@@ -175,7 +189,7 @@ function _showRestoreToast(s) {
   var toast = document.createElement('div');
   toast.id = 'restoreToast';
   toast.innerHTML = '<strong style="color:var(--amber-bright)">Session restored</strong> &mdash; ' +
-    (charLabel[s.char]||s.char) + ' &bull; Act ' + (s.act||1) + ' &bull; ' + total + ' cards' +
+    (charLabel[s.char]||s.char) + ' &bull; ' + regionText(s) + ' &bull; ' + total + ' cards' +
     (when ? ' &bull; saved ' + when : '') +
     ' <button onclick="clearAutoSave()" style="background:none;border:1px solid rgba(200,146,42,.4);border-radius:2px;color:var(--text-muted);font-family:\'Share Tech Mono\',monospace;font-size:9px;cursor:pointer;padding:2px 7px;margin-left:10px;letter-spacing:.05em">DISMISS</button>';
   toast.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;background:#1f1c15;border:1px solid var(--amber);border-radius:5px;padding:.75rem 1.1rem;font-size:12px;color:var(--text);z-index:200;max-width:420px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:opacity .4s;';
@@ -202,6 +216,7 @@ function exportDeck() {
     version: 1,
     char: currentChar,
     act: currentAct,
+    region: startRegion,
     hp: document.getElementById('hpCur').value,
     hpMax: document.getElementById('hpMax').value,
     deck: deck,
@@ -241,6 +256,7 @@ function importDeckFile(event) {
       currentChar = data.char;
       deck = data.deck;
       currentAct = data.act || 1;
+      restoreRegion(data.region);
       currentAsc = data.asc || 0;
       syncAscendersBane();
       selectedBoss = data.boss || null;
@@ -258,6 +274,7 @@ function importDeckFile(event) {
       updateResult();
       updatePriorityPanel();
       renderPickerList();
+      applyRunView();
     } catch(err) {
       alert('Could not import file: ' + err.message);
     }

@@ -457,6 +457,77 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 #act2btn.active{border-color:var(--amber-bright);color:var(--amber-bright);background:rgba(30,25,10,.4);}
 #act3btn.active{border-color:var(--amethyst);color:#b07ad0;background:rgba(25,10,35,.4);}
 
+/* ── Run setup: starting region cards + start button ── */
+.run-setup{margin-top:-1rem;}
+.setup-regions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px;}
+.setup-region{height:76px;border:1px solid rgba(100,90,70,.25);border-radius:3px;background-size:cover;background-position:center;
+  cursor:pointer;position:relative;overflow:hidden;padding:0;filter:grayscale(.75) brightness(.5);
+  transition:filter .2s,border-color .2s,box-shadow .2s;}
+.setup-region span{position:absolute;left:0;right:0;bottom:0;padding:6px 10px;text-align:left;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));font-family:var(--font-display);font-size:16px;color:#fff;letter-spacing:.04em;}
+.setup-region:hover{filter:grayscale(.2) brightness(.8);}
+.setup-region.active{filter:none;border-color:var(--rc);box-shadow:0 0 14px var(--rc);}
+.setup-region.active span{color:var(--rc);text-shadow:0 0 12px var(--rc);}
+.setup-start{width:100%;padding:10px;border:1px solid var(--gold);border-radius:3px;background:var(--gold-dim);color:var(--gold-bright);
+  font-family:var(--font-display);font-size:15px;letter-spacing:.06em;cursor:pointer;transition:all .2s;}
+.setup-start:hover:not(:disabled){box-shadow:0 0 16px rgba(200,146,42,.35);}
+.setup-start:disabled{border-color:rgba(100,90,70,.25);background:rgba(0,0,0,.35);color:var(--text-muted);cursor:default;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;}
+
+/* ── Cinematic Region Transition Overlay ── */
+.region-cinematic{position:fixed;inset:0;z-index:500;pointer-events:none;opacity:0;transition:opacity .4s ease;}
+.region-cinematic.active{opacity:1;pointer-events:auto;}
+.region-cinematic__bg{position:absolute;inset:0;background-size:cover;background-position:center;
+  animation:regionKenBurns 3s ease-out forwards;
+  filter:brightness(0.35) saturate(1.2);}
+.region-cinematic__vignette{position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 50% 50%,transparent 30%,rgba(0,0,0,0.85) 100%);}
+.region-cinematic__scanlines{position:absolute;inset:0;opacity:.04;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.3) 2px,rgba(0,0,0,.3) 4px);}
+.region-cinematic__content{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;}
+.region-cinematic__act{font-family:var(--font-mono);font-size:11px;letter-spacing:.4em;
+  text-transform:uppercase;opacity:0;transform:translateY(20px);
+  animation:regionTextIn .6s ease .3s forwards;}
+.region-cinematic__name{font-family:var(--font-display);font-size:clamp(2rem,6vw,4rem);
+  letter-spacing:.06em;line-height:1;opacity:0;transform:translateY(30px) scale(0.95);
+  animation:regionNameIn .8s ease .5s forwards;}
+.region-cinematic__divider{width:0;height:2px;opacity:0;
+  animation:regionDividerIn .6s ease .7s forwards;margin:.8rem 0;}
+.region-cinematic__subtitle{font-family:var(--font-body);font-size:13px;font-weight:300;
+  font-style:italic;opacity:0;transform:translateY(10px);
+  animation:regionTextIn .5s ease .9s forwards;}
+.region-cinematic__particles{position:absolute;inset:0;overflow:hidden;}
+.region-cinematic__particle{position:absolute;border-radius:50%;pointer-events:none;
+  animation:regionParticleFloat linear forwards;}
+
+@keyframes regionKenBurns{
+  0%{transform:scale(1.05);}
+  100%{transform:scale(1.12);}
+}
+@keyframes regionTextIn{
+  0%{opacity:0;transform:translateY(20px);}
+  100%{opacity:.7;transform:translateY(0);}
+}
+@keyframes regionNameIn{
+  0%{opacity:0;transform:translateY(30px) scale(0.95);}
+  60%{opacity:1;transform:translateY(-2px) scale(1.02);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes regionDividerIn{
+  0%{width:0;opacity:0;}
+  100%{width:120px;opacity:.6;}
+}
+@keyframes regionParticleFloat{
+  0%{transform:translateY(0) translateX(0) scale(1);opacity:0;}
+  15%{opacity:var(--p-alpha,0.6);}
+  85%{opacity:var(--p-alpha,0.6);}
+  100%{transform:translateY(var(--p-dy,-80px)) translateX(var(--p-dx,20px)) scale(var(--p-scale,0.3));opacity:0;}
+}
+@keyframes regionFadeOut{
+  0%{opacity:1;}
+  100%{opacity:0;}
+}
+
 /* ── Animated Background ── */
 @keyframes bgDrift {
   0%{background-position:0% 30%,100% 70%,50% 0%}
@@ -525,15 +596,16 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 <div style="background:rgba(0,0,0,.5);border-radius:4px;padding:12px 14px;margin-bottom:12px">
 <p class="slabel" style="margin-bottom:8px">choose your character</p>
 <div class="char-grid" id="charGrid"></div>
+<div class="run-setup" id="runSetup" style="display:none"></div>
 </div>
 
 <div id="mainUI" style="display:none" class="fade-up">
 <div style="background:rgba(0,0,0,.5);border-radius:4px;padding:10px 12px;margin-bottom:12px">
-  <div class="act-row">
+  <div class="act-row" style="flex-wrap:wrap">
     <span class="act-label">act</span>
     <button class="act-btn active" id="act1btn" onclick="setAct(1)">1 &mdash; Ascent</button>
-    <button class="act-btn" id="act2btn" onclick="setAct(2)">2 &mdash; City</button>
-    <button class="act-btn" id="act3btn" onclick="setAct(3)">3 &mdash; Beyond</button>
+    <button class="act-btn" id="act2btn" onclick="setAct(2)">2 &mdash; Hive</button>
+    <button class="act-btn" id="act3btn" onclick="setAct(3)">3 &mdash; Glory</button>
     <span class="act-advice" id="actAdvice"></span>
   </div>
 
@@ -653,11 +725,11 @@ h1::after{content:'';display:block;width:60px;height:1px;margin:.5rem auto 0;
 <script src="data/constants.js?v=4"></script>
 <script src="data/builds.js?v=7"></script>
 <script src="data/bossTips.js?v=2"></script>
-<script src="core/state.js?v=2"></script>
+<script src="core/state.js?v=5"></script>
 <script src="core/deckStats.js?v=6"></script>
 <script src="core/engineTracker.js?v=1"></script>
-<script src="core/rewardAdvisor.js?v=5"></script>
-<script src="core/storage.js?v=1"></script>
+<script src="core/rewardAdvisor.js?v=8"></script>
+<script src="core/storage.js?v=3"></script>
 <script>
 // Format card description with icon replacements — shared by popup and inline rendering
 function formatCardDescription(desc) {
@@ -719,9 +791,9 @@ function formatCardDescription(desc) {
 </script>
 <script src="ui/helpers.js?v=4"></script>
 <script src="ui/deckView.js?v=2"></script>
-<script src="ui/resultView.js?v=21"></script>
+<script src="ui/resultView.js?v=23"></script>
 <script src="ui/pickerView.js?v=16"></script>
-<script src="ui/headerControls.js?v=11"></script>
+<script src="ui/headerControls.js?v=15"></script>
 
 <script>
 // getCardTier, tierBadgeHtml, getCardTierNote moved to ui/helpers.js.
@@ -753,7 +825,7 @@ function init() {
     btn.id = 'char-' + key;
     const label = key.charAt(0).toUpperCase() + key.slice(1);
     btn.innerHTML = `<img class="char-portrait" src="assets/icons/char-${key}.png" alt="" onerror="this.remove()"><span style="display:block;width:100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${label}</span>`;
-    btn.onclick = () => selectChar(key);
+    btn.onclick = () => pickSetupChar(key);
     grid.appendChild(btn);
   });
   
@@ -775,6 +847,7 @@ function init() {
   updateActUI();
   updateAscUI();
   autoRestore();
+  if (!currentChar) enterSetup();
 
   subscribe(() => {
     updateActUI();
@@ -841,8 +914,8 @@ function refreshBg() { updateBgTheme(); updateBgAct(); updateBgAsc(); }
 
 // Hook into character select
 var _origSelectChar = window.selectChar;
-window.selectChar = function(key){
-  _origSelectChar(key);
+window.selectChar = function(key, region){
+  _origSelectChar(key, region);
   refreshBg();
 };
 // Hook into setAct
@@ -1125,29 +1198,69 @@ window.setAsc = function(n){
     }
   };
 
-  // Hook setAct for transition + floating text
+  // Full-screen region title card shown when ascending to an act or switching region.
+  // A fresh overlay per play so the CSS keyframes restart.
+  var _cinematic = null;
+  function playRegionCinematic(rk){
+    var rd = REGION_DATA[rk];
+    if(!rd || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if(_cinematic && _cinematic.parentNode) _cinematic.parentNode.removeChild(_cinematic);
+    var root = document.createElement('div');
+    root.className = 'region-cinematic';
+    var part = function(cls, parent){ var d = document.createElement('div'); d.className = 'region-cinematic__' + cls; (parent || root).appendChild(d); return d; };
+    var src = 'assets/regions/' + rk + '.webp';
+    part('bg').style.backgroundImage = 'url(' + src + ')';
+    part('vignette'); part('scanlines');
+    var particles = part('particles');
+    for(var i = 0; i < 30; i++){
+      var p = document.createElement('span');
+      p.className = 'region-cinematic__particle';
+      var size = 2 + Math.random() * 4;
+      p.style.cssText = 'left:' + (Math.random()*100) + '%;top:' + (30 + Math.random()*70) + '%;width:' + size + 'px;height:' + size + 'px;' +
+        'background:' + rd.color + ';box-shadow:0 0 ' + (size*3) + 'px ' + rd.color + ';animation-duration:' + (1.6 + Math.random()*1.4) + 's;' +
+        'animation-delay:' + (Math.random()*0.6) + 's;--p-dy:' + (-60 - Math.random()*140) + 'px;--p-dx:' + (Math.random()*60 - 30) + 'px;--p-alpha:' + (0.4 + Math.random()*0.5);
+      particles.appendChild(p);
+    }
+    var content = part('content');
+    var who = currentChar ? 'The ' + currentChar.charAt(0).toUpperCase() + currentChar.slice(1) + ' · ' : '';
+    part('act', content).textContent = who + 'Act ' + ['I','II','III'][rd.act - 1];
+    var name = part('name', content);
+    name.textContent = rd.label;
+    name.style.color = rd.color;
+    name.style.textShadow = '0 0 40px ' + rd.color + '99, 0 3px 0 rgba(0,0,0,.6)';
+    part('divider', content).style.background = rd.color;
+    part('subtitle', content).textContent = 'Bosses: ' + Object.keys(rd.bosses).join(' · ');
+    _cinematic = root;
+    document.body.appendChild(root);
+    var hide = function(){
+      root.classList.remove('active');
+      setTimeout(function(){ if(root.parentNode) root.parentNode.removeChild(root); }, 450);
+    };
+    root.onclick = hide;
+    // Wait for the art (or 400ms) so it doesn't pop in after the title.
+    var shown = false;
+    var show = function(){
+      if(shown) return; shown = true;
+      void root.offsetWidth; // commit the hidden state so the fade-in transition runs
+      root.classList.add('active');
+      setTimeout(hide, 2200);
+    };
+    var img = new Image(); img.onload = show; img.onerror = show; img.src = src;
+    setTimeout(show, 400);
+  }
+
+  // Hook setAct: particles + region title card on change
   var _origSetAct = window.setAct;
   window.setAct = function(n){
     var btn = document.getElementById('act'+n+'btn');
     var cx, cy;
     if(btn){ var r = btn.getBoundingClientRect(); cx = r.left + r.width/2; cy = r.top + r.height/2; }
-    if(n !== currentAct){
-      window.__particle.fireActTransition(cx, cy, n);
-      // Floating text
-      var labels = ['ACT I — ASCENT','ACT II — HIVE','ACT III — GLORY'];
-      var colors = ['#6aac5f','#c8922a','#9a6aba'];
-      var label = labels[n-1] || 'ACT '+n;
-      var color = colors[n-1] || GOLD;
-      var el = document.createElement('div');
-      el.style.cssText = 'position:fixed;left:50%;top:70%;transform:translateX(-50%);font-family:\'Abril Fatface\',Georgia,serif;font-size:clamp(1.2rem,3vw,2rem);color:'+color+';text-shadow:0 0 40px '+color+'88,0 2px 0 rgba(0,0,0,.5);pointer-events:none;z-index:300;opacity:0;transition:all .8s ease;letter-spacing:.03em';
-      el.textContent = label;
-      document.body.appendChild(el);
-      requestAnimationFrame(function(){ el.style.opacity='1'; el.style.transform='translateX(-50%) translateY(-30px)'; });
-      setTimeout(function(){ el.style.opacity='0'; el.style.transform='translateX(-50%) translateY(-60px)'; }, 1500);
-      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 2500);
-    }
+    var changed = n !== currentAct;
+    if(changed) window.__particle.fireActTransition(cx, cy, n);
     _origSetAct(n);
+    if(changed) playRegionCinematic(currentRegion);
   };
+  window.playRegionCinematic = playRegionCinematic; // used by the setup Start button
 
   // Hook setBoss for boss select particles
   if(typeof setBoss === 'function'){

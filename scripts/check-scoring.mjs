@@ -15,7 +15,7 @@ const ctx = vm.createContext({ console });
 for (const f of FILES) vm.runInContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), ctx, { filename: f });
 const run = code => vm.runInContext(code, ctx);
 const setState = (char, act, deck, boss = null) =>
-  run(`currentChar=${JSON.stringify(char)};currentAct=${act};deck=${JSON.stringify(deck)};var selectedBoss=${JSON.stringify(boss)};`);
+  run(`currentChar=${JSON.stringify(char)};currentAct=${act};syncRegionToAct();deck=${JSON.stringify(deck)};var selectedBoss=${JSON.stringify(boss)};`);
 const score = name => run(`scoreCard(${JSON.stringify(name)})`);
 const cards = pool => run(`ALL_CARDS.${pool}.filter(c => !c.isUpgraded)`);
 
@@ -84,6 +84,21 @@ const pool = run(`scoreRewardPool(['Strike', 'Offering', 'Iron Wave'])`);
 check('reward pool sorts best first', pool[0].name === 'Offering', pool.map(s => s.name).join(', '));
 check('no skip advice when a good card is offered', pool.skipAdvice === false);
 check('skip advice when only weak cards are offered', run(`scoreRewardPool(['Strike', 'Injury']).skipAdvice`) === true);
+
+// Region state: Act 1 region is picked at run start and remembered; saves restore it
+run(`var _n = notifyListeners; notifyListeners = function(){}; selectedBoss = null;`);
+setState('ironclad', 1, starter);
+run(`restoreRegion(undefined)`);
+check('no start region: both Act 1 regions in play', run(`!startRegion && inCurrentRegion('overgrowth') && inCurrentRegion('underdock')`));
+run(`restoreRegion('underdock')`);
+check('Underdock start limits Act 1 fights to Underdock', run(`currentRegion === 'underdock' && !inCurrentRegion('overgrowth')`));
+run(`setAct(2)`);
+check('Act 2 is Hive', run(`currentRegion === 'hive' && inCurrentRegion('hive') && !inCurrentRegion('underdock')`));
+run(`setAct(1)`);
+check('back in Act 1 the start region is remembered', run(`currentRegion === 'underdock'`));
+run(`currentAct = 2; restoreRegion('hive')`);
+check('older save storing the Act 2 region: no start region, still Hive', run(`startRegion === null && currentRegion === 'hive'`));
+run(`notifyListeners = _n;`);
 
 console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
 process.exit(failed ? 1 : 0);

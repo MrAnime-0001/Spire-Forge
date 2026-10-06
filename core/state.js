@@ -4,6 +4,10 @@ let currentChar = null;
 
 let currentAct = 1;
 
+let currentRegion = 'overgrowth'; // REGION_DATA key for the current act
+
+let startRegion = null; // Act 1 region picked when the run started (Act 1 has two)
+
 let currentAsc = 0; // ascension level 0-10
 
 let deck = {}; // card name -> count
@@ -31,9 +35,13 @@ function setAsc(n) {
   if(window.__particle) window.__particle.fireAscensionParticle(n);
 }
 
-function selectChar(key) {
+// Start a new run (called by the setup panel's Start button).
+function selectChar(key, region) {
   currentChar = key;
   currentAct = 1;
+  startRegion = region || null;
+  syncRegionToAct();
+  selectedBoss = null;
   loadDefaultDeck(key);
   document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('char-' + key).classList.add('active');
@@ -82,22 +90,41 @@ function syncAscendersBane() {
   }
 }
 
+// Run over: clear it and go back to picking a character and starting region.
 function resetRun() {
-  if (!currentChar) return;
+  if (!currentChar || !confirm('End this run? Your deck is cleared and you pick a character and region again.')) return;
+  clearAutoSave();
+  currentChar = null;
+  deck = {};
+  relics = [];
   currentAct = 1;
-  loadDefaultDeck(currentChar);
-  const hp = CHAR_HP[currentChar] || 80;
-  hpCur = hp; hpMax = hp;
-  document.getElementById('hpCur').value = hp;
-  document.getElementById('hpMax').value = hp;
-  document.getElementById('inlinePicker').style.display = 'block';
-  if(typeof updateHpBar === 'function') updateHpBar();
-  notifyListeners();
+  startRegion = null;
+  selectedBoss = null;
+  syncRegionToAct();
+  enterSetup();
 }
 
 function setAct(n) {
   currentAct = n;
+  syncRegionToAct();
   notifyListeners();
+}
+
+// Act 1 uses the region picked at run start; Acts 2-3 have one region each.
+function syncRegionToAct() {
+  currentRegion = (currentAct === 1 && startRegion) ||
+    Object.keys(REGION_DATA).find(function(rk) { return REGION_DATA[rk].act === currentAct; });
+}
+
+// Saved data: older saves may have no region, or the act's region instead of the Act 1 one.
+function restoreRegion(rk) {
+  startRegion = rk && REGION_DATA[rk] && REGION_DATA[rk].act === 1 ? rk : null;
+  syncRegionToAct();
+}
+
+// Region filter for bosses/scoring: the current region, or all of Act 1 if no start region is known.
+function inCurrentRegion(rk) {
+  return currentAct === 1 && !startRegion ? REGION_DATA[rk].act === 1 : rk === currentRegion;
 }
 
 function addCard(name, count = 1) {
