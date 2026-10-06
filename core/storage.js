@@ -47,6 +47,7 @@ function confirmSave() {
   if (list.length > 20) list.pop();
   setSavedLoadouts(list);
   closeSaveModal();
+  if (window.playRunCard) playRunCard('saved', name);
 }
 
 function openLoadModal() {
@@ -106,6 +107,7 @@ function confirmLoad(i) {
   renderPickerList();
   closeLoadModal();
   applyRunView();
+  if (window.playRunCard) playRunCard('loaded', s.name);
   autoSave();
 }
 
@@ -179,6 +181,8 @@ function autoRestore() {
     renderBossAlert();
     applyRunView();
     _showRestoreToast(s);
+    // Welcome-back card. autoRestore runs during page parse, before the card code exists.
+    document.addEventListener('DOMContentLoaded', function() { if (window.playRunCard) playRunCard('continued'); });
   } catch(e) {}
 }
 
@@ -252,6 +256,7 @@ function importDeckFile(event) {
     try {
       const data = JSON.parse(e.target.result);
       if (!data.char || !data.deck) throw new Error('Invalid file format.');
+      if (!CHAR_HP[data.char]) throw new Error('Unknown character "' + String(data.char).slice(0, 20) + '".');
       // Apply the imported state
       currentChar = data.char;
       deck = data.deck;
@@ -275,6 +280,7 @@ function importDeckFile(event) {
       updatePriorityPanel();
       renderPickerList();
       applyRunView();
+      if (window.playRunCard) playRunCard('imported', file.name.replace(/\.json$/i, ''));
     } catch(err) {
       alert('Could not import file: ' + err.message);
     }

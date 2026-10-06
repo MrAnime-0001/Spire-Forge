@@ -93,6 +93,7 @@ function syncAscendersBane() {
 // Run over: clear it and go back to picking a character and starting region.
 function resetRun() {
   if (!currentChar || !confirm('End this run? Your deck is cleared and you pick a character and region again.')) return;
+  if (window.playRunCard) playRunCard('died'); // before the run is cleared: the card shows how far it got
   clearAutoSave();
   currentChar = null;
   deck = {};
