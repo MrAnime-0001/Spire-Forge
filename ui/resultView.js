@@ -995,8 +995,8 @@ function renderBuildResults() {
 
 // ── renderRelicBar ───────────────────────────────────────────
 // Shows current relics with add/remove controls.
-var RELIC_LIST = ['Dead Branch','Magic Flower','Mark of Pain','Brimstone','Orange Pellets','Snecko Eye','Runic Pyramid','Incense Burner','Tungsten Rod','Torii','Thread and Needle','Tough Bandages','Enchiridion','Nilry\'s Codex','Shuriken','Kunai','Pen Nib','Preserved Insect','Bag of Preparation','Centennial Puzzle','Smiling Mask','Strange Spoon','Membership Card','Merchant Card','Juzu Bracelet','Omamori','Ancient Tea Set','Gremlin Horn','Horn Cleat','Lantern','Vajra','War Paint','Whetstone','Bottled Lightning','Bottled Flame','Bottled Tornado','Meal Ticket','Regal Pillow','Pear','Strawberry','Mango','Old Coin','Question Card','Happy Flower','Golden Idol','Cultist Mask','Necronomicon','Gremlin Visage','Spirit Poop','Cauldron','Clockwork','Face of Cleric','Face of Miner','Face of Serpent','Wing Boots','Boot','Letter Opener','Blue Candle','Dream Catcher','Bird-Faced Urn','Sling','Anchor','Abacus','Eternal Feather','Ice Cream','Ginger','Turnip','Du-Vu Doll','Scales','The Specimen','Frozen Core','Inserter','Symbiotic Virus','Emotion Chip','Gold-Plated Cables','Graviton','Cracked Core','Data Disk','Nuclear Battery','Star Crystal','Champion Belt','Neows Blessing','Calling Bell','The Bomb','Bloody Idol','Mutagenic Strength','Darkstone Periapt','Leech','Ectoplasm','Cursed Key','Coffee Dripper','Velvet Choker','Fusion Hammer','Crown','Sozu','Runic Dome','Astrolabe','Slavers Collar','Philosopher Stone','Tiny House','Busted Crown','Pandoras Box','Eternal Feather','The Boot','Orrery','Empty Cage','Lizard Tail','Sapphire Key','Ruby Key','Emerald Key','Green Key','Red Key','Blue Key'];
-var RELIC_CATEGORIES = {build:'Magic Flower',str:'Dead Branch',energy:'Mark of Pain',draw:'Bag of Preparation',def:'Tough Bandages'};
+var RELIC_LIST = ['Charon\'s Ashes','Brimstone','Snecko Eye','Runic Pyramid','Tungsten Rod','Tough Bandages','Shuriken','Kunai','Pen Nib','Bag of Preparation','Centennial Puzzle','Membership Card','Juzu Bracelet','Gremlin Horn','Horn Cleat','Lantern','Vajra','War Paint','Whetstone','Meal Ticket','Regal Pillow','Pear','Strawberry','Mango','Old Coin','Happy Flower','Cauldron','Letter Opener','Dream Catcher','Anchor','Eternal Feather','Ice Cream','Symbiotic Virus','Emotion Chip','Gold-Plated Cables','Cracked Core','Data Disk','Calling Bell','Darkstone Periapt','Ectoplasm','Velvet Choker','Sozu','Astrolabe','Philosopher\'s Stone','Pandoras Box','Eternal Feather','The Boot','Orrery','Empty Cage','Lizard Tail'];
+var RELIC_CATEGORIES = {build:'Snecko Eye',str:'Vajra',energy:'Lantern',draw:'Bag of Preparation',def:'Tough Bandages'};
 
 function renderRelicBar() {
   var el = document.getElementById('relicBar');
@@ -1014,7 +1014,7 @@ function renderRelicBar() {
   html += '</div>';
   html += '<div style="font-family:Share Tech Mono,monospace;font-size:8px;color:var(--text-muted);letter-spacing:.08em;margin-bottom:3px">quick add</div>';
   html += '<div style="display:flex;flex-wrap:wrap;gap:3px">';
-  var commonRelics = ['Dead Branch','Magic Flower','Mark of Pain','Snecko Eye','Runic Pyramid','Bag of Preparation','Shuriken','Kunai','Pen Nib','Preserved Insect'];
+  var commonRelics = ['Charon\'s Ashes','Snecko Eye','Runic Pyramid','Bag of Preparation','Shuriken','Kunai','Pen Nib'];
   commonRelics.forEach(function(r) {
     if (relics.indexOf(r) < 0) {
       html += '<span onclick="addRelic(\''+r.replace(/'/g,"\\'")+'\')" style="font-size:8px;padding:2px 6px;border:1px solid rgba(180,140,60,.3);border-radius:2px;background:rgba(20,15,5,.5);color:var(--text-dim);cursor:pointer">'+r+'</span>';

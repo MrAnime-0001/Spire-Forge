@@ -83,7 +83,7 @@ const ARCHETYPE_ANTI_SYNERGY = {
   exhaust:   ['Battle Trance'],
   infinite:  ['Battle Trance'],
   osty:      ['Bone Shards'],
-  block:     ['Brimstone'],
+  block:     [],
   doom:      ['Defy','Defile','Call of the Void'],
   sly:       ['Impervious','Barricade'],
   claw:      ['Genetic Algorithm'],
@@ -705,26 +705,26 @@ Object.entries(REGION_DATA).forEach(([rk, rd]) => {
 const ENGINES = {
   ironclad: [
     {name:'Exhaust engine',cards:['Corruption','Dark Embrace','Feel No Pain'],note:'Core Exhaust trinity. Sculpts deck mid-combat. Priority: remove Strikes first.'},
-    {name:'Strength engine',cards:['Demon Form','Inflame','Heavy Blade'],note:'Passive Strength per turn. Go wide with multi-hit.'},
+    {name:'Strength engine',cards:['Demon Form','Inflame','Twin Strike'],note:'Passive Strength per turn. Go wide with multi-hit.'},
     {name:'Block engine',cards:['Barricade','Juggernaut','Body Slam'],note:'Block never expires. Juggernaut converts block to damage.'},
     {name:'Bloodletting engine',cards:['Bloodletting','Rupture','Offering'],note:'HP as resource. Bloodletting/Offering pay HP -> energy+draw -> Rupture gives Strength per HP loss.'},
     {name:'Strike engine',cards:['Perfected Strike','Twin Strike','Hellraiser'],note:'Pump Strike-family cards. Perfected Strike scales per Strike in deck. Hellraiser auto-plays drawn Strikes.'},
-    {name:'Self-Wound engine',cards:['Combust','Rupture','Evolve','Fire Breathing'],note:'Turn HP loss into card draw (Evolve) and Strength (Rupture). Combust + Fire Breathing = passive AoE.'}
+    {name:'Self-Wound engine',cards:['Inferno','Rupture'],note:'Turn HP loss into Strength (Rupture) and AoE damage (Inferno).'}
   ],
   silent: [
     {name:'Sly engine',cards:['Tactician','Tools of the Trade','Master Planner'],note:'Discard = free Energy. Keep deck thin to cycle fast.'},
     {name:'Shiv engine',cards:['Accuracy','Infinite Blades','Knife Trap'],note:'Scale Shiv damage. Accuracy stacks multiplicatively.'},
     {name:'Poison engine',cards:['Noxious Fumes','Accelerant','Bubble Bubble'],note:'Stack Poison then double it. Survive the early turns.'},
-    {name:'Grand Finale engine',cards:['Grand Finale','Acrobatics','Calculated Gamble'],note:'Empty draw pile = 50 AoE. Acrobatics+Gamble cycle through deck. Keep ~15 cards total.'},
+    {name:'Grand Finale engine',cards:['Grand Finale','Acrobatics','Calculated Gamble'],note:'Empty draw pile = 60 AoE. Acrobatics+Gamble cycle through deck. Keep ~15 cards total.'},
     {name:'Envenom engine',cards:['Envenom','Accuracy','Blade Dance'],note:'Shivs apply Poison via Envenom. Accuracy buffs the Shivs. Hybrid attack/poison scaling.'},
-    {name:'Combo engine',cards:['Expertise','Setup','Catalyst'],note:'Chain cards in specific order. Expertise fills hand, Setup enables 0-cost next turn.'}
+    {name:'Combo engine',cards:['Expertise','Accelerant'],note:'Chain cards in specific order. Expertise fills hand, Accelerant finishes.'}
   ],
   defect: [
     {name:'Orb/Focus engine',cards:['Defragment','Loop','Multi-Cast'],note:'Stack Focus ASAP. Remove Strikes — passive orbs outscale them by Act 2.'},
     {name:'Claw engine',cards:['Claw','All for One','Scrape'],note:'Every Claw buffs all Claws. Keep deck small. Feral returns 0-cost attacks.'},
     {name:'Hologram/TURBO loop',cards:['Hologram','TURBO','Claw'],note:'TURBO generates energy, Hologram retrieves Claw. Infinite-like turns with enough draw.'},
     {name:'Frost engine',cards:['Glacier','Biased Cognition','Coolheaded'],note:'Passive block via Frost orbs. Biased Cog spikes Focus making each Frost orb block more. Glacier channels 2 at once.'},
-    {name:'Dark Orb engine',cards:['Darkness','Dark Orb','Multi-Cast'],note:'Dark orbs store damage (ignores Focus). Let them grow then Multi-Cast for huge burst.'},
+    {name:'Dark Orb engine',cards:['Darkness','Multi-Cast'],note:'Dark orbs store damage (ignores Focus). Let them grow then Multi-Cast for huge burst.'},
     {name:'Creative AI engine',cards:['Creative AI','Hologram','White Noise'],note:'Random Power each turn. Hologram retrieves key powers from discard. White Noise adds free Power.'}
   ],
   necrobinder: [

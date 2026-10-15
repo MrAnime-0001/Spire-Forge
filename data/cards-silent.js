@@ -1619,7 +1619,7 @@ const SILENT_CARDS = [
       "cost": 0,
       "rarity": "rare",
       "cardType": "Attack",
-      "note": "50 AoE if draw pile empty. 0-cost nuke with setup required.",
+      "note": "60 AoE if draw pile empty. 0-cost nuke with setup required.",
       "description": "Can only be played if there are no cards in your Draw Pile. Deal 60 damage to ALL enemies.",
       "tier": "D"
     },
