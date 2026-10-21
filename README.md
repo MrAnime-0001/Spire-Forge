@@ -15,8 +15,12 @@ High-performance web-based **Build Advisor and Strategy Tool** for *Slay the Spi
 - **Boss Counter-Play** — Strategy panel with attack patterns, kill order, and deck matchup analysis for every boss and elite.
 - **Engine Tracker** — Build status panel showing committed/building archetypes with progress bars.
 - **Auto-Save & Persistence** — Session auto-saves to localStorage; export/import JSON; named loadouts (up to 20).
-- **Browse All Modal** — Manual card search/add for theorycrafting.
-- **Responsive 3-Column Layout** — Deck list, stat chips, and reward advisor panels.
+- **Manual Add Tab** — Search any card to see its verdict and add it for theorycrafting.
+- **Undo** — Ending a run, loading, importing, or deleting a loadout shows a toast with Undo.
+- **Safe Import** — Imported files are validated: unknown cards and relics are dropped, counts clamped, bad characters rejected.
+- **Keyboard Friendly** — `/` focuses search, `Enter` adds the top match, `Esc` clears or closes; every control is reachable with Tab.
+- **Responsive 3-Column Layout** — Deck list, stat chips, and reward advisor panels; single column with a thumb nav bar on phones.
+- **Motion** — Staggered verdict reveal with count-up scores, foil-tilt card previews, act/ascension title cards. All of it switches off under the OS "reduce motion" setting.
 
 ## Supported Characters
 
@@ -44,7 +48,11 @@ Every card gets one score (0–100) from `scoreCard` in `core/rewardAdvisor.js`.
 
 PICK at 70+, CONSIDER at 50+, otherwise SKIP. If nothing on offer reaches 50, the reward tab recommends skipping. Each verdict shows up to 3 "why" chips. Co-op-only cards, curses and statuses always score 0.
 
-Card text comes from the [Slay the Spire wiki](https://slaythespire.wiki.gg/) via `node scripts/sync-wiki-cards.mjs`. Run `node scripts/check-scoring.mjs` after changing the scorer.
+Card text comes from the [Slay the Spire wiki](https://slaythespire.wiki.gg/) via `node scripts/sync-wiki-cards.mjs`. Run `node scripts/check-scoring.mjs` after changing the scorer, deck stats, or save/import code.
+
+## Running Locally
+
+`node serve.mjs` serves the site at http://localhost:3000 (zero dependencies). Export/import needs a real origin, not `file://`.
 
 ## Project Structure
 
@@ -53,10 +61,11 @@ data/     — Static game data (10 files): per-character cards, constants, build
 core/     — Logic engine (5 files): state, deck stats, engine tracker, reward advisor, storage
 ui/       — View layer (5 files): deck view, picker view, result view, header controls, helpers
 assets/   — 32 PNG icons for status effects and character energy
-scripts/  — Tooling (4 files): card type classifier, data generators, balance test scenarios
+scripts/  — Tooling (3 files): wiki card sync, card art fetcher, scorer/state/import self-checks
+serve.mjs — Local static server
 ```
 
-**~16,300 lines across 27 source files (22 loaded in HTML).**
+**~19,000 lines across 25 source files (20 loaded in HTML).**
 
 ## Browser Support
 

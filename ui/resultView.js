@@ -20,7 +20,7 @@ function updatePriorityPanel() {
   const crisis  = getCrisisStates(axes, targets);
 
   if (crisis.attack || crisis.defense || crisis.scaling) {
-    html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#ff6040;margin-bottom:.6rem">critical needs</div>`;
+    html += `<div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#ff6040;margin-bottom:.6rem">critical needs</div>`;
     
     const suggestNeed = (label, color, role) => {
       // Only recommend cards from current character's pool — cross-class/colorless
@@ -36,12 +36,12 @@ function updatePriorityPanel() {
         const safeN = card.name.replace(/'/g,"\\'");
         html += `<div data-card="${card.name}" onclick="quickAddPriority('${safeN}')" style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid ${color}60;border-radius:3px;background:${color}12;cursor:pointer;margin-bottom:4px;transition:all .12s" onmouseover="this.style.borderColor='${color}';this.style.background='${color}25'" onmouseout="this.style.borderColor='${color}60';this.style.background='${color}12'">
           <div style="flex:1;min-width:0">
-            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:${color};text-transform:uppercase;margin-bottom:2px">${label}</div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:${color};text-transform:uppercase;margin-bottom:2px">${label}</div>
             <div style="font-size:13px;color:var(--text)">${card.name}</div>
           </div>
           ${typeTagHtml(card)}
-          <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${color};opacity:.6;flex-shrink:0;min-width:28px;text-align:right">${score}</span>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${color};opacity:.8;flex-shrink:0">+ add</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:${color};opacity:.6;flex-shrink:0;min-width:28px;text-align:right">${score}</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:${color};opacity:.8;flex-shrink:0">+ add</span>
         </div>`;
       });
     };
@@ -112,14 +112,12 @@ function updateResult() {
     box.innerHTML = '<div class="placeholder"><div class="placeholder-icon">⚔</div><p>Add cards to your deck to see your build path.</p></div>';
     renderDeckHealth();
     renderEngineTracker();
-    renderBossAlert();
     return;
   }
 
   renderDeckHealth();
   renderRelicBar();
   renderEngineTracker();
-  renderBossAlert();
   box.innerHTML = '<div style="background:rgba(0,0,0,.5);border-radius:4px;padding:8px 10px;margin-bottom:6px">' + renderBuildResults() + '</div>';
 }
 
@@ -132,8 +130,8 @@ function renderDeckProfile(p) {
   function row(icon, label, main, sub) {
     return `<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
       <span style="font-size:10px;width:14px;text-align:center;flex-shrink:0">${icon}</span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);width:62px;flex-shrink:0">${label}</span>
-      <span style="font-size:12px;font-family:'Cinzel',serif;font-weight:600;${main.color ? 'color:'+main.color : ''}">${main.val}</span>
+      <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);width:62px;flex-shrink:0">${label}</span>
+      <span style="font-size:12px;font-family:var(--font-display);font-weight:600;${main.color ? 'color:'+main.color : ''}">${main.val}</span>
       ${sub ? `<span style="font-size:9px;color:var(--text-muted);margin-left:auto;white-space:nowrap">${sub}</span>` : ''}
     </div>`;
   }
@@ -142,7 +140,7 @@ function renderDeckProfile(p) {
   var blkColor = statColor(p.blkPerTurn, p.blkMin);
 
   var html = `<div style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:.55rem .65rem;margin-bottom:.6rem">
-    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.45rem">deck profile</div>`;
+    <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.45rem">deck profile</div>`;
 
   html += row('⚔', 'Damage', {val: p.dmgPerTurn + ' dmg/turn', color: dmgColor}, 'target ' + p.dmgTarget);
   if (p.poisonPerCycle > 0)
@@ -262,15 +260,15 @@ function renderDeckHealth() {
   el.innerHTML = `<div class="axes-wrap" style="margin-bottom:.75rem">
     ${renderDeckOneLiner(axes)}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">deck evaluation</span>
-      <span style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:${volColor}">${volume} <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase">${volLabel}</span></span>
+      <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">deck evaluation</span>
+      <span style="font-family:var(--font-display);font-size:15px;font-weight:600;color:${volColor}">${volume} <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase">${volLabel}</span></span>
     </div>
     ${profile ? renderDeckProfile(profile) : ''}
 
     <div style="padding:.55rem .75rem;background:rgba(0,0,0,.5);border:1px solid ${szp.color}40;border-left:3px solid ${szp.color};border-radius:4px;margin-bottom:.75rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem">
-        <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">${szp.total} cards \xb7 ${szp.label}</span>
-        ${tte !== null ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--text-muted)">cycle speed: <span class="${tteCls}" style="font-family:'Cinzel',serif;font-size:13px;font-weight:600">${tte}</span></span>` : ''}
+        <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">${szp.total} cards \xb7 ${szp.label}</span>
+        ${tte !== null ? `<span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--text-muted)">cycle speed: <span class="${tteCls}" style="font-family:var(--font-display);font-size:13px;font-weight:600">${tte}</span></span>` : ''}
       </div>
       <div style="height:5px;background:var(--surface);border-radius:99px;overflow:hidden;margin:.25rem 0">
         <div style="height:100%;border-radius:99px;width:${Math.min(100,Math.round(szp.total/35*100))}%;background:${szp.color};transition:width .4s"></div>
@@ -278,7 +276,7 @@ function renderDeckHealth() {
       <div style="font-size:11px;color:var(--text-dim);font-style:italic;line-height:1.4">${szp.advice}</div>
     </div>
 
-    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
       <span>draw odds</span>
       <span style="color:var(--text-muted);font-size:9px">${drawBreakdown}</span>
     </div>
@@ -306,7 +304,7 @@ function renderEngineTracker() {
   var items = getEngineTrackerItems();
 
   let html = '<div class="engine-wrap">';
-  html += '<div style="font-family:&quot;Share Tech Mono&quot;,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">build status</div>';
+  html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">build status</div>';
 
   items.forEach(item => {
     const cards   = item.eng.cards;
@@ -319,11 +317,11 @@ function renderEngineTracker() {
 
     html += '<div style="margin-bottom:.5rem;padding:.4rem .5rem;border:1px solid '+color+'30;border-radius:3px;background:'+color+'08">';
     html += '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">';
-    html += '<span style="font-size:11px;font-family:Cinzel,serif;color:'+item.build.color+'">'+item.build.name+'</span>';
-    html += '<span style="font-family:Share Tech Mono,monospace;font-size:8px;color:'+color+';margin-left:auto">'+status+'</span>';
+    html += '<span style="font-size:11px;font-family:var(--font-display);color:'+item.build.color+'">'+item.build.name+'</span>';
+    html += '<span style="font-family:var(--font-mono);font-size:10px;color:'+color+';margin-left:auto">'+status+'</span>';
     html += '</div>';
     html += '<div class="axis-row" style="margin-bottom:4px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:'+Math.round(pct*100)+'%;background:'+color+'"></div></div><span class="axis-val">'+have+'/'+total+'</span></div>';
-    if (missing.length > 0 && pct < 1) html += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted)">need: <span style="color:'+color+'">'+missing.slice(0,5).join(', ')+'</span></div>';
+    if (missing.length > 0 && pct < 1) html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted)">need: <span style="color:'+color+'">'+missing.slice(0,5).join(', ')+'</span></div>';
     html += '</div>';
   });
 
@@ -345,7 +343,7 @@ function renderEngineTracker() {
   var era = getEradicateNukeEstimate();
   if (era) {
     html += '<div style="padding:4px 7px;border:1px solid rgba(74,154,138,.3);border-radius:3px;background:rgba(74,154,138,.06);margin-top:2px">';
-    html += '<div style="font-family:Share Tech Mono,monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">eradicate ceiling</div>';
+    html += '<div style="font-family:var(--font-mono);font-size:10px;color:var(--teal-bright);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">eradicate ceiling</div>';
     html += '<div style="font-size:11px;color:var(--text-dim)">'+era.energy+' energy &rarr; '+era.base+' dmg';
     if (era.withMultipliers !== era.base) html += ' &rarr; <span style="color:var(--amber-bright)">'+era.withMultipliers+' with multipliers</span>';
     html += '</div></div>';
@@ -369,7 +367,7 @@ function renderEngineTracker() {
       });
     }
     if (buildEnablers.length > 0) {
-      if (items.length === 0) html += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">build status</div>';
+      if (items.length === 0) html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">build status</div>';
       buildEnablers.forEach(function(be) {
         html += '<div style="margin-bottom:4px;padding:4px 7px;border:1px solid '+be.color+'40;border-radius:3px;background:'+be.color+'10;font-size:10px;color:'+be.color+'">✦ Your <strong>'+be.relic+'</strong> enables <strong>'+be.build+'</strong></div>';
       });
@@ -444,7 +442,7 @@ function renderPlayTips(axes, targets, crisis) {
     if (atkCount > 10) add(2, '<span style="color:#c06060">⚔ ' + atkCount + ' attacks</span> — Ironclad needs block too, over 10 attacks is greedy');
   }
   if (currentChar === 'necrobinder') {
-    if (deck['Soul'] > 0 && deck['Osty'] === 0 && currentAct <= 1) {
+    if (deck['Soul'] > 0 && !deck['Osty'] && currentAct <= 1) {
       add(1, '<span style="color:#c06060">⚠ Soul before Osty</span> — Act 1 Osty is safer, prioritize Summon cards');
     }
   }
@@ -466,7 +464,7 @@ function renderPlayTips(axes, targets, crisis) {
   if (shown.length === 0) return '';
 
   var tipHtml = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
-  tipHtml += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">play tips</div>';
+  tipHtml += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">play tips</div>';
   shown.forEach(function(tip) {
     tipHtml += '<div style="font-size:11px;line-height:1.5;padding:4px 7px;border:1px solid rgba(100,90,70,.2);border-radius:3px;background:rgba(100,90,70,.06);margin-bottom:4px">' + tip.h + '</div>';
   });
@@ -482,7 +480,7 @@ function renderGettingStarted() {
   var arrow = isOpen ? '▼' : '▶';
 
   var html = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
-  html += '<div onclick="toggleGs(\'' + key + '\')" style="cursor:pointer;font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;user-select:none">';
+  html += '<div onclick="toggleGs(\'' + key + '\')" style="cursor:pointer;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;user-select:none">';
   html += '<span style="display:inline-block;width:12px">' + arrow + '</span> getting started</div>';
   html += '<div id="gs_' + key + '" style="display:' + display + ';font-size:11px;line-height:1.6;color:var(--text-dim)">';
 
@@ -633,7 +631,7 @@ function renderCampfireAdvice(axes, targets) {
 
   var color = primary === 'Rest' ? 'var(--teal)' : primary === 'Upgrade' ? 'var(--amber-bright)' : 'var(--amethyst)';
   var html = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
-  html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">campfire</div>';
+  html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">campfire</div>';
   html += '<div style="padding:6px 9px;border:1px solid ' + color + '40;border-radius:3px;background:' + color + '0d;font-size:11px;line-height:1.5">';
   html += '<strong style="color:' + color + '">' + primary + '</strong>';
   html += ' <span style="color:var(--text-dim)">— ' + reasoning + '</span>';
@@ -642,14 +640,14 @@ function renderCampfireAdvice(axes, targets) {
   var upgradeCards = getUpgradeCandidates();
   if (upgradeCards && upgradeCards.length > 0) {
     html += '<div style="margin-top:7px;padding-top:6px;border-top:1px solid ' + color + '20">';
-    html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);letter-spacing:.08em;margin-bottom:4px">upgrade order</div>';
+    html += '<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.08em;margin-bottom:4px">upgrade order</div>';
     upgradeCards.forEach(function(c) {
       var uc = c.score >= 30 ? 'var(--amber-bright)' : c.score >= 20 ? 'var(--teal)' : 'var(--text-dim)';
       var deckCount = deck[c.name] || 0;
       html += '<div onclick="upgradeCard(\'' + c.name.replace(/'/g,"\\'") + '\');updatePriorityPanel();updateResult();autoSave()" style="display:flex;align-items:center;gap:5px;padding:3px 6px;border:1px solid rgba(100,90,70,.12);border-radius:2px;background:rgba(100,90,70,.04);margin-bottom:2px;font-size:10px;cursor:pointer">';
       html += '<span style="color:' + uc + ';flex:1">' + c.name + '</span>';
-      html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted)">' + deckCount + ' in deck</span>';
-      html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:' + uc + '">' + c.score + ' ⚒</span>';
+      html += '<span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">' + deckCount + ' in deck</span>';
+      html += '<span style="font-family:var(--font-mono);font-size:10px;color:' + uc + '">' + c.score + ' ⚒</span>';
       html += '</div>';
     });
     html += '</div>';
@@ -671,7 +669,7 @@ function renderPathSuggestion(axes) {
   var efficiencyOK = axes.Efficiency >= targets.Efficiency;
 
   var html = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
-  html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">path suggestion</div>';
+  html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">path suggestion</div>';
 
   var suggestion = '';
   var color = 'var(--verdant-bright)';
@@ -733,7 +731,7 @@ function renderEncounterTips() {
   var arrow = isOpen ? '▼' : '▶';
 
   var html = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
-  html += '<div onclick="__encounterTipsOpen.encTips=!__encounterTipsOpen.encTips;updatePriorityPanel()" style="cursor:pointer;font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;user-select:none">';
+  html += '<div onclick="__encounterTipsOpen.encTips=!__encounterTipsOpen.encTips;updatePriorityPanel()" style="cursor:pointer;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;user-select:none">';
   html += '<span style="display:inline-block;width:12px">' + arrow + '</span> encounter tips</div>';
 
   if (!isOpen) return html;
@@ -743,9 +741,9 @@ function renderEncounterTips() {
   // Find regions matching current act
   Object.keys(REGION_DATA).forEach(function(rk) {
     var rd = REGION_DATA[rk];
-    if (rd.act !== currentAct) return;
+    if (!inCurrentRegion(rk)) return;
 
-    html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:' + rd.color + ';letter-spacing:.1em;text-transform:uppercase;margin:.5rem 0 .2rem">' + rd.label + '</div>';
+    html += '<div style="font-family:var(--font-mono);font-size:10px;color:' + rd.color + ';letter-spacing:.1em;text-transform:uppercase;margin:.5rem 0 .2rem">' + rd.label + '</div>';
 
     // Elites
     if (rd.elites) {
@@ -782,7 +780,7 @@ function renderRemoveCandidates() {
   var candidates = getRemoveCandidates();
   if (!candidates || candidates.length === 0) return '';
   var html = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
-  html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">remove at campfire</div>';
+  html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">remove at campfire</div>';
   candidates.forEach(function(c) {
     var dotColor = c.priority === 'high' ? '#c06060' : c.priority === 'medium' ? 'var(--amber-bright)' : 'var(--text-muted)';
     html += '<div style="display:flex;align-items:center;gap:6px;padding:4px 7px;border:1px solid rgba(100,90,70,.15);border-radius:3px;background:rgba(100,90,70,.05);margin-bottom:3px;font-size:11px">';
@@ -802,7 +800,7 @@ function renderCostCurve() {
   var total = dist.reduce(function(s, d) { return s + d.count; }, 0);
   if (total === 0) return '';
   var html = '<div class="divider" style="margin:.6rem 0 .7rem"></div>';
-  html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">energy cost curve</div>';
+  html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">energy cost curve</div>';
   html += '<div style="display:flex;gap:3px;min-height:20px;align-items:flex-end;margin-bottom:4px">';
   var barColors = {0:'var(--teal)',1:'var(--verdant-bright)',2:'var(--amber-bright)',3:'var(--blood-bright)',4:'var(--amethyst)'};
   dist.forEach(function(d) {
@@ -811,9 +809,9 @@ function renderCostCurve() {
     var color = barColors[d.cost] || 'var(--text-muted)';
     var displayLabel = d.count > 0 ? d.count : '';
     html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center">';
-    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text)">' + d.count + '</span>';
+    html += '<span style="font-family:var(--font-mono);font-size:9px;color:var(--text)">' + d.count + '</span>';
     html += '<div style="width:100%;height:' + barH + 'px;background:' + color + ';border-radius:2px;min-height:4px"></div>';
-    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);margin-top:2px">' + d.label + '</span>';
+    html += '<span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-top:2px">' + d.label + '</span>';
     html += '</div>';
   });
   html += '</div>';
@@ -828,15 +826,15 @@ function renderCostCurve() {
     var starDist = getStarCostDistribution();
     if (starDist.length > 0) {
       var starTotal = starDist.reduce(function(s, d) { return s + d.count; }, 0);
-      html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin:.5rem 0 .3rem">star cost curve</div>';
+      html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin:.5rem 0 .3rem">star cost curve</div>';
       html += '<div style="display:flex;gap:3px;min-height:16px;align-items:flex-end;margin-bottom:2px">';
       starDist.forEach(function(d) {
         var pct = starTotal > 0 ? Math.round(d.count / starTotal * 100) : 0;
         var barH = Math.max(4, pct * 0.5);
         html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center">';
-        html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--gold-bright)">' + d.count + '</span>';
+        html += '<span style="font-family:var(--font-mono);font-size:10px;color:var(--gold-bright)">' + d.count + '</span>';
         html += '<div style="width:100%;height:' + barH + 'px;background:var(--gold);border-radius:2px;min-height:4px"></div>';
-        html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);margin-top:1px">' + d.label + '</span>';
+        html += '<span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-top:1px">' + d.label + '</span>';
         html += '</div>';
       });
       html += '</div>';
@@ -856,7 +854,7 @@ function renderBuildResults() {
   if (totalCards === 0) return '<div class="placeholder"><div class="placeholder-icon">⚔</div><p>Add cards to your deck to see your build path.</p></div>';
 
   var html = '<div class="result-scroll">';
-  html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem">all builds</div>';
+  html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem">all builds</div>';
 
   // Sort: mustPick% → highPriority% → synergy% (highest commitment first)
   var buildEntries = Object.keys(charBuilds).map(function(bk) {
@@ -895,15 +893,15 @@ function renderBuildResults() {
     // Build header
     html += '<div style="margin-bottom:.5rem;padding:.5rem;border:1px solid ' + b.color + '30;border-radius:4px;background:' + b.color + '06">';
     html += '<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">';
-    html += '<span style="font-size:12px;font-family:Cinzel,serif;color:' + b.color + '">' + b.name + '</span>';
-    if (b.rank) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;padding:1px 5px;border-radius:2px;border:1px solid ' + b.color + '50;color:' + b.color + '">' + b.rank + '</span>';
-    html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:' + statusColor + ';margin-left:auto">' + statusLabel + '</span>';
+    html += '<span style="font-size:12px;font-family:var(--font-display);color:' + b.color + '">' + b.name + '</span>';
+    if (b.rank) html += '<span style="font-family:var(--font-mono);font-size:10px;padding:1px 5px;border-radius:2px;border:1px solid ' + b.color + '50;color:' + b.color + '">' + b.rank + '</span>';
+    html += '<span style="font-family:var(--font-mono);font-size:10px;color:' + statusColor + ';margin-left:auto">' + statusLabel + '</span>';
     html += '</div>';
 
     // Must Pick bar + cards
     if (mustPick.length > 0) {
       var mpPct = haveMustPick / mustPick.length;
-      html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#ff6040;letter-spacing:.06em">MUST PICK</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(mpPct*100) + '%;background:#ff6040"></div></div><span class="axis-val" style="color:#ff6040;font-size:9px">' + haveMustPick + '/' + mustPick.length + '</span></div><div style="font-size:10px;color:var(--text)">';
+      html += '<div style="margin-bottom:6px"><div><span style="font-family:var(--font-mono);font-size:10px;color:#ff6040;letter-spacing:.06em">MUST PICK</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(mpPct*100) + '%;background:#ff6040"></div></div><span class="axis-val" style="color:#ff6040;font-size:9px">' + haveMustPick + '/' + mustPick.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       mustPick.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
         var safeC = c.replace(/'/g, "\\'");
@@ -916,7 +914,7 @@ function renderBuildResults() {
     // High priority bar + cards
     if (highPri.length > 0) {
       var hpPct = haveHighPri / highPri.length;
-      html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--amber-bright);letter-spacing:.06em">HIGH PRIORITY</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(hpPct*100) + '%;background:var(--amber-bright)"></div></div><span class="axis-val" style="color:var(--amber-bright);font-size:9px">' + haveHighPri + '/' + highPri.length + '</span></div><div style="font-size:10px;color:var(--text)">';
+      html += '<div style="margin-bottom:6px"><div><span style="font-family:var(--font-mono);font-size:10px;color:var(--amber-bright);letter-spacing:.06em">HIGH PRIORITY</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(hpPct*100) + '%;background:var(--amber-bright)"></div></div><span class="axis-val" style="color:var(--amber-bright);font-size:9px">' + haveHighPri + '/' + highPri.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       highPri.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
         var safeC = c.replace(/'/g, "\\'");
@@ -931,7 +929,7 @@ function renderBuildResults() {
     if (otherEssential.length > 0) {
       var haveOther = otherEssential.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
       var oePct = haveOther / otherEssential.length;
-      html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.06em">ESSENTIAL</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(oePct*100) + '%;background:var(--teal-bright)"></div></div><span class="axis-val" style="color:var(--teal-bright);font-size:9px">' + haveOther + '/' + otherEssential.length + '</span></div><div style="font-size:10px;color:var(--text)">';
+      html += '<div style="margin-bottom:6px"><div><span style="font-family:var(--font-mono);font-size:10px;color:var(--teal-bright);letter-spacing:.06em">ESSENTIAL</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(oePct*100) + '%;background:var(--teal-bright)"></div></div><span class="axis-val" style="color:var(--teal-bright);font-size:9px">' + haveOther + '/' + otherEssential.length + '</span></div><div style="font-size:10px;color:var(--text)">';
       otherEssential.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
         var safeC = c.replace(/'/g, "\\'");
@@ -945,7 +943,7 @@ function renderBuildResults() {
     if (synergy.length > 0) {
       var haveSynergy = synergy.filter(function(c) { return deck[c] || deck[c+'+']; }).length;
       var syPct = haveSynergy / synergy.length;
-      html += '<div style="margin-bottom:6px"><div><span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--green-bright);letter-spacing:.06em">SYNERGY</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(syPct*100) + '%;background:var(--green-bright)"></div></div><span class="axis-val" style="color:var(--green-bright);font-size:9px">' + haveSynergy + '/' + synergy.length + '</span></div>';
+      html += '<div style="margin-bottom:6px"><div><span style="font-family:var(--font-mono);font-size:10px;color:var(--green-bright);letter-spacing:.06em">SYNERGY</span></div><div class="axis-row" style="margin-bottom:2px"><div class="axis-bar-bg" style="flex:1"><div class="axis-bar-fill" style="width:' + Math.round(syPct*100) + '%;background:var(--green-bright)"></div></div><span class="axis-val" style="color:var(--green-bright);font-size:9px">' + haveSynergy + '/' + synergy.length + '</span></div>';
       html += '<div style="margin-top:3px;font-size:10px;color:var(--text-dim)">';
       synergy.forEach(function(c) {
         var inDeck = deck[c] || deck[c+'+'] ? true : false;
@@ -958,7 +956,7 @@ function renderBuildResults() {
 
     // Recommended relics
     if (b.relicPriority && b.relicPriority.length > 0) {
-      html += '<details style="margin-top:3px"><summary style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--amber);cursor:pointer;letter-spacing:.06em">RECOMMENDED RELICS (' + b.relicPriority.length + ')</summary>';
+      html += '<details style="margin-top:3px"><summary style="font-family:var(--font-mono);font-size:10px;color:var(--amber);cursor:pointer;letter-spacing:.06em">RECOMMENDED RELICS (' + b.relicPriority.length + ')</summary>';
       html += '<div style="margin-top:3px;font-size:10px;color:var(--text-dim)">';
       b.relicPriority.forEach(function(r) {
         var owned = relics.indexOf(r) >= 0;
@@ -970,17 +968,17 @@ function renderBuildResults() {
     // Upgrade priority
     var upgradeList = mustPick.concat(highPri).filter(function(c) { return deck[c] && !deck[c+'+']; });
     if (upgradeList.length > 0) {
-      html += '<div style="margin-top:3px;font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--amber-bright);letter-spacing:.06em">UPGRADE PRIORITY: <span style="color:var(--text-dim);font-size:9px">' + upgradeList.slice(0, 4).join(' > ') + '</span></div>';
+      html += '<div style="margin-top:3px;font-family:var(--font-mono);font-size:10px;color:var(--amber-bright);letter-spacing:.06em">UPGRADE PRIORITY: <span style="color:var(--text-dim);font-size:9px">' + upgradeList.slice(0, 4).join(' > ') + '</span></div>';
     }
 
     // Potion priority
     if (b.potionPriority) {
-      html += '<div style="margin-top:3px;font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--teal-bright);letter-spacing:.06em">POTIONS: <span style="color:var(--text-dim);font-size:9px;font-family:inherit">' + b.potionPriority + '</span></div>';
+      html += '<div style="margin-top:3px;font-family:var(--font-mono);font-size:10px;color:var(--teal-bright);letter-spacing:.06em">POTIONS: <span style="color:var(--text-dim);font-size:9px;font-family:inherit">' + b.potionPriority + '</span></div>';
     }
 
     // Tips
     if (b.tips && b.tips.length > 0) {
-      html += '<details style="margin-top:3px"><summary style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);cursor:pointer;letter-spacing:.06em">tips</summary>';
+      html += '<details style="margin-top:3px"><summary style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);cursor:pointer;letter-spacing:.06em">tips</summary>';
       html += '<ul style="margin:4px 0 0 1rem;padding:0;font-size:10px;color:var(--text-dim);line-height:1.5">';
       b.tips.forEach(function(tip) { html += '<li>' + tip + '</li>'; });
       html += '</ul></details>';
@@ -995,33 +993,22 @@ function renderBuildResults() {
 
 // ── renderRelicBar ───────────────────────────────────────────
 // Shows current relics with add/remove controls.
-var RELIC_LIST = ['Charon\'s Ashes','Brimstone','Snecko Eye','Runic Pyramid','Tungsten Rod','Tough Bandages','Shuriken','Kunai','Pen Nib','Bag of Preparation','Centennial Puzzle','Membership Card','Juzu Bracelet','Gremlin Horn','Horn Cleat','Lantern','Vajra','War Paint','Whetstone','Meal Ticket','Regal Pillow','Pear','Strawberry','Mango','Old Coin','Happy Flower','Cauldron','Letter Opener','Dream Catcher','Anchor','Eternal Feather','Ice Cream','Symbiotic Virus','Emotion Chip','Gold-Plated Cables','Cracked Core','Data Disk','Calling Bell','Darkstone Periapt','Ectoplasm','Velvet Choker','Sozu','Astrolabe','Philosopher\'s Stone','Pandoras Box','Eternal Feather','The Boot','Orrery','Empty Cage','Lizard Tail'];
-var RELIC_CATEGORIES = {build:'Snecko Eye',str:'Vajra',energy:'Lantern',draw:'Bag of Preparation',def:'Tough Bandages'};
+var QUICK_RELICS = ['Charon\'s Ashes','Snecko Eye','Runic Pyramid','Bag of Preparation','Shuriken','Kunai','Pen Nib'];
 
+// Relics are passed by index: imported names are untrusted and never go into onclick strings.
 function renderRelicBar() {
   var el = document.getElementById('relicBar');
   if (!el || !currentChar) { if(el) el.innerHTML=''; return; }
-  var html = '<div style="background:rgba(0,0,0,.5);border-radius:4px;padding:6px 8px;margin-bottom:6px">';
-  html += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">relics</div>';
-  html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">';
-  if (relics.length === 0) {
-    html += '<span style="font-size:10px;color:var(--text-dim)">none — click to add</span>';
-  } else {
-    relics.forEach(function(r) {
-      html += '<span onclick="removeRelic(\''+r.replace(/'/g,"\\'")+'\')" style="font-size:10px;padding:2px 8px;border:1px solid rgba(200,146,42,.5);border-radius:3px;background:rgba(30,20,5,.6);color:var(--amber-bright);cursor:pointer;display:inline-flex;align-items:center;gap:4px">'+r+' <span style="color:var(--text-muted);font-size:8px">✕</span></span>';
-    });
-  }
-  html += '</div>';
-  html += '<div style="font-family:Share Tech Mono,monospace;font-size:8px;color:var(--text-muted);letter-spacing:.08em;margin-bottom:3px">quick add</div>';
-  html += '<div style="display:flex;flex-wrap:wrap;gap:3px">';
-  var commonRelics = ['Charon\'s Ashes','Snecko Eye','Runic Pyramid','Bag of Preparation','Shuriken','Kunai','Pen Nib'];
-  commonRelics.forEach(function(r) {
-    if (relics.indexOf(r) < 0) {
-      html += '<span onclick="addRelic(\''+r.replace(/'/g,"\\'")+'\')" style="font-size:8px;padding:2px 6px;border:1px solid rgba(180,140,60,.3);border-radius:2px;background:rgba(20,15,5,.5);color:var(--text-dim);cursor:pointer">'+r+'</span>';
-    }
+  var html = '<div class="relic-bar"><div class="mini-label">relics</div><div class="chip-row">';
+  if (relics.length === 0) html += '<span class="empty-note">none yet — quick add below</span>';
+  relics.forEach(function(r, i) {
+    html += '<button type="button" class="chip-btn relic-chip" onclick="removeRelic(relics[' + i + '])" aria-label="Remove relic ' + esc(r) + '">' + esc(r) + ' <span aria-hidden="true">✕</span></button>';
   });
-  html += '</div></div>';
-  el.innerHTML = html;
+  html += '</div><div class="mini-label">quick add</div><div class="chip-row">';
+  QUICK_RELICS.forEach(function(r, i) {
+    if (relics.indexOf(r) < 0) html += '<button type="button" class="chip-btn" onclick="addRelic(QUICK_RELICS[' + i + '])">+ ' + esc(r) + '</button>';
+  });
+  el.innerHTML = html + '</div></div>';
 }
 
 // Toggle Getting Started section

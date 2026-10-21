@@ -1,6 +1,59 @@
 // Shared display helpers for STS2 Build Advisor.
 // Used by deckView, resultView, pickerView, and modals.
 
+// Particles, cinematics and count-ups check this; CSS has its own prefers-reduced-motion block.
+var REDUCED_MOTION = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Escape text for innerHTML / attribute values.
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c];
+  });
+}
+
+// Stacked toasts (max 3). opts: {title, type:'error', ms, actions:[{label, fn}]}.
+// The host is a manual popover so it sits in the top layer above open dialogs.
+function toast(msg, opts) {
+  opts = opts || {};
+  if (typeof document === 'undefined') return;
+  var host = document.getElementById('toastHost');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'toastHost';
+    host.setAttribute('role', 'status');
+    host.setAttribute('aria-live', 'polite');
+    if ('popover' in host) host.popover = 'manual';
+    document.body.appendChild(host);
+  }
+  if (host.showPopover) { if (host.matches(':popover-open')) host.hidePopover(); host.showPopover(); }
+  while (host.children.length >= 3) host.firstChild.remove();
+  var t = document.createElement('div');
+  t.className = 'toast' + (opts.type ? ' toast-' + opts.type : '');
+  t.innerHTML = (opts.title ? '<strong>' + esc(opts.title) + '</strong> ' : '') + '<span>' + esc(msg) + '</span>';
+  var close = function() {
+    clearTimeout(timer);
+    t.classList.add('out');
+    setTimeout(function() { t.remove(); }, 250);
+  };
+  (opts.actions || []).forEach(function(a) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'toast-btn';
+    b.textContent = a.label;
+    b.onclick = function() { close(); a.fn(); };
+    t.appendChild(b);
+  });
+  var x = document.createElement('button');
+  x.type = 'button';
+  x.className = 'toast-x';
+  x.setAttribute('aria-label', 'Dismiss');
+  x.textContent = '✕';
+  x.onclick = close;
+  t.appendChild(x);
+  host.appendChild(t);
+  var timer = setTimeout(close, opts.ms || (opts.actions ? 7000 : 4000));
+}
+
 
 function getAllCardsForPicker() {
   var own = (ALL_CARDS[currentChar] || []).map(function(c){ return Object.assign({}, c, {crossChar: false}); });
@@ -48,8 +101,8 @@ function cardOrbHtml(card, small) {
   var found = findCard(card.name);
   var col = CHAR_COLORS[found ? found.pool : currentChar] || CHAR_COLORS.colorless;
   var sm = small ? ' sm' : '';
-  var html = '<span class="cf-orb' + sm + '" style="--char:' + col + '">' + card.cost + '</span>';
-  if (card.starCost !== undefined) html += '<span class="cf-orb cf-star' + sm + '">' + card.starCost + '</span>';
+  var html = '<span class="cf-orb' + sm + '" style="--char:' + col + '">' + (card.cost < 0 ? 'X' : card.cost) + '</span>';
+  if (card.starCost !== undefined) html += '<span class="cf-orb cf-star' + sm + '">' + (card.starCost < 0 ? 'X' : card.starCost) + '</span>';
   return html;
 }
 
@@ -61,7 +114,8 @@ function cardArtHtml(card, pool) {
     'onerror="this.onerror=function(){this.remove()};this.src=\'assets/cards/colorless/' + slug + '.webp\'">';
 }
 
-function cardFaceHtml(card) {
+// noNote: leave out the advisor note under the face (reward cards show their own detail).
+function cardFaceHtml(card, noNote) {
   var found = findCard(card.name);
   var col = CHAR_COLORS[found ? found.pool : currentChar] || CHAR_COLORS.colorless;
   var type = card.cardType || (/atk/.test(card.type) ? 'Attack' : /pow/.test(card.type) ? 'Power' : isUnplayable(card) ? 'Curse' : 'Skill');
@@ -69,13 +123,13 @@ function cardFaceHtml(card) {
   return '<div class="cf cf-' + type.toLowerCase() + '" style="--char:' + col + '">' +
       '<div class="cf-orbs">' + cardOrbHtml(card) + '</div>' +
       (card.multiplayer ? '<span class="cf-coop">CO-OP</span>' : '') +
-      '<div class="cf-banner cf-rar-' + rar + '"><span class="cf-name' + (card.isUpgraded ? ' up' : '') + '">' + card.name + '</span></div>' +
+      '<div class="cf-banner cf-rar-' + rar + '"><span class="cf-name' + (card.isUpgraded ? ' up' : '') + '">' + esc(card.name) + '</span></div>' +
       '<div class="cf-art">' + cardArtHtml(card, found ? found.pool : 'colorless') + '</div>' +
       '<div class="cf-type">' + type + '</div>' +
       '<div class="cf-body">' + formatCardDescription(card.description) + '</div>' +
       '<div class="cf-rarity">' + rar + '</div>' +
     '</div>' +
-    (card.note ? '<div class="cf-note">' + card.note + '</div>' : '');
+    (card.note && !noNote ? '<div class="cf-note">' + card.note + '</div>' : '');
 }
 
 function getRarity(card) {

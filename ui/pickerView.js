@@ -1,22 +1,26 @@
 // Inline card picker (reward tab + add tab) for STS2 Build Advisor.
 
 let pickerTab = 'reward';
-let rewardOffered = [];
-let rewardStage = 'select'; // 'select' | 'verdict'
+let rewardOffered = []; // card names in the current reward pool; kept across tab switches
 
-function showInlinePicker() {
-  document.getElementById('inlinePicker').style.display = 'block';
-  renderPickerReward();
+// '⚡⚡', 'X', or '⚡✦✦' for Regent stars. Negative costs in the data mean X (or unplayable).
+function costText(c) {
+  if (isUnplayable(c)) return '';
+  const rep = (ch, n) => n === 'X' || n < 0 ? 'X' : ch.repeat(Number(n) || 0);
+  return (c.cost !== undefined ? rep('⚡', c.cost) : '') + (currentChar === 'regent' && c.starCost ? rep('✦', c.starCost) : '');
 }
 
 function switchPickerTab(tab) {
   pickerTab = tab;
-  document.getElementById('ptab-reward').classList.toggle('active', tab === 'reward');
-  document.getElementById('ptab-add').classList.toggle('active', tab === 'add');
+  ['reward', 'add'].forEach(function(t) {
+    var b = document.getElementById('ptab-' + t);
+    b.classList.toggle('active', tab === t);
+    b.setAttribute('aria-selected', tab === t);
+  });
+  document.querySelector('.picker-tabs').dataset.tab = tab;
   document.getElementById('pickerSearch').value = '';
   document.getElementById('pickerSearch').placeholder = tab === 'reward' ? 'Search cards being offered...' : 'Search to see build details, or browse below...';
   if (tab === 'reward') {
-    rewardOffered = []; rewardStage = 'select';
     renderPickerReward();
   } else {
     renderPickerAdd();
@@ -54,14 +58,14 @@ function renderRewardUnified(el) {
   // Pool chips (always visible at top)
   if (rewardOffered.length > 0) {
     html += '<div style="padding:5px 2px 7px;border-bottom:1px solid var(--border);margin-bottom:6px">';
-    html += '<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">pool \u2014 click to remove</div>';
+    html += '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">pool \u2014 click to remove</div>';
     html += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
     rewardOffered.forEach(function(n) {
       const c = allCards.find(function(x){return x.name===n;});
       const t = c ? c.type : 'skl';
       const safeNR = n.replace(/'/g,"\\'");
       html += '<span data-card="'+n+'" onclick="rewardRemoveOffered(\''+safeNR+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--border-bright);border-radius:3px;background:var(--surface2);font-size:12px;cursor:pointer;color:var(--text)">';
-      html += '<span class="deck-item-tag '+typeCls(t)+'" style="font-size:8px;padding:1px 4px">'+t.replace(/_/g,'·').toUpperCase()+'</span>';
+      html += '<span class="deck-item-tag '+typeCls(t)+'" style="font-size:10px;padding:1px 4px">'+t.replace(/_/g,'·').toUpperCase()+'</span>';
       html += ' '+n+' <span style="color:var(--text-muted);font-size:10px">\u2715</span></span>';
     });
     html += '</div></div>';
@@ -85,9 +89,8 @@ function renderRewardUnified(el) {
         const nameCol = already ? 'var(--amber-bright)' : (c.crossChar ? 'var(--text-dim)' : 'var(--text)');
         const addCol = already ? 'var(--amber)' : 'var(--green-bright)';
         const addLbl = already ? '&#10003; added' : '+ add';
-        const crossLabel = c.crossChar ? ' <span style="font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">'+c.crossCharName+'</span>' : '';
-        const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
-  const finalCostStr = (currentChar === 'regent' && c.starCost) ? costStr + '✦'.repeat(c.starCost) : costStr;
+        const crossLabel = c.crossChar ? ' <span style="font-size:10px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">'+c.crossCharName+'</span>' : '';
+        const finalCostStr = costText(c);
         const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
         const descHtml = formatCardDescription(c.description || '');
         const detailHtml = '<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">'+typeLabel+(finalCostStr?' · '+finalCostStr:'')+(descHtml?' — '+descHtml:'')+'</div>';
@@ -118,6 +121,19 @@ function renderRewardUnified(el) {
   el.innerHTML = html;
 }
 
+var _revealKey = '';
+
+// Verdict scores tick up from 0 (400 ms, ease-out) on freshly revealed reward rows.
+function countUpScores() {
+  var els = document.querySelectorAll('.rcard.reveal .score-num');
+  var t0 = performance.now();
+  (function tick(now) {
+    var k = Math.min(1, (now - t0) / 400), e = 1 - Math.pow(1 - k, 3);
+    els.forEach(function(el) { el.textContent = Math.round(el.dataset.score * e); });
+    if (k < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+
 function renderRewardVerdictHtml() {
   if (!currentChar) return '';
   var total = getDeckSize();
@@ -138,31 +154,26 @@ function renderRewardVerdictHtml() {
   var db = getDrawBalance();
   var deckStateChips = [];
   if (axes) {
-    if (axes.Defense < targets.Defense && total > 6) deckStateChips.push({t:'low defense', c:'#6aacda'});
-    if (axes.Attack < targets.Attack && total > 6) deckStateChips.push({t:'low attack', c:'#c06060'});
-    if (axes.Efficiency < targets.Efficiency && total > 6) deckStateChips.push({t:'low efficiency', c:'var(--amber)'});
-    if (axes.Scaling < targets.Scaling && total > 8) deckStateChips.push({t:'low scaling', c:'#9a6aba'});
-    if (axes.Consistency < targets.Consistency && total > 10) deckStateChips.push({t:'low consistency', c:'var(--teal-bright)'});
-    if (axes.Synergy < targets.Synergy && total > 15) deckStateChips.push({t:'low synergy', c:'var(--amber-bright)'});
+    if (axes.Defense < targets.Defense && total > 6) deckStateChips.push({t:'low defense', warn:true});
+    if (axes.Attack < targets.Attack && total > 6) deckStateChips.push({t:'low attack', warn:true});
+    if (axes.Efficiency < targets.Efficiency && total > 6) deckStateChips.push({t:'low efficiency'});
+    if (axes.Scaling < targets.Scaling && total > 8) deckStateChips.push({t:'low scaling'});
+    if (axes.Consistency < targets.Consistency && total > 10) deckStateChips.push({t:'low consistency'});
+    if (axes.Synergy < targets.Synergy && total > 15) deckStateChips.push({t:'low synergy'});
   }
   var atkDefPool = Math.max(1, db.atkDraw + db.defDraw);
   var rAtk = Math.round(db.atkDraw / atkDefPool * 100);
-  if (rAtk > 65 && total > 7) deckStateChips.push({t:'atk-heavy draws', c:'#c06060'});
-  if (rAtk < 35 && total > 7) deckStateChips.push({t:'def-heavy draws', c:'#6aacda'});
+  if (rAtk > 65 && total > 7) deckStateChips.push({t:'atk-heavy draws'});
+  if (rAtk < 35 && total > 7) deckStateChips.push({t:'def-heavy draws'});
 
   var bossCtx = selectedBoss ? ' · vs '+selectedBoss : '';
   var html = '<div style="font-size:9px;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:4px 2px 6px;border-bottom:1px solid var(--border);margin-bottom:6px">card reward — all builds considered'+bossCtx+'</div>';
   var szp = getDeckSizeProfile();
-  var szChipColor = szp.zone==='sweet' ? 'var(--green-bright)' : szp.zone==='danger' ? '#c06060' : 'var(--amber)';
-  var szChipIcon = szp.zone==='sweet' ? '\u2714' : '\u26A0';
-  deckStateChips.unshift({t: szChipIcon+' '+szp.total+' cards ('+szp.label+')', c: szChipColor});
-  if (deckStateChips.length > 0) {
-    html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">';
-    deckStateChips.forEach(function(chip) {
-      html += '<span style="font-size:9px;padding:2px 7px;border-radius:3px;border:1px solid '+chip.c+'50;background:'+chip.c+'15;color:'+chip.c+'">\u26A0 '+chip.t+'</span>';
-    });
-    html += '</div>';
-  }
+  deckStateChips.unshift({t: szp.total + ' cards · ' + szp.label, warn: szp.zone === 'danger'});
+  // Neutral chips; red only for real gaps (low attack/defense, deck size in the danger zone).
+  html += '<div class="state-chips">' + deckStateChips.map(function(chip) {
+    return '<span class="state-chip' + (chip.warn ? ' warn' : '') + '">' + (chip.warn ? '\u26A0 ' : '') + chip.t + '</span>';
+  }).join('') + '</div>';
 
   if (allSkip) {
     html += '<div style="padding:.75rem;border:1px solid rgba(200,146,42,.25);border-radius:4px;background:rgba(200,146,42,.07);margin-bottom:8px">';
@@ -170,76 +181,33 @@ function renderRewardVerdictHtml() {
     html += '<div style="font-size:12px;color:var(--text-dim)">None of these make your deck stronger. Taking a weak card means drawing your good cards less often.</div></div>';
   }
 
+  // Rows stagger in and scores count up only when the offered pool changes, not on every redraw.
+  var revealKey = rewardOffered.join('|');
+  var reveal = !REDUCED_MOTION && revealKey !== _revealKey;
+  _revealKey = revealKey;
+  if (reveal) requestAnimationFrame(countUpScores);
+
+  // Offered cards as game-style faces with a verdict ribbon; the best one is lifted and crowned.
+  html += '<div class="reward-stage">';
   scored.forEach(function(s, i) {
     var isBest = i===0 && !allSkip;
-    var outerBorder = isBest ? (s.verdict==='pick'?'rgba(106,172,95,.5)':'rgba(200,146,42,.4)') : 'rgba(100,90,70,.15)';
-    var outerBg = isBest ? (s.verdict==='pick'?'rgba(74,124,63,.1)':'rgba(200,146,42,.07)') : 'rgba(0,0,0,.45)';
-    var borderW = isBest ? '1.5px' : '1px';
-    var typeTag = (s.card.type||'skl').replace(/_/g,'·').toUpperCase();
-
-    var isUpgraded = s.name.endsWith('+');
-    var nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:'+(isBest?'var(--text)':'var(--text-dim)');
-    html += '<div style="padding:9px 10px;border:'+borderW+' solid '+outerBorder+';border-radius:4px;background:'+outerBg+';margin-bottom:6px">';
-
-    var sRarity = getRarity(s.card);
-    html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap">';
-    html += '<span data-card="'+s.name+'" style="font-size:14px;'+nameStyle+'"><span class="cf-row-orb">'+cardOrbHtml(s.card, true)+'</span>'+s.name+'</span>';
-    html += '<span class="deck-item-tag '+typeCls(s.card.type)+'" style="font-size:9px;padding:1px 5px">'+typeTag+'</span>';
-    html += rarityBadgeHtml(sRarity);
-    if (deck[s.name]) html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×'+deck[s.name]+'</span>';
-    html += '<span style="font-size:9px;padding:3px 8px;border-radius:2px;background:'+s.vBg+';color:'+s.vColor+';border:1px solid '+s.vBorder+';margin-left:auto">'+s.vLabel+' '+s.score+'</span>';
-    html += '</div>';
-
-    var rCtx = rarityContext(sRarity, s.verdict);
-    if (rCtx) html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;opacity:.8">'+rCtx+'</div>';
-
-    // Inline card detail
-    var costStr = '';
-    if(currentChar === 'regent') {
-      var starCost = s.card.starCost || 0;
-      var enCost = s.card.cost !== undefined ? s.card.cost : 0;
-      costStr = (enCost === 'X' ? 'X' : (Number(enCost) > 0 ? '⚡'.repeat(Number(enCost)) : '')) +
-                (starCost > 0 ? '✦'.repeat(starCost) : '');
-      if(costStr === '' && enCost === 0) costStr = '0';
-    } else {
-      costStr = s.card.cost !== undefined ? (s.card.cost === 'X' ? 'X' : '⚡'.repeat(Number(s.card.cost))) : '';
-    }
-    var typeLabel = (s.card.type||'skl').replace(/_/g,'·').toUpperCase();
-    var descHtml = formatCardDescription(s.card.description || '');
-    html += '<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-bottom:6px">'+typeLabel+(costStr?' · '+costStr:'')+(descHtml?' — '+descHtml:'')+'</div>';
-
-    // X-cost card calculator
+    var safeN = esc(s.name.replace(/'/g,"\\'"));
+    html += '<div class="rcard v-' + s.verdict + (isBest ? ' best' : '') + (reveal ? ' reveal' : '') + '" style="--i:' + i + '" title="' + esc(rarityContext(getRarity(s.card), s.verdict)) + '">';
+    html += '<div class="rcard-face">' + (isBest ? '<span class="rcard-crown">best pick</span>' : '') + cardFaceHtml(s.card, true);
+    html += '<div class="verdict-ribbon">' + s.vLabel + ' <span class="seal"><span class="score-num" data-score="' + s.score + '">' + s.score + '</span></span></div></div>';
+    if (deck[s.name]) html += '<div class="rcard-note">in deck ×' + deck[s.name] + '</div>';
     if (s.card.cost === 'X') {
       var xDmg = extractXCostDamage(s.card);
-      if (xDmg > 0) {
-        var energies = [3,4,5,6];
-        html += '<div style="display:flex;gap:3px;margin-bottom:6px;flex-wrap:wrap;padding:3px 0">';
-        html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);letter-spacing:.06em;margin-right:3px">X dmg:</span>';
-        energies.forEach(function(e) {
-          html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:1px 5px;border-radius:2px;border:1px solid rgba(100,90,70,.2);color:' + (e === 3 ? 'var(--text-dim)' : 'var(--amber-bright)') + '">' + e + '⚡=' + (xDmg * e) + '</span>';
-        });
-        html += '</div>';
-      }
+      if (xDmg > 0) html += '<div class="rcard-note">X dmg: ' + [3,4,5].map(function(e) { return e + '⚡ ' + (xDmg * e); }).join(' · ') + '</div>';
     }
-
     html += verdictChipsHtml(s);
-
-    if (s.card.note) {
-      html += '<div style="font-size:10px;color:var(--text-muted);margin-top:3px;opacity:.65">'+s.card.note+'</div>';
-    }
-
-
+    html += '<button type="button" class="rcard-take" onclick="rewardConfirm(\'' + safeN + '\')">Take ' + esc(s.name) + '</button>';
     html += '</div>';
   });
-
-  html += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)">';
-  html += '<button onclick="rewardReset()" style="padding:6px 10px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-size:9px;text-transform:uppercase;cursor:pointer">&#8635; reset</button>';
-  scored.filter(function(s){return s.verdict!=='skip';}).forEach(function(s) {
-    var safeN = s.name.replace(/'/g,"\\'");
-    html += '<button onclick="rewardConfirm(\''+safeN+'\')" style="padding:6px 10px;border:1px solid '+s.vBorder+';border-radius:3px;background:'+s.vBg+';color:'+s.vColor+';font-size:9px;text-transform:uppercase;cursor:pointer">took '+s.name+'</button>';
-  });
-  html += '<button onclick="rewardReset()" style="padding:6px 10px;border:1px solid var(--border);border-radius:3px;background:none;color:var(--text-muted);font-size:9px;text-transform:uppercase;cursor:pointer">took nothing</button>';
   html += '</div>';
+  html += '<div class="reward-foot">' +
+    '<button type="button" class="footer-btn ghost" onclick="rewardReset()">&#8635; reset</button>' +
+    '<button type="button" class="footer-btn" onclick="rewardReset()">take nothing</button></div>';
   return html;
 }
 
@@ -254,20 +222,9 @@ function rewardRemoveOffered(name) {
   rewardOffered = rewardOffered.filter(n=>n!==name);
   renderRewardUnified(document.getElementById('pickerList'));
 }
-function rewardProceed() {
-  if (!rewardOffered.length) return;
-  rewardStage = 'verdict';
-  document.getElementById('pickerSearch').value = '';
-  renderPickerReward();
-}
-function rewardBack() {
-  rewardStage = 'select';
-  document.getElementById('pickerSearch').value = '';
-  renderPickerReward();
-}
 function rewardConfirm(name) { addCard(name); rewardReset(); }
 function rewardReset() {
-  rewardOffered=[]; rewardStage='select';
+  rewardOffered=[];
   document.getElementById('pickerSearch').value='';
   renderPickerReward();
 }
@@ -300,8 +257,8 @@ function renderPickerAdd() {
       const t = card.type || 'skl';
       const tCls = t.startsWith('atk')?'tag-atk':t.startsWith('def')?'tag-def':t==='pow'?'tag-pow':t==='vel'?'tag-vel':'tag-skl';
       const typeTag = `<span class="deck-item-tag ${tCls}" style="font-size:9px;padding:1px 5px">${t.replace(/_/g,'·').toUpperCase()}</span>`;
-      const crossTag = card.crossChar ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">${card.crossCharName}</span>` : '';
-      const deckTag = alreadyInDeck > 0 ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×${alreadyInDeck}</span>` : '';
+      const crossTag = card.crossChar ? `<span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:0 4px">${card.crossCharName}</span>` : '';
+      const deckTag = alreadyInDeck > 0 ? `<span style="font-family:var(--font-mono);font-size:9px;color:var(--amber);padding:2px 5px;border:1px solid rgba(200,146,42,.3);border-radius:2px">in deck ×${alreadyInDeck}</span>` : '';
       const isUpgraded = name.endsWith('+');
       const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600;' : 'color:var(--text)';
       const bg = s.verdict === 'skip' ? 'rgba(0,0,0,.35)' : s.vBg;
@@ -315,17 +272,7 @@ function renderPickerAdd() {
       html += `</div>`;
 
       // Inline card detail
-      var costStr = '';
-      if(currentChar === 'regent') {
-        var starCost = card.starCost || 0;
-        var enCost = card.cost !== undefined ? card.cost : 0;
-        costStr = (enCost === 'X' ? 'X' : (Number(enCost) > 0 ? '⚡'.repeat(Number(enCost)) : '')) +
-                  (starCost > 0 ? '✦'.repeat(starCost) : '');
-        if(costStr === '' && enCost === 0) costStr = '0';
-      } else {
-        costStr = card.cost !== undefined ? (card.cost === 'X' ? 'X' : '⚡'.repeat(Number(card.cost))) : '';
-      }
-      const finalCostStr = (currentChar === 'regent' && card.starCost) ? costStr + '✦'.repeat(card.starCost) : costStr;
+      const finalCostStr = costText(card);
       const typeLabel = (t||'skl').replace(/_/g,'·').toUpperCase();
       const descHtml = formatCardDescription(card.description || '');
       if (descHtml) {
@@ -337,9 +284,9 @@ function renderPickerAdd() {
         var xDmg = extractXCostDamage(card);
         if (xDmg > 0) {
           html += '<div style="display:flex;gap:3px;margin-bottom:6px;flex-wrap:wrap;padding:3px 0">';
-          html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:var(--text-muted);letter-spacing:.06em;margin-right:3px">X dmg:</span>';
+          html += '<span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.06em;margin-right:3px">X dmg:</span>';
           [3,4,5,6].forEach(function(e) {
-            html += '<span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:1px 5px;border-radius:2px;border:1px solid rgba(100,90,70,.2);color:' + (e===3?'var(--text-dim)':'var(--amber-bright)') + '">' + e + '⚡=' + (xDmg * e) + '</span>';
+            html += '<span style="font-family:var(--font-mono);font-size:9px;padding:1px 5px;border-radius:2px;border:1px solid rgba(100,90,70,.2);color:' + (e===3?'var(--text-dim)':'var(--amber-bright)') + '">' + e + '⚡=' + (xDmg * e) + '</span>';
           });
           html += '</div>';
         }
@@ -350,7 +297,7 @@ function renderPickerAdd() {
       if (card.note) html += `<div style="font-size:10px;color:var(--text-muted);margin-top:3px;opacity:.65">${card.note}</div>`;
 
       const safeN = name.replace(/'/g,"\\'");
-      html += `<div style="margin-top:5px"><button onclick="pickerAddCard('${safeN}')" style="padding:3px 9px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber-bright)'" onmouseout="this.style.borderColor='var(--border-bright)';this.style.color='var(--text-muted)'">${alreadyInDeck > 0 ? '+ add another' : '+ add to deck'}</button></div>`;
+      html += `<div style="margin-top:5px"><button onclick="pickerAddCard('${safeN}')" style="padding:3px 9px;border:1px solid var(--border-bright);border-radius:3px;background:none;color:var(--text-muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer" onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber-bright)'" onmouseout="this.style.borderColor='var(--border-bright)';this.style.color='var(--text-muted)'">${alreadyInDeck > 0 ? '+ add another' : '+ add to deck'}</button></div>`;
 
       html += `</div>`;
     });
@@ -388,12 +335,11 @@ function renderPickerList() {
 }
 
 function pickerRowHtmlAdd(c, s, typeCls) {
-  const inDeck = deck[c.name] ? ` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber)">(×${deck[c.name]})</span>` : '';
+  const inDeck = deck[c.name] ? ` <span style="font-family:var(--font-mono);font-size:9px;color:var(--amber)">(×${deck[c.name]})</span>` : '';
   const rowCls = s.verdict==='pick'?' rec':' syn';
   const safeN = c.name.replace(/'/g,"\\'");
   const noteText = s.reasons.join(' · ');
-  const costStr = c.cost !== undefined ? (c.cost === 'X' ? 'X' : '⚡'.repeat(Number(c.cost))) : '';
-  const finalCostStr = (currentChar === 'regent' && c.starCost) ? costStr + '✦'.repeat(c.starCost) : costStr;
+  const finalCostStr = costText(c);
   const typeLabel = (c.type||'skl').replace(/_/g,'·').toUpperCase();
   const descHtml = formatCardDescription(c.description || '');
   const cardDetail = descHtml ? `<div style="font-size:10px;color:var(--text-dim);line-height:1.35;margin-top:1px">${typeLabel}${finalCostStr?' · '+finalCostStr:''} — ${descHtml}</div>` : '';
@@ -411,7 +357,7 @@ function pickerRowHtmlAdd(c, s, typeCls) {
 // Compact "PICK 78" badge for search rows.
 function verdictBadgeHtml(s) {
   if (!s) return '';
-  return '<span style="font-size:8px;padding:1px 6px;border-radius:2px;border:1px solid '+s.vBorder+';color:'+s.vColor+';background:'+s.vBg+';font-weight:600;white-space:nowrap">'+s.vLabel+' '+s.score+'</span>';
+  return '<span style="font-size:10px;padding:1px 6px;border-radius:2px;border:1px solid '+s.vBorder+';color:'+s.vColor+';background:'+s.vBg+';font-weight:600;white-space:nowrap">'+s.vLabel+' '+s.score+'</span>';
 }
 
 // Up to 3 "why" chips under a verdict.
@@ -426,7 +372,7 @@ function verdictChipsHtml(s) {
   return html + '</div>';
 }
 
-function pickerAddCard(name) { addCard(name); renderPickerAdd(); }
+function pickerAddCard(name) { addCard(name); }
 
 function extractXCostDamage(card) {
   if (!card) return 0;

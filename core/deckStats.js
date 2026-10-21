@@ -224,6 +224,12 @@ function calcDeckProfile() {
   };
 }
 
+// Card type ('atk', 'atk_skl', 'def_skl_vel', ...) -> axes: atk / def / vel / scl (skl and pow scale).
+function typeAxes(t) {
+  return (t || 'skl').split('_').map(p => p === 'atk' || p === 'def' || p === 'vel' ? p : 'scl')
+    .filter((p, i, a) => a.indexOf(p) === i);
+}
+
 function getDeckStats() {
   let atk=0,def=0,vel=0,scl=0,other=0;
   const charCards = ALL_CARDS[currentChar] || [];
@@ -233,20 +239,12 @@ function getDeckStats() {
   Object.entries(deck).forEach(([name,count]) => {
     const c = findCard(name);
     if (!c) return;
-    const t = c.type || 'scl';
-    if (t==='atk') { atk+=count; }
-    else if (t==='def') { def+=count; }
-    else if (t==='vel') { vel+=count; }
-    else if (t==='scl'||t==='pow'||t==='skl') { scl+=count; }
-    else if (t==='other') { other+=count; }
-    else if (t==='atk_def') { atk+=count*0.5; def+=count*0.5; }
-    else if (t==='atk_scl') { atk+=count*0.5; scl+=count*0.5; }
-    else if (t==='def_scl') { def+=count*0.5; scl+=count*0.5; }
-    else if (t==='atk_def_scl') { atk+=count/3; def+=count/3; scl+=count/3; }
-    else if (t==='atk_vel') { atk+=count*0.5; vel+=count*0.5; }
-    else if (t==='def_vel') { def+=count*0.5; vel+=count*0.5; }
-    else if (t==='scl_vel') { scl+=count*0.5; vel+=count*0.5; }
-    else { scl+=count; }
+    if (isUnplayable(c)) { other += count; return; }
+    const p = typeAxes(c.type);
+    p.forEach(a => {
+      const share = count / p.length;
+      if (a === 'atk') atk += share; else if (a === 'def') def += share; else if (a === 'vel') vel += share; else scl += share;
+    });
   });
   const total = getDeckSize();
   return {atk:Math.round(atk*10)/10, def:Math.round(def*10)/10, vel:Math.round(vel*10)/10, scl:Math.round(scl*10)/10, other:Math.round(other*10)/10, total};
@@ -526,19 +524,12 @@ function getDrawBalance() {
   Object.entries(deck).forEach(([name, count]) => {
     const c = findCard(name);
     if (!c) return;
-    const t = c.type || 'scl';
-    if      (t === 'atk')         { atkDraw += count; }
-    else if (t === 'def')         { defDraw += count; }
-    else if (t === 'atk_def')     { atkDraw += count; defDraw += count; }
-    else if (t === 'atk_scl')     { atkDraw += count; }
-    else if (t === 'def_scl')     { defDraw += count; }
-    else if (t === 'atk_def_scl') { atkDraw += count; defDraw += count; }
-    else if (t === 'scl' || t === 'pow' || t === 'skl') { sclDraw += count; }
-    else if (t === 'vel') { velDraw += count; }
-    else if (t === 'atk_vel') { atkDraw += count; velDraw += count; }
-    else if (t === 'def_vel') { defDraw += count; velDraw += count; }
-    else if (t === 'scl_vel') { sclDraw += count; velDraw += count; }
-    else if (t === 'other') { deadDraw += count; }
+    if (isUnplayable(c)) { deadDraw += count; return; }
+    const p = typeAxes(c.type);
+    if (p.includes('atk')) atkDraw += count;
+    if (p.includes('def')) defDraw += count;
+    if (p.includes('vel')) velDraw += count;
+    if (p.includes('scl') && !p.includes('atk') && !p.includes('def')) sclDraw += count;
   });
   return { atkDraw, defDraw, sclDraw, deadDraw, velDraw };
 }
@@ -586,7 +577,7 @@ function getStarCostDistribution() {
     var c = charCards.find(function(x){return x.name===n;});
     if (!c) return;
     var sc = c.starCost || 0;
-    if (sc === 0) buckets[0] += deck[n];
+    if (sc <= 0) buckets[0] += deck[n]; // X-star (-1) counts with free
     else if (sc === 1) buckets[1] += deck[n];
     else if (sc === 2) buckets[2] += deck[n];
     else if (sc === 3) buckets[3] += deck[n];
@@ -609,10 +600,9 @@ function getUpgradeCandidates() {
   var allCards = charCards.concat(ALL_CARDS['colorless']||[]);
   Object.keys(deck).forEach(function(name) {
     if (name.endsWith('+')) return; // already upgraded
-    var upgraded = name + '+';
-    if ((deck[name] || 0) > (deck[upgraded] || 0)) {
+    if (findCard(name + '+')) { // un-upgraded copies exist and an upgrade does too
       var card = allCards.find(function(c){return c.name===name;});
-      if (!card) return;
+      if (!card || isUnplayable(card)) return;
       // Upgrade the cards the scorer values most (power, fit, build) — they're played most.
       var scoreResult = scoreCard(name);
       candidates.push({name:name, score:scoreResult ? scoreResult.score : 0, hasEssential:false});

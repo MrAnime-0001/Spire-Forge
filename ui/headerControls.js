@@ -30,16 +30,10 @@ const INTENT_ICONS = {
   spawn:    {icon:'◇', label:'Spawn', color:'#80a060'},
 };
 
-// Render icon for intent/power using local asset or badge
-function renderIntentBadge(intent, text) {
-  const idata = INTENT_ICONS[intent] || {icon:'?', color:'#808080'};
-  return `<span style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;background:${idata.color}22;color:${idata.color};font-size:9px;border:1px solid ${idata.color}44">${idata.icon}</span><span style="color:var(--text-dim)">${text}</span>`;
-}
-
 function renderPatternTable(pattern) {
   if (!pattern || pattern.length === 0) return '';
-  let html = '<div style="margin:6px 0;font-family:\'Share Tech Mono\',monospace">';
-  html += '<div style="font-size:8px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">attack pattern</div>';
+  let html = '<div style="margin:6px 0;font-family:var(--font-mono)">';
+  html += '<div style="font-size:10px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">attack pattern</div>';
   pattern.forEach(step => {
     const [iconKey, text] = step;
     if (iconKey === 'divider') {
@@ -54,7 +48,7 @@ function renderPatternTable(pattern) {
       const iconFiles = {slippery:'inky',plating:'plating',frail:'frail',weak:'weak',vulnerable:'vulnerable',strength:'strength',intangible:'intangible',block:'block',vigor:'vigor',sandpit:'sandpit',status:'status',plow:'plating',ringing:'frail',slow:'frail',skittish:'shiv',hardenedshell:'block',beckon:'status',infection:'status',wound:'status',burn:'status',frantic:'status',regen:'plating',reattach:'plating',crabrage:'strength',artifact:'block',hex:'soul',dampen:'frail',territorial:'soul',personalhive:'status',vitalspark:'energy-colorless'};
       const imgFile = iconFiles[powerImg];
       if (imgFile) {
-        html += `<img src="assets/icons/${imgFile}.png" style="width:16px;height:16px;border-radius:2px;flex-shrink:0">`;
+        html += `<img src="assets/icons/${imgFile}.png" alt="" style="width:16px;height:16px;border-radius:2px;flex-shrink:0">`;
       } else {
         html += `<span style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;background:${intent.color}22;color:${intent.color};font-size:9px;border:1px solid ${intent.color}44">${intent.icon}</span>`;
       }
@@ -82,16 +76,27 @@ function updateActUI() {
   document.getElementById('actAdvice').textContent = ACT_ADVICE[currentAct - 1];
   syncRegionToAct();
   if (selectedBoss && !inCurrentRegion(BOSS_TO_REGION[selectedBoss])) selectedBoss = null;
-  document.getElementById('act1btn').innerHTML = '1 &mdash; ' + (startRegion ? REGION_DATA[startRegion].label : 'Ascent');
+  // Run bar: character seal + the current act's region
+  const rd = REGION_DATA[currentRegion];
+  document.getElementById('rbRegion').textContent = rd ? rd.label : '';
+  if (currentChar) {
+    document.getElementById('runBar').dataset.char = currentChar;
+    document.getElementById('rbName').textContent = currentChar.charAt(0).toUpperCase() + currentChar.slice(1);
+    document.getElementById('rbPortrait').src = 'assets/icons/char-' + currentChar + '.png';
+  }
+  [1,2,3].forEach(n => {
+    const r = Object.keys(REGION_DATA).find(k => REGION_DATA[k].act === n && (n !== 1 || !startRegion || k === startRegion));
+    document.getElementById('act'+n+'btn').title = 'Act ' + n + (r ? ' — ' + REGION_DATA[r].label : '');
+  });
   renderBossAlert();
 }
 
 function updateAscUI() {
-  for (let i = 0; i <= 10; i++) {
-    const el = document.getElementById('asc' + i + 'btn');
-    if (el) el.classList.toggle('active', currentAsc === i);
-  }
+  const flame = document.getElementById('rbFlame');
+  document.getElementById('rbAscNum').textContent = currentAsc;
+  flame.classList.toggle('off', currentAsc === 0);
   const asc = ASCENSION_DATA[currentAsc];
+  flame.title = 'Ascension ' + currentAsc + (asc ? ' — ' + asc.name : '');
   const advEl = document.getElementById('ascAdvice');
   if (asc && advEl) {
     const color = currentAsc === 0 ? 'var(--text-dim)' : currentAsc >= 8 ? '#c06060' : 'var(--amber)';
@@ -122,7 +127,7 @@ function renderBossAlert() {
   const actRegions = Object.entries(REGION_DATA).filter(([rk]) => inCurrentRegion(rk));
 
   let html = `<div style="background:rgba(0,0,0,.5);border:1px solid rgba(100,90,70,.12);border-radius:4px;padding:10px 12px">`;
-  html += `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);opacity:.8;margin-bottom:.75rem">boss &amp; region</div>`;
+  html += `<div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);opacity:.8;margin-bottom:.75rem">boss &amp; region</div>`;
 
   if (actRegions.length === 0) {
     html += `<div style="font-size:12px;color:var(--text-muted);font-style:italic">No regions mapped for Act ${currentAct} yet.</div>`;
@@ -134,7 +139,7 @@ function renderBossAlert() {
   actRegions.forEach(([rk, rd]) => {
     const isSelectedRegion = selectedBoss && BOSS_TO_REGION[selectedBoss] === rk;
     html += `<div style="margin-bottom:.5rem">`;
-    html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;opacity:.9">${rd.label}</div>`;
+    html += `<div style="font-family:var(--font-mono);font-size:9px;color:${rd.color};letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;opacity:.9">${rd.label}</div>`;
     html += `<div style="display:flex;flex-wrap:wrap;gap:5px">`;
     Object.keys(rd.bosses).forEach(bname => {
       const sel = selectedBoss === bname;
@@ -151,8 +156,8 @@ function renderBossAlert() {
       const boss = rd.bosses[selectedBoss];
       html += `<div style="border-top:1px solid var(--border);margin-top:.6rem;padding-top:.7rem">`;
       html += `<div class="boss-bar" style="border-color:${rd.color}40;background:${rd.color}0d;margin-top:0">`;
-      html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:8px">${boss.type}</span></div>`;
-      if (boss.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${boss.hp}</span></div>`;
+      html += `<div class="boss-bar-title" style="color:${rd.color}">${selectedBoss} <span style="opacity:.6;font-size:10px">${boss.type}</span></div>`;
+      if (boss.hp) html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${boss.hp}</span></div>`;
 
       if (boss.pattern) html += renderPatternTable(boss.pattern);
 
@@ -174,7 +179,7 @@ function renderBossAlert() {
         const energyCards = (ENERGY_CARDS[currentChar]||[]).filter(n=>deck[n]);
         if (insatWarnings.length > 0) {
           html += `<div style="padding:6px 8px;border:1px solid rgba(192,64,64,.5);border-radius:3px;background:rgba(192,64,64,.1);margin-bottom:6px">`;
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c06060;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">\u2C64 TIMER BOSS \u2014 VELOCITY CHECK</div>`;
+          html += `<div style="font-family:var(--font-mono);font-size:9px;color:#c06060;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">\u2C64 TIMER BOSS \u2014 VELOCITY CHECK</div>`;
           insatWarnings.forEach(w => { html += `<div style="font-size:12px;color:${w.startsWith('\u2714')?'var(--green-bright)':'#c08060'};line-height:1.55;margin-bottom:3px">${w}</div>`; });
           if (drawCards.length > 0) html += `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">draw in your deck: <span style="color:var(--amber)">${drawCards.join(', ')}</span></div>`;
           if (energyCards.length > 0) html += `<div style="font-size:11px;color:var(--text-muted)">energy in your deck: <span style="color:var(--amber)">${energyCards.join(', ')}</span></div>`;
@@ -185,10 +190,10 @@ function renderBossAlert() {
         }
       }
 
-      html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
+      html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
       html += `<div class="boss-bar-text" style="margin-bottom:6px">${boss.strategy}</div>`;
       if (boss.killOrder) {
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
+        html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
         html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${boss.killOrder}</div>`;
       }
 
@@ -196,21 +201,21 @@ function renderBossAlert() {
       if (matrix) {
         html += `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed ${rd.color}30">`;
         if (matrix.difficulty) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">difficulty</div>`;
+          html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">difficulty</div>`;
           html += `<div style="font-size:11px;color:${rd.color};margin-bottom:6px;font-style:italic">${matrix.difficulty}</div>`;
         }
         if (matrix.killWindow) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">kill window</div>`;
+          html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">kill window</div>`;
           html += `<div style="font-size:11px;color:var(--text-dim);margin-bottom:6px">${matrix.killWindow}</div>`;
         }
         if (matrix.punishes) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#c06060;letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">punishes</div>`;
+          html += `<div style="font-family:var(--font-mono);font-size:9px;color:#c06060;letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">punishes</div>`;
           html += `<ul style="margin:0 0 6px 1rem;padding:0;font-size:11px;color:#c88080;line-height:1.45">`;
           matrix.punishes.forEach(p => { html += `<li style="margin-bottom:1px">${p}</li>`; });
           html += `</ul>`;
         }
         if (matrix.rewards) {
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green-bright);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">rewards</div>`;
+          html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--green-bright);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">rewards</div>`;
           html += `<ul style="margin:0 0 6px 1rem;padding:0;font-size:11px;color:#80b080;line-height:1.45">`;
           matrix.rewards.forEach(r => { html += `<li style="margin-bottom:1px">${r}</li>`; });
           html += `</ul>`;
@@ -245,16 +250,16 @@ function renderBossAlert() {
 
       const elites = rd.elites;
       if (Object.keys(elites).length > 0) {
-        html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin:.6rem 0 .3rem">${rd.label} elites</div>`;
+        html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin:.6rem 0 .3rem">${rd.label} elites</div>`;
         Object.entries(elites).forEach(([ename, elite]) => {
           html += `<div style="padding:.45rem .7rem;border-radius:3px;border:1px solid ${rd.color}25;background:${rd.color}08;margin-bottom:.35rem">`;
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:4px">${ename} <span style="opacity:.5;font-size:8px">${elite.type}</span></div>`;
-          if (elite.hp) html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${elite.hp}</span></div>`;
+          html += `<div style="font-family:var(--font-mono);font-size:9px;color:${rd.color};letter-spacing:.06em;margin-bottom:4px">${ename} <span style="opacity:.5;font-size:10px">${elite.type}</span></div>`;
+          if (elite.hp) html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:4px">HP: <span style="color:${rd.color}">${elite.hp}</span></div>`;
           if (elite.pattern) html += renderPatternTable(elite.pattern);
-          html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
+          html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Strategy</div>`;
           html += `<div style="font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:6px">${elite.strategy}</div>`;
           if (elite.killOrder) {
-            html += `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
+            html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase">Kill Order</div>`;
             html += `<div style="font-size:12px;color:${rd.color};line-height:1.5;font-style:italic">${elite.killOrder}</div>`;
           }
           html += `</div>`;
@@ -268,24 +273,12 @@ function renderBossAlert() {
   el.innerHTML = html;
 }
 
+// Toggle the boss; picking one from another act moves the run to that act.
 function setBoss(name) {
-  if (selectedBoss === name) {
-    selectedBoss = null;
-  } else {
-    selectedBoss = name;
-    const rk = BOSS_TO_REGION[name];
-    if (rk && REGION_DATA[rk]) {
-      const regionAct = REGION_DATA[rk].act;
-      if (regionAct !== currentAct) {
-        currentAct = regionAct;
-        syncAscendersBane();
-        updateActUI();
-        updateResult();
-      }
-    }
-  }
-  renderBossAlert();
-  autoSave();
+  selectedBoss = selectedBoss === name ? null : name;
+  const rk = selectedBoss && BOSS_TO_REGION[selectedBoss];
+  if (rk && REGION_DATA[rk].act !== currentAct) setAct(REGION_DATA[rk].act);
+  else notifyListeners();
 }
 
 // Deck vs fight demands (REGION_DATA needs): how many cards cover each one.
@@ -300,7 +293,7 @@ function renderNeedsMatchup(needs, color) {
   });
   var keys = Object.keys(needs).sort(function(a, b) { return needs[b] - needs[a]; });
   var html = '<div style="margin-top:6px;padding:6px 8px;border:1px solid ' + color + '30;border-radius:3px;background:' + color + '08">';
-  html += '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:' + color + ';letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase">deck matchup</div>';
+  html += '<div style="font-family:var(--font-mono);font-size:9px;color:' + color + ';letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase">deck matchup</div>';
   keys.forEach(function(k) {
     var n = have[k] || 0, ok = n >= needs[k];
     html += '<div style="font-size:11px;color:' + (ok ? 'var(--green-bright)' : '#c08060') + '">' + (ok ? '✔ ' : '⚠ ') +
@@ -323,6 +316,7 @@ function enterSetup(char, keepDeck) {
   document.getElementById('mainUI').style.display = 'none';
   document.getElementById('inlinePicker').style.display = 'none';
   document.getElementById('runSetup').style.display = '';
+  document.body.classList.remove('in-run'); // header + character grid come back
   document.querySelectorAll('.char-btn').forEach(b => { b.title = ''; });
   if (typeof refreshBg === 'function') refreshBg(); // back to the cycling theme after a run ends
   renderRunSetup();
@@ -330,7 +324,7 @@ function enterSetup(char, keepDeck) {
 
 function exitSetup() {
   document.getElementById('runSetup').style.display = 'none';
-  document.querySelectorAll('.char-btn').forEach(b => { b.title = 'Run in progress — press ☠ died to start a new one'; });
+  document.body.classList.add('in-run'); // the run bar takes over from header + character grid
 }
 
 // After loading saved data: show the run, or ask for its Act 1 region if the save never had one.
@@ -341,8 +335,11 @@ function applyRunView() {
 
 function pickSetupChar(key) {
   if (!inSetup() || setupKeepDeck) return; // character is locked once a run starts
-  setupChar = key;
-  renderRunSetup();
+  setupChar = key; // set now: the transition callback below waits for the next rendered frame
+  // Cross-fade the portrait seals where View Transitions exist.
+  if (document.startViewTransition && !REDUCED_MOTION && !document.hidden) {
+    document.startViewTransition(renderRunSetup).ready.catch(() => {}); // a quick second pick skips the first: fine
+  } else renderRunSetup();
 }
 
 function pickSetupRegion(rk) {

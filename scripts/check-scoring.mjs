@@ -9,9 +9,13 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FILES = ['ironclad', 'silent', 'defect', 'regent', 'necrobinder', 'colorless'].map(p => `data/cards-${p}.js`)
   .concat(['data/cards.js', 'data/constants.js', 'data/builds.js', 'data/bossTips.js',
-    'core/state.js', 'core/deckStats.js', 'core/rewardAdvisor.js', 'ui/helpers.js']);
+    'core/state.js', 'core/deckStats.js', 'core/rewardAdvisor.js', 'core/storage.js', 'ui/helpers.js', 'ui/pickerView.js']);
 
-const ctx = vm.createContext({ console });
+// Minimal DOM/storage stubs: storage.js reads the HP inputs and localStorage.
+const store = new Map();
+const localStorage = { getItem: k => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: k => store.delete(k) };
+const document = { getElementById: () => ({ value: '70' }), addEventListener() {} };
+const ctx = vm.createContext({ console, localStorage, document, window: {} });
 for (const f of FILES) vm.runInContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), ctx, { filename: f });
 const run = code => vm.runInContext(code, ctx);
 const setState = (char, act, deck, boss = null) =>
@@ -98,7 +102,49 @@ run(`setAct(1)`);
 check('back in Act 1 the start region is remembered', run(`currentRegion === 'underdock'`));
 run(`currentAct = 2; restoreRegion('hive')`);
 check('older save storing the Act 2 region: no start region, still Hive', run(`startRegion === null && currentRegion === 'hive'`));
+check('unknown region / boss is out of play, not a crash', run(`inCurrentRegion(undefined) === false && inCurrentRegion('nope') === false`));
 run(`notifyListeners = _n;`);
+
+// Card cost text: negative costs in the data (X / unplayable) used to throw in String.repeat
+const costErrors = run(`(() => { const bad = [];
+  ['ironclad','silent','defect','necrobinder','regent'].forEach(ch => { currentChar = ch;
+    Object.values(ALL_CARDS).flat().forEach(c => { try { costText(c); cardOrbHtml(c, true); } catch (e) { bad.push(c.name); } }); });
+  return bad; })()`);
+check('cost text renders for every card as every character', costErrors.length === 0, costErrors.slice(0, 5).join(', '));
+
+// Deck stats: curses are dead draws, hybrid types split across axes
+setState('ironclad', 1, { Strike: 5, Injury: 2 });
+check('curses count as dead cards', run(`getDeckStats().other`) === 2 && run(`getDrawBalance().deadDraw`) === 2);
+const hybrid = run(`ALL_CARDS.ironclad.find(c => c.type === 'atk_skl')`);
+if (hybrid) {
+  setState('ironclad', 1, { [hybrid.name]: 2 });
+  const st = run(`getDeckStats()`);
+  check(`hybrid ${hybrid.name} (atk_skl) splits attack/scale`, st.atk === 1 && st.scl === 1, `atk ${st.atk} scl ${st.scl}`);
+}
+
+// Upgrade suggestions
+setState('ironclad', 1, { Bash: 1, 'Bash+': 1, Injury: 1, "Ascender's Bane": 1 });
+const ups = run(`getUpgradeCandidates().map(c => c.name)`);
+check('upgrade list keeps Bash with a Bash+ beside it', ups.includes('Bash'), ups.join(', '));
+check('upgrade list skips curses', !ups.includes('Injury') && !ups.includes("Ascender's Bane"), ups.join(', '));
+
+// Import / save validation (normalizeRun) — untrusted files and localStorage
+const norm = d => run(`normalizeRun(${JSON.stringify(d)})`);
+const throws = d => { try { norm(d); return false; } catch { return true; } };
+check('import rejects prototype keys as character', throws({ char: '__proto__', deck: { Strike: 1 } }) && throws({ char: 'toString', deck: { Strike: 1 } }));
+check('import rejects a file with no deck', throws({ char: 'ironclad' }));
+const n1 = norm({ char: 'ironclad', act: '2', asc: 42, deck: { Strike: 1e9, '<img src=x onerror=alert(1)>': 1, Bash: 'abc' },
+  relics: ['Kunai', 5, 'x'.repeat(100)], boss: 'Not A Boss' });
+check('import drops unknown / script card names and bad counts', JSON.stringify(n1.deck) === '{"Strike":99}', JSON.stringify(n1.deck));
+check('import coerces act, clamps asc, filters relics, drops unknown boss',
+  n1.act === 2 && n1.asc === 0 && JSON.stringify(n1.relics) === '["Kunai"]' && n1.boss === null);
+check('import rejects a deck of only unknown cards', throws({ char: 'ironclad', deck: { '<b>': 3 } }));
+const boss = run(`Object.keys(BOSS_TO_REGION)[0]`);
+run(`currentChar='ironclad'; currentAct=2; startRegion='underdock'; currentAsc=6; deck={Strike:4,'Bash+':1}; relics=['Kunai']; var selectedBoss=${JSON.stringify(boss)};`);
+const rt = norm(JSON.parse(JSON.stringify(run(`currentRun()`))));
+check('export -> import round-trips asc, relics, boss, region',
+  rt.asc === 6 && rt.act === 2 && rt.region === 'underdock' && rt.relics[0] === 'Kunai' && rt.boss === boss && rt.deck['Bash+'] === 1);
+check('esc escapes HTML', run(`esc('<a href="x">\\'&')`) === '&lt;a href=&quot;x&quot;&gt;&#39;&amp;');
 
 console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
 process.exit(failed ? 1 : 0);

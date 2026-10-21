@@ -14,9 +14,7 @@ let deck = {}; // card name -> count
 
 let relics = []; // relic names
 
-let hpCur = 0;
-
-let hpMax = 0;
+let lastTouchedCard = null; // card the last add/+/- changed; deck list flashes it
 
 const stateListeners = [];
 
@@ -46,7 +44,6 @@ function selectChar(key, region) {
   document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('char-' + key).classList.add('active');
   const hp = CHAR_HP[key] || 80;
-  hpCur = hp; hpMax = hp;
   document.getElementById('hpCur').value = hp;
   document.getElementById('hpMax').value = hp;
   document.getElementById('mainUI').style.display = 'block';
@@ -77,10 +74,6 @@ function removeRelic(name) {
   if (idx >= 0) { relics.splice(idx, 1); notifyListeners(); }
 }
 
-function hasRelic(name) {
-  return relics.indexOf(name) >= 0;
-}
-
 function syncAscendersBane() {
   var hasBane = "Ascender's Bane" in deck;
   if(currentAsc >= 5 && !hasBane) {
@@ -91,10 +84,15 @@ function syncAscendersBane() {
 }
 
 // Run over: clear it and go back to picking a character and starting region.
-function resetRun() {
-  if (!currentChar || !confirm('End this run? Your deck is cleared and you pick a character and region again.')) return;
-  if (window.playRunCard) playRunCard('died'); // before the run is cleared: the card shows how far it got
+// quiet: no death card or undo toast (the caller offers its own undo).
+function resetRun(quiet) {
+  if (!currentChar) return;
+  if (!quiet) {
+    if (window.playRunCard) playRunCard('died'); // before the run is cleared: the card shows how far it got
+    offerUndo('Run ended.', currentRun());
+  }
   clearAutoSave();
+  rewardOffered = [];
   currentChar = null;
   deck = {};
   relics = [];
@@ -125,11 +123,13 @@ function restoreRegion(rk) {
 
 // Region filter for bosses/scoring: the current region, or all of Act 1 if no start region is known.
 function inCurrentRegion(rk) {
+  if (!REGION_DATA[rk]) return false;
   return currentAct === 1 && !startRegion ? REGION_DATA[rk].act === 1 : rk === currentRegion;
 }
 
 function addCard(name, count = 1) {
   deck[name] = (deck[name] || 0) + count;
+  lastTouchedCard = name;
   window._particleSkipVerdict = true;
   notifyListeners();
   // Particle highlight on added card
@@ -149,29 +149,12 @@ function addCard(name, count = 1) {
 function adjustQty(name, delta) {
   if(name === "Ascender's Bane") return;
   deck[name] = Math.max(0, (deck[name] || 0) + delta);
+  lastTouchedCard = name;
   if (deck[name] === 0) delete deck[name];
   notifyListeners();
 }
 
-function deckCards() {
-  const out = [];
-  Object.entries(deck).forEach(([name, count]) => { for(let i=0;i<count;i++) out.push(name); });
-  return out;
-}
-
 function getDeckSize() { return Object.values(deck).reduce((a,b)=>a+b,0); }
-
-function setHP(cur, max) {
-  hpCur = cur;
-  if (max !== undefined) hpMax = max;
-  document.getElementById('hpCur').value = hpCur;
-  if (max !== undefined) document.getElementById('hpMax').value = hpMax;
-  notifyListeners();
-}
-
-function removeCard(cardName) {
-  adjustQty(cardName, -1);
-}
 
 function upgradeCard(baseName) {
   if(baseName === "Ascender's Bane") return;

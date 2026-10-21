@@ -6,19 +6,20 @@ function renderDeckStats() {
   if (getDeckSize() === 0) { el.innerHTML = ''; return; }
 
   const stats = getDeckStats();
-  const atkCls = stats.atk <= 2 ? 'stat-warn' : stats.atk >= 3 ? 'stat-ok' : '';
-  const defCls = stats.def <= 1 ? 'stat-warn' : stats.def >= 3 ? 'stat-ok' : '';
-  const sclCls = stats.scl <= 0 ? 'stat-warn' : stats.scl >= 3 ? 'stat-ok' : '';
-  const velCls = stats.vel <= 0 ? 'stat-warn' : stats.vel >= 3 ? 'stat-ok' : '';
+  // Icon + class so low/healthy isn't shown by color alone.
+  const cls = (v, lo, ok) => v <= lo ? 'stat-warn' : v >= ok ? 'stat-ok' : '';
+  const chip = (v, label, c) => `<div class="stat-chip"><div class="stat-val ${c}">${c === 'stat-warn' ? '<span class="stat-ico" aria-label="low">⚠</span>' : ''}${v}</div><div class="stat-lbl">${label}</div></div>`;
 
-  el.innerHTML = `
-    <div class="stat-chip"><div class="stat-val">${getDeckSize()}</div><div class="stat-lbl">Cards</div></div>
-    <div class="stat-chip"><div class="stat-val ${atkCls}">${stats.atk}</div><div class="stat-lbl">Attack</div></div>
-    <div class="stat-chip"><div class="stat-val ${defCls}">${stats.def}</div><div class="stat-lbl">Defense</div></div>
-    <div class="stat-chip"><div class="stat-val ${sclCls}">${stats.scl}</div><div class="stat-lbl">Scale</div></div>
-    <div class="stat-chip"><div class="stat-val ${velCls}">${stats.vel}</div><div class="stat-lbl">Velocity</div></div>
-  `;
+  el.innerHTML =
+    chip(getDeckSize(), 'Cards', '') +
+    chip(stats.atk, 'Attack', cls(stats.atk, 2, 3)) +
+    chip(stats.def, 'Defense', cls(stats.def, 1, 3)) +
+    chip(stats.scl, 'Scale', cls(stats.scl, 0, 3)) +
+    chip(stats.vel, 'Velocity', cls(stats.vel, 0, 3));
 }
+
+
+const TYPE_COLORS = {atk:'var(--c-atk)', def:'var(--c-def)', skl:'var(--c-skl)', pow:'var(--c-pow)', vel:'var(--c-vel)'};
 
 function renderDeckList() {
   const list = document.getElementById('deckList');
@@ -33,7 +34,12 @@ function renderDeckList() {
     return;
   }
 
-  const typeLabel = t => (t||'skl').replace(/_/g,'\u00B7').toUpperCase();
+  // Remember which control had focus so keyboard users stay put after the rebuild.
+  const active = document.activeElement;
+  const focusRow = active && list.contains(active) && active.closest('[data-card]');
+  const focusKey = focusRow ? [focusRow.dataset.card, active.dataset.act] : null;
+
+  const typeLabel = t => (t||'skl').replace(/_/g,'·').toUpperCase();
   const typeCls = t => {
     if (t.includes('atk')) return 'tag-atk';
     if (t.includes('def')) return 'tag-def';
@@ -41,34 +47,41 @@ function renderDeckList() {
     if (t.includes('pow')) return 'tag-pow';
     return 'tag-skl';
   };
-  const charCards = ALL_CARDS[currentChar] || [];
-  const colorlessCards = ALL_CARDS['colorless'] || [];
-  const allOtherDeckCards = ['ironclad','silent','defect','necrobinder','regent'].filter(k=>k!==currentChar).flatMap(k=>ALL_CARDS[k]||[]);
 
   const sorted = Object.entries(deck).sort((a,b)=>a[0].localeCompare(b[0]));
   list.innerHTML = sorted.map(([name,count]) => {
-    const c = charCards.find(x=>x.name===name) || colorlessCards.find(x=>x.name===name) || allOtherDeckCards.find(x=>x.name===name);
+    const found = findCard(name);
+    const c = found && found.card;
     const type = c ? c.type : 'skl';
-    const tl = typeLabel(type);
     const isUpgraded = name.endsWith('+');
-    const hasUpgrade = !isUpgraded && (charCards.find(x=>x.name===name+'+') || colorlessCards.find(x=>x.name===name+'+') || allOtherDeckCards.find(x=>x.name===name+'+'));
-    const nameStyle = isUpgraded ? 'color:var(--amber-bright); font-weight:600; text-shadow: 0 0 5px rgba(200,146,42,0.3);' : '';
-    const safeN = name.replace(/'/g, "\\'");
-        var isBane = name === "Ascender's Bane";
-    const upgradeBtn = (hasUpgrade && !isBane) ? `<button class="qty-btn" onclick="upgradeCard('${safeN}')" title="Upgrade this card" style="border-color:var(--amber); color:var(--amber-bright); font-size:11px; margin-right:4px;">\u2692</button>` : '';
-
+    const hasUpgrade = !isUpgraded && findCard(name + '+');
+    const isBane = name === "Ascender's Bane";
+    const safeN = esc(name.replace(/'/g, "\\'"));
+    const n = esc(name);
+    const upgradeBtn = (hasUpgrade && !isBane) ? `<button type="button" class="qty-btn qty-up" data-act="up" onclick="upgradeCard('${safeN}')" aria-label="Upgrade ${n}" title="Upgrade">⚒</button>` : '';
     const orb = c ? `<span class="cf-row-orb">${cardOrbHtml(c, true)}</span>` : '';
-    return `<div class="deck-item" data-card="${name}" style="grid-template-columns:1fr auto auto auto;gap:6px">
-      <span style="display:flex;align-items:center;min-width:0">${orb}<span class="deck-item-name" style="${nameStyle}${isBane ? ';color:var(--text-muted);font-style:italic' : ''}">${name}</span></span>
+    const rowCls = 'deck-item' + (isUpgraded ? ' up' : '') + (isBane ? ' bane' : '') + (name === lastTouchedCard ? ' touched' : '');
+    // Left-edge stripe in the type color; hybrids (atk_def) get a two-color edge.
+    const cols = isBane ? [] : (type || 'skl').split('_').map(p => TYPE_COLORS[p]).filter(Boolean);
+    const stripe = cols.length > 1 ? 'linear-gradient(' + cols.join(',') + ')' : cols[0] || 'var(--text-muted)';
+    return `<div class="${rowCls}" data-card="${n}" style="--t:${stripe};grid-template-columns:1fr auto auto auto;gap:6px">
+      <span style="display:flex;align-items:center;min-width:0">${orb}<span class="deck-item-name">${n}</span></span>
       <div style="display:flex; align-items:center; gap:4px">
         ${upgradeBtn}
-        <span class="deck-item-tag ${typeCls(type)}" style="${isBane ? 'background:rgba(100,90,70,.2);color:var(--text-muted)' : ''}">${tl}</span>
+        <span class="deck-item-tag ${typeCls(type)}">${typeLabel(type)}</span>
       </div>
       <div class="qty-ctrl">
-        ${isBane ? '<span style="opacity:.3;font-size:11px">✕</span>' : `<button class="qty-btn" onclick="adjustQty('${safeN}',-1)">−</button>`}
+        ${isBane ? '<span class="qty-lock" title="Cannot be removed">✕</span>' : `<button type="button" class="qty-btn" data-act="minus" onclick="adjustQty('${safeN}',-1)" aria-label="Remove one ${n}">−</button>`}
         <span class="qty-num">${count}</span>
-        ${isBane ? '<span style="opacity:.3;font-size:11px">✕</span>' : `<button class="qty-btn" onclick="adjustQty('${safeN}',+1)">+</button>`}
+        ${isBane ? '' : `<button type="button" class="qty-btn" data-act="plus" onclick="adjustQty('${safeN}',+1)" aria-label="Add one ${n}">+</button>`}
       </div>
     </div>`;
   }).join('');
+  lastTouchedCard = null;
+
+  if (focusKey) {
+    const row = Array.from(list.querySelectorAll('[data-card]')).find(r => r.dataset.card === focusKey[0]);
+    const btn = row && (row.querySelector('[data-act="' + focusKey[1] + '"]') || row.querySelector('button'));
+    if (btn) btn.focus({preventScroll: true});
+  }
 }
